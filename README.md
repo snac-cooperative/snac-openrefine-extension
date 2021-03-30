@@ -1,7 +1,10 @@
-# snac-openrefine-extension
+# Snac Openrefine Extension
 The SNAC OpenRefine extension allows SNAC edits to be made via OpenRefine.
 
+
 ### Installation
+More complete instructions for installing OpenRefine Extensions can be found in the [official documentation](https://docs.openrefine.org/manual/installing/#installing-extensions).
+
 To install this extension,
 1. Download the extension (usually as a zip file from GitHub)
 2. Extract the zip contents into OpenRefine's “extensions” directory, making sure all the contents go into one folder with the name of the extension. You may have to create the "extensions" folder if it does not already exist in your workspace.
@@ -29,6 +32,4 @@ C:\Users\(user id)\OpenRefine
 
 
 ### Updating
-To update the SNAC extension, simply download the latest version and reinstall the extension.
-
-More complete instructions for installing OpenRefine Extensions can be found in the [official documentation](https://docs.openrefine.org/manual/installing/#installing-extensions).
+To update the SNAC extension, simply download the latest release of this zip file and reinstall the extension.
