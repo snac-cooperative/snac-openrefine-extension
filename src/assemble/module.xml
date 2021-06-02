@@ -13,7 +13,7 @@
             <directory>./</directory>
             <outputDirectory>./</outputDirectory>
             <includes>
-                <include>LICENSE</include>
+                <include>LICENSE.txt</include>
                 <include>README.md</include>
             </includes>
         </fileSet>
