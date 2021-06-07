@@ -23,7 +23,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Package Extension
-        run: mvn -B package
+        env:
+          USERNAME: ${{ github.actor }}
+          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B package --settings settings.xml
       - name: Create Release
         uses: actions/create-release@v1
         id: create_release
