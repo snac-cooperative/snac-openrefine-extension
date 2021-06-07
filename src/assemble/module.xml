@@ -1,11 +1,10 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-    <id>OpenRefine-3.4.1</id>
+    <id>openrefine</id>
     <includeBaseDirectory>true</includeBaseDirectory>
     <baseDirectory>snac</baseDirectory>
     <formats>
-        <format>tgz</format>
         <format>zip</format>
     </formats>
     <fileSets>
@@ -21,13 +20,19 @@
             <directory>src/resources/module</directory>
             <outputDirectory>module</outputDirectory>
         </fileSet>
+        <fileSet>
+	    <directory>module/MOD-INF/classes</directory>
+            <outputDirectory>module/MOD-INF/classes</outputDirectory>
+            <excludes>
+                <exclude>**/*.java</exclude>
+                <exclude>resources/</exclude>
+                <exclude>assemble/</exclude>
+            </excludes>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <outputDirectory>module/MOD-INF/lib</outputDirectory>
-        </dependencySet>
-        <dependencySet>
-            <outputDirectory>module/MOD-INF/classes</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>

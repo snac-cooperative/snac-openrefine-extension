@@ -96,16 +96,6 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>make-zip-versioned</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<finalName>${project.artifactId}-${project.version}</finalName>
-						</configuration>
-					</execution>
-					<execution>
 						<id>make-zip-unversioned</id>
 						<phase>package</phase>
 						<goals>
