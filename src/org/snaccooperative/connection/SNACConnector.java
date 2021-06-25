@@ -30,8 +30,9 @@ public class SNACConnector {
   }
 
   public void saveKey(String apikey) {
+    String cleanKey = apikey.trim();
     JFrame jf = new JFrame();
-    if (apikey == "") {
+    if (cleanKey == "") {
       jf.setAlwaysOnTop(true);
       JOptionPane.showMessageDialog(jf, "Key cleared!");
     }
@@ -39,7 +40,7 @@ public class SNACConnector {
     ArrayNode array = ParsingUtilities.mapper.createArrayNode();
     ObjectNode obj = ParsingUtilities.mapper.createObjectNode();
 
-    obj.put("apikey", apikey);
+    obj.put("apikey", cleanKey);
     array.add(obj);
     prefStore.put(PREFERENCE_STORE_KEY, array);
     jf.setAlwaysOnTop(true);
@@ -60,7 +61,7 @@ public class SNACConnector {
   public String getKey() {
     String visible;
     if (getStoredKeyData() != null) {
-      visible = getStoredKeyData().get("apikey").asText();
+      visible = getStoredKeyData().get("apikey").asText().trim();
       return visible;
     } else {
       return null;
