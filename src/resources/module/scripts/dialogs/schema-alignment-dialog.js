@@ -61,7 +61,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    snacDebug(`***** [ getSNACModel ] *****`);
 
    this.SNACResourceModel = [
-      { name: "ID",                         required: false, tooltip:  "ID" },
+      { name: "ID",                         required: false, tooltip:  "SNAC Resource ID" },
       { name: "Type",                       required: true,  tooltip:  "The resource type (ArchivalResource, BibliographicResource, etc.)" },
       { name: "Title",                      required: true,  tooltip:  "The official title (e.g.  Papers, 1809-1882)" },
       { name: "Display Entry",              required: false, tooltip:  "The descriptive display name (e.g.  Jacob Miller Papers, 1809-1882)" },
@@ -74,8 +74,8 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    ];
 
    this.SNACConstellationModel = [
-      { name: "Entity Type",     required: true,  tooltip:  "Entity Type" },
-      { name: "ID",              required: false, tooltip:  "ID" },
+      { name: "Entity Type",     required: true,  tooltip:  "The entity type (person, corporateBody, family)" },
+      { name: "ID",              required: false, tooltip:  "SNAC ID" },
       { name: "Name Entry",      required: true,  tooltip:  "Name Entry" },
       { name: "Date",            required: false, tooltip:  "Date" },
       { name: "Date Type",       required: false, tooltip:  "Date Type" },
@@ -86,8 +86,8 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "Function",        required: false, tooltip:  "Function" },
       { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
       { name: "SameAs Relation", required: false, tooltip:  "SameAs Relation" },
-      { name: "Resource ID",     required: false, tooltip:  "Resource ID" },
-      { name: "Resource Role",   required: false, tooltip:  "Resource Role" }
+      { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },
+      { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, etc)" }
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);
