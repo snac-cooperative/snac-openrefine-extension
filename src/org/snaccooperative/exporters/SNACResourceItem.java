@@ -36,6 +36,8 @@ public class SNACResourceItem extends SNACUploadItem {
     this._rowIndex = record.fromRowIndex;
 
     Resource res = new Resource();
+    // Insert by default
+    res.setOperation("insert");
 
     for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
@@ -55,7 +57,9 @@ public class SNACResourceItem extends SNACUploadItem {
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
+              res.setOperation("update");
             } catch (NumberFormatException e) {
+              // If no numeric ID, leave operation as "insert"
             }
             continue;
 
@@ -115,8 +119,10 @@ public class SNACResourceItem extends SNACUploadItem {
 
               Constellation cons = new Constellation();
 
-              cons.setID(id);
-              res.setRepository(cons);
+              if (id != 0) {
+                cons.setID(id);
+                res.setRepository(cons);
+              }
             } catch (NumberFormatException e) {
             }
             continue;
@@ -230,8 +236,8 @@ public class SNACResourceItem extends SNACUploadItem {
 
     String apiQuery =
         "{\"command\": \"insert_resource\",\n \"resource\":"
-            + insertJSON.substring(0, insertJSON.length() - 1)
-            + ",\n\"operation\":\"insert\"\n},\"apikey\":\""
+            + insertJSON
+            + ",\"apikey\":\""
             + key
             + "\""
             + "}";
