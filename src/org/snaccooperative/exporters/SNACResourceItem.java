@@ -8,6 +8,7 @@ import com.google.refine.model.Row;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,44 +140,53 @@ public class SNACResourceItem extends SNACUploadItem {
   public String getPreviewText() {
     String preview = "";
 
+    if (_resource.getOperation() == "update") {
+      preview += "------Editing Resource with ID:" + _resource.getID() + "------\n";
+    } else {
+      preview += "------Inserting new resource" + "------\n";
+    }
+
+    Map<String, String> resourceFields = new HashMap<>();
+
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacText = entry.getValue();
       String snacField = snacText.toLowerCase();
 
       switch (snacField) {
         case "id":
-          preview += snacText + ": " + _resource.getID() + "\n";
+          // Already added to Preview
+          // resourceFields.put(snacText, String.valueOf(_resource.getID()));
           break;
 
         case "type":
           Term previewTerm = _resource.getDocumentType();
           if (previewTerm != null) {
-            preview += snacText + ": " + previewTerm.getTerm() + " (" + previewTerm.getID() + ")\n";
+            resourceFields.put(snacText, previewTerm.getTerm() + " (" + previewTerm.getID() + ")");
           }
           break;
 
         case "title":
-          preview += snacText + ": " + _resource.getTitle() + "\n";
+          resourceFields.put(snacText, _resource.getTitle());
           break;
 
         case "display entry":
-          preview += snacText + ": " + _resource.getDisplayEntry() + "\n";
+          resourceFields.put(snacText, _resource.getDisplayEntry());
           break;
 
         case "link":
-          preview += snacText + ": " + _resource.getLink() + "\n";
+          resourceFields.put(snacText, _resource.getLink());
           break;
 
         case "abstract":
-          preview += snacText + ": " + _resource.getAbstract() + "\n";
+          resourceFields.put(snacText, _resource.getAbstract());
           break;
 
         case "extent":
-          preview += snacText + ": " + _resource.getExtent() + "\n";
+          resourceFields.put(snacText, _resource.getExtent());
           break;
 
         case "date":
-          preview += snacText + ": " + _resource.getDate() + "\n";
+          resourceFields.put(snacText, _resource.getDate());
           break;
 
         case "language":
@@ -201,22 +211,31 @@ public class SNACResourceItem extends SNACUploadItem {
             _resourceLanguages += valid_lang.get(valid_lang.size() - 1) + "\n";
           }
 
-          preview += snacText + "(s): " + _resourceLanguages + "\n";
+          resourceFields.put(snacText, _resourceLanguages);
           break;
 
         case "holding repository snac id":
           snacText = "Repository ID";
 
+          // TODO: handle missing repository. Could check for cell value type and show error in Issues tab.
           int repo_id = _resource.getRepository().getID();
           String repo_str = "";
 
           if (repo_id != 0) {
             repo_str = Integer.toString(repo_id);
           }
-
-          preview += snacText + ": " + repo_str + "\n";
+          resourceFields.put(snacText, repo_str);
       }
     }
+
+    // TODO: Print preview in set order for consistency.
+    for (String key : resourceFields.keySet()) {
+      preview += key + ": " + resourceFields.get(key) + "\n";
+      System.out.println(key + " => " + resourceFields.get(key));
+    }
+
+    System.out.print("OPERATION: ");
+    System.out.println(_resource.getOperation());
 
     return preview;
   }
