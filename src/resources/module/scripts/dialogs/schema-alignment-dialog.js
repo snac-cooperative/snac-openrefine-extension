@@ -87,7 +87,10 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
       { name: "SameAs Relation", required: false, tooltip:  "SameAs Relation" },
       { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },
-      { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, etc)" }
+      { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, etc)" },
+      { name: "Source Citation", required: false, tooltip:  "Source citation" },
+      { name: "Source Citation URL",     required: false, tooltip:  "The URL for this citation" },
+      { name: "Source Citation Found Data",   required: false, tooltip:  "Data as found to be cited" }
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);

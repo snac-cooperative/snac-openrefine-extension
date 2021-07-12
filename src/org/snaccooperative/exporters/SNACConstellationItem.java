@@ -18,6 +18,7 @@ import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.NameEntry;
 import org.snaccooperative.data.Occupation;
 import org.snaccooperative.data.Place;
+import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.ResourceRelation;
 import org.snaccooperative.data.SNACDate;
@@ -51,6 +52,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     List<SNACDate> dates = new LinkedList<SNACDate>();
     List<Subject> subjects = new LinkedList<Subject>();
     List<Place> places = new LinkedList<Place>();
+    List<Source> sources = new LinkedList<Source>();
     List<Occupation> occupations = new LinkedList<Occupation>();
     List<SNACFunction> functions = new LinkedList<SNACFunction>();
     List<BiogHist> biogHists = new LinkedList<BiogHist>();
@@ -180,6 +182,37 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "place role": // queried alongside "place"
             continue;
 
+          
+          case "source citation":
+            Source source = new Source();
+
+            // set citation
+            source.setCitation(cellValue);
+
+            // set url
+            String urlColumn = schema.getReverseColumnMappings().get("source citation url");
+            if (urlColumn != null) {
+              String url = getCellValueForRowByColumnName(project, row, urlColumn);
+              source.setURI(url);
+            }
+            
+            // set found data
+            String foundColumn = schema.getReverseColumnMappings().get("source citation found data");
+            if (foundColumn != null) {
+              String foundData = getCellValueForRowByColumnName(project, row, foundColumn);
+              source.setText(foundData);
+            }
+
+            sources.add(source);
+
+            continue;
+
+          case "source citation url": // queried alongside "source citation"
+            continue;
+
+          case "source citation found data": // queried alongside "source citation"
+            continue;
+
           case "occupation":
             Term occupationTerm = new Term();
             occupationTerm.setType("occupation");
@@ -294,6 +327,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setSameAsRelations(sameAsRelations);
     con.setResourceRelations(resourceRelations);
     con.setDateList(dateList);
+    con.setSources(sources);
 
     this._constellation = con;
   }
@@ -344,6 +378,10 @@ public class SNACConstellationItem extends SNACUploadItem {
 
         case "bioghist":
           preview += snacText + ": " + _constellation.getBiogHists() + "\n";
+          break;
+
+        case "source citation":
+          preview += snacText + ": " + _constellation.getSources() + "\n";
           break;
 
         case "sameas relation":
