@@ -90,6 +90,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
       List<CellAtRow> results = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> messages = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> ids = new ArrayList<CellAtRow>(items.size());
+      List<CellAtRow> links = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> responses = new ArrayList<CellAtRow>(items.size());
 
       for (int i = 0; i < items.size(); i++) {
@@ -101,6 +102,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         results.add(new CellAtRow(row, new Cell(uploadResponse.getResult(), null)));
         messages.add(new CellAtRow(row, new Cell(uploadResponse.getMessage(), null)));
         ids.add(new CellAtRow(row, new Cell(uploadResponse.getIDString(), null)));
+        links.add(new CellAtRow(row, new Cell(uploadResponse.getURI(), null)));
         responses.add(new CellAtRow(row, new Cell(uploadResponse.getAPIResponse(), null)));
 
         _progress = i * 100 / items.size();
@@ -119,6 +121,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         String resultColumn = "SNAC Result";
         String messageColumn = "SNAC Message";
         String idColumn = "SNAC ID";
+        String uriColumn = "SNAC Link";
         String responseColumn = "SNAC API Response";
 
         int i = 0;
@@ -136,11 +139,13 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
           if ((_project.columnModel.getColumnByName(resultColumn + postfix) == null)
               && (_project.columnModel.getColumnByName(messageColumn + postfix) == null)
               && (_project.columnModel.getColumnByName(idColumn + postfix) == null)
+              && (_project.columnModel.getColumnByName(uriColumn + postfix) == null)
               && (_project.columnModel.getColumnByName(responseColumn + postfix) == null)) {
             found = true;
             resultColumn = resultColumn + postfix;
             messageColumn = messageColumn + postfix;
             idColumn = idColumn + postfix;
+            uriColumn = uriColumn + postfix;
             responseColumn = responseColumn + postfix;
           }
         }
@@ -148,6 +153,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         addHistoryEntry(resultColumn, results);
         addHistoryEntry(messageColumn, messages);
         addHistoryEntry(idColumn, ids);
+        addHistoryEntry(uriColumn, links);
         addHistoryEntry(responseColumn, responses);
 
         _project.processManager.onDoneProcess(this);

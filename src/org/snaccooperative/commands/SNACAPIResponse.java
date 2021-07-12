@@ -15,6 +15,7 @@ public class SNACAPIResponse {
   protected String _apiResponse;
   protected String _result;
   protected String _message;
+  protected String _uri;
   protected Resource _resource;
   protected Constellation _constellation;
   protected int _id;
@@ -88,11 +89,13 @@ public class SNACAPIResponse {
         this._resource = res;
         this._id = res.getID();
         this._version = res.getVersion();
+        this._uri = "https://snaccooperative.org/vocab_administrator/resources/" + res.getID();
       } else if (constellation instanceof JSONObject) {
         Constellation con = Constellation.fromJSON(((JSONObject) constellation).toString());
         this._constellation = con;
         this._id = con.getID();
         this._version = con.getVersion();
+        this._uri = con.getArk();
       }
     } catch (ParseException e) {
       // assume apiResponse is an exception string, not a badly-formed API responsee
@@ -116,11 +119,16 @@ public class SNACAPIResponse {
     this._resource = other.getResource();
     this._constellation = other.getConstellation();
     this._id = other.getID();
+    this._uri = other.getURI();
     this._version = other.getVersion();
   }
 
   public String getAPIResponse() {
     return _apiResponse;
+  }
+
+  public String getURI() {
+    return _uri;
   }
 
   public String getResult() {
