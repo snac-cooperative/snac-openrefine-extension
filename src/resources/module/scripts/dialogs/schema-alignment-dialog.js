@@ -232,14 +232,6 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    // init the radio buttons
 
    var uploadingResourceButtonClicked = function() {
-      // Show SNAC ID Buttons
-      $('#idRadio').show();
-
-      if ($('#idYesButton').is(':checked')) {
-         idYesButtonClicked();
-      } else if ($('#idNoButton').is(':checked')) {
-         idNoButtonClicked();
-      }
 
       // Show Resources
       $('.schema-alignment-dialog-columns-area-resource').show();
@@ -251,11 +243,6 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    };
 
    var uploadingConstellationButtonClicked = function() {
-      // Hide SNAC ID Buttons
-      $('#idRadio').hide();
-      $('#idSelectionDiv').css('visibility', 'hidden');
-      $('.idfield').prop('disabled', false);
-
       // Hide Resources
       $('.schema-alignment-dialog-columns-area-resource').hide();
       $('.schema-alignment-dialog-columns-area-resource--ref').hide();
@@ -265,15 +252,6 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
       $('.schema-alignment-dialog-columns-area-constellation--ref').show();
    };
 
-   var idYesButtonClicked = function() {
-      $('.idfield').prop('disabled', false);
-      $('#idSelectionDiv').css('visibility', 'visible');
-   };
-
-   var idNoButtonClicked = function() {
-      $('.idfield').prop('disabled', true);
-      $('#idSelectionDiv').css('visibility', 'hidden');
-   };
 
    $('#uploadingResourceButton').on('click', function() {
       uploadingResourceButtonClicked();
@@ -284,18 +262,6 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    $('#uploadingConstellationButton').on('click', function() {
       uploadingConstellationButtonClicked();
       snacDebug(`uploadingCon calling _hasChanged()`);
-      self._hasChanged();
-   });
-
-   $('#idYesButton').on('click', function() {
-      idYesButtonClicked();
-      snacDebug(`idYes calling _hasChanged()`);
-      self._hasChanged();
-   });
-
-   $('#idNoButton').on('click', function() {
-      idNoButtonClicked();
-      snacDebug(`idNo calling _hasChanged()`);
       self._hasChanged();
    });
 
@@ -405,12 +371,6 @@ SNACSchemaAlignmentDialog.addResourceTable = function (schema) {
          .addClass(column.name + "ResDropDown")
          .attr('style', 'width: 180px');
 
-/*
-      if (column.name == 'id') {
-         selectList.addClass('idfield');
-      }
-*/
-
       //Create and append the options
       var defaultoption = document.createElement('option');
       defaultoption.setAttribute('value', 'default');
@@ -505,12 +465,6 @@ SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
          .addClass('selectColumnConst')
          .addClass(column.name + "ConstDropDown")
          .attr('style', 'width: 180px');
-
-/*
-      if (column.name == 'id') {
-         selectList.addClass('idfield');
-      }
-*/
 
       //Create and append the options
       var defaultoption = document.createElement('option');
@@ -634,29 +588,6 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
    var myTableDivResource = this.addResourceTable(schema);
    this._columnAreaResource.append(myTableDivResource);
-
-   this._idDropdownDiv = $('#idSelectionDiv');
-
-   var idDropdown = document.getElementById('idDropDown');
-   if (idDropdown == null) {
-      idDropdown = document.createElement('select');
-      idDropdown.setAttribute('id', 'idDropDown');
-      var defaultOp = new Option();
-      defaultOp.value = 'idDefault';
-      defaultOp.text = 'Select ID Column';
-      idDropdown.options.add(defaultOp);
-      columns.forEach(function (arrItem){
-         var op = new Option();
-         op.value = arrItem.originalName;
-         op.text = arrItem.originalName;
-         idDropdown.options.add(op);
-      });
-      this._idDropdownDiv.append(idDropdown);
-      this._idDropdownDiv.on('change', function(){
-         snacDebug(`idDropdown calling _hasChanged()`);
-         self._hasChanged();
-      });
-   }
 
    for (var i = 0; i < dragItemsResource.length; i++) {
       var cell = this._createDraggableColumn(dragItemsResource[i], false);
@@ -839,13 +770,7 @@ SNACSchemaAlignmentDialog._reset = function(schema) {
       $('#uploadingConstellationButton').trigger('click');
    } else {
       $('#uploadingResourceButton').trigger('click');
-      if (this._schema.idColumn == "") {
-         $('#idNoButton').trigger('click');
-         $('#idDropDown').val('idDefault').change();
-      } else {
-         $('#idYesButton').trigger('click');
-         $('#idDropDown').val(this._schema.idColumn).change();
-      }
+
    }
 
    this._ignoreChanges = false;
@@ -934,12 +859,6 @@ SNACSchemaAlignmentDialog.getJSON = function() {
       schemaType = "resource";
       dropDownColumn = $('.selectColumnRes');
 
-      if ($('#idYesButton').is(':checked')) {
-         let value = $('#idDropDown').val();
-         if (value != "idDefault") {
-            idColumn = value;
-         }
-      }
    } else if ($('#uploadingConstellationButton').is(':checked')) {
       schemaType = "constellation";
       dropDownColumn = $('.selectColumnConst');
