@@ -83,7 +83,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "Place",           required: false, tooltip:  "Place" },
       { name: "Place Role",      required: false, tooltip:  "Place Role" },
       { name: "Occupation",      required: false, tooltip:  "Occupation" },
-      { name: "Function",        required: false, tooltip:  "Function" },
+      { name: "Activity",        required: false, tooltip:  "Activity" },
       { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
       { name: "SameAs Relation", required: false, tooltip:  "SameAs Relation" },
       { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },

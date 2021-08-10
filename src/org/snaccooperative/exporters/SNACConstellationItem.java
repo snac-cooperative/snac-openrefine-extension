@@ -22,7 +22,7 @@ import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.ResourceRelation;
 import org.snaccooperative.data.SNACDate;
-import org.snaccooperative.data.SNACFunction;
+import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.SameAs;
 import org.snaccooperative.data.Subject;
 import org.snaccooperative.data.Term;
@@ -54,7 +54,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     List<Place> places = new LinkedList<Place>();
     List<Source> sources = new LinkedList<Source>();
     List<Occupation> occupations = new LinkedList<Occupation>();
-    List<SNACFunction> functions = new LinkedList<SNACFunction>();
+    List<Activity> activities = new LinkedList<Activity>();
     List<BiogHist> biogHists = new LinkedList<BiogHist>();
     List<SameAs> sameAsRelations = new LinkedList<SameAs>();
     List<ResourceRelation> resourceRelations = new LinkedList<ResourceRelation>();
@@ -182,7 +182,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "place role": // queried alongside "place"
             continue;
 
-          
+
           case "source citation":
             Source source = new Source();
 
@@ -195,7 +195,7 @@ public class SNACConstellationItem extends SNACUploadItem {
               String url = getCellValueForRowByColumnName(project, row, urlColumn);
               source.setURI(url);
             }
-            
+
             // set found data
             String foundColumn = schema.getReverseColumnMappings().get("source citation found data");
             if (foundColumn != null) {
@@ -226,16 +226,16 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "function":
-            Term functionTerm = new Term();
-            functionTerm.setType("function");
-            functionTerm.setTerm(cellValue);
+          case "activity":
+            Term activityTerm = new Term();
+            activityTerm.setType("activity");
+            activityTerm.setTerm(cellValue);
 
-            SNACFunction funcshn = new SNACFunction();
-            funcshn.setTerm(functionTerm);
-            funcshn.setOperation("insert");
+            Activity activity = new Activity();
+            activity.setTerm(activityTerm);
+            activity.setOperation("insert");
 
-            functions.add(funcshn);
+            activities.add(activity);
 
             continue;
 
@@ -322,7 +322,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setSubjects(subjects);
     con.setPlaces(places);
     con.setOccupations(occupations);
-    con.setFunctions(functions);
+    con.setActivities(activities);
     con.setBiogHists(biogHists);
     con.setSameAsRelations(sameAsRelations);
     con.setResourceRelations(resourceRelations);
@@ -372,8 +372,8 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getOccupations() + "\n";
           break;
 
-        case "function":
-          preview += snacText + ": " + _constellation.getFunctions() + "\n";
+        case "activity":
+          preview += snacText + ": " + _constellation.getActivities() + "\n";
           break;
 
         case "bioghist":
