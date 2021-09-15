@@ -301,7 +301,7 @@ public class SNACResourceItem extends SNACUploadItem {
     }
 
     Term t = new Term();
-    t.setType("document_role");
+    t.setType("document_type");
     t.setTerm(term);
     t.setID(id);
 
