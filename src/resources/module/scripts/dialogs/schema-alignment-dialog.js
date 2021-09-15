@@ -85,12 +85,14 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "Occupation",      required: false, tooltip:  "Occupation" },
       { name: "Activity",        required: false, tooltip:  "Activity" },
       { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
-      { name: "SameAs Relation", required: false, tooltip:  "SameAs Relation" },
+      { name: "Related Identity", required: false, tooltip:  "URL to this entity in another identity authority such as wikiData or VIAF" },
       { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },
       { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, etc)" },
       { name: "Source Citation", required: false, tooltip:  "Source citation" },
       { name: "Source Citation URL",     required: false, tooltip:  "The URL for this citation" },
-      { name: "Source Citation Found Data",   required: false, tooltip:  "Data as found to be cited" }
+      { name: "Source Citation Found Data",   required: false, tooltip:  "Data as found to be cited" },
+      { name: "Related CPF ID",   required: false, tooltip:  "SNAC ID of related CPF entity" },
+      { name: "Related CPF relation type",   required: false, tooltip:  "Type of CPF relation (associatedWith, correspondedWith, etc)" }
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);

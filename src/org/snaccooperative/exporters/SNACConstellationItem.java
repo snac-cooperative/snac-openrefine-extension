@@ -15,6 +15,7 @@ import org.snaccooperative.commands.SNACAPIClient;
 import org.snaccooperative.commands.SNACAPIResponse;
 import org.snaccooperative.data.BiogHist;
 import org.snaccooperative.data.Constellation;
+import org.snaccooperative.data.ConstellationRelation;
 import org.snaccooperative.data.NameEntry;
 import org.snaccooperative.data.Occupation;
 import org.snaccooperative.data.Place;
@@ -58,6 +59,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     List<BiogHist> biogHists = new LinkedList<BiogHist>();
     List<SameAs> sameAsRelations = new LinkedList<SameAs>();
     List<ResourceRelation> resourceRelations = new LinkedList<ResourceRelation>();
+    List<ConstellationRelation> cpfRelations = new LinkedList<ConstellationRelation>();
 
     for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
@@ -284,6 +286,26 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "resource role": // queried alongside "resource id"
+            continue;
+
+          case "related cpf id":
+            ConstellationRelation cpfRelation = new ConstellationRelation();
+            cpfRelation.setSourceConstellation(con.getID());
+            cpfRelation.setTargetConstellation(Integer.parseInt(cellValue));
+
+            // Get Relation Type.
+            String cpfRelationTypeColumn = schema.getReverseColumnMappings().get("related cpf relation type");
+            
+            if (cpfRelationTypeColumn != null) {
+              String cpfRelationType = getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
+              Term cpfRelationTypeTerm = createRelationTypeTerm(cpfRelationType);
+              cpfRelation.setType(cpfRelationTypeTerm);
+            }
+            cpfRelation.setOperation("insert");
+            cpfRelations.add(cpfRelation);
+            continue;
+
+          case "related cpf relation type": // Queried alongside related cpf id
             break;
 
           default:
@@ -326,6 +348,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setBiogHists(biogHists);
     con.setSameAsRelations(sameAsRelations);
     con.setResourceRelations(resourceRelations);
+    con.setRelations(cpfRelations);
     con.setDateList(dateList);
     con.setSources(sources);
 
@@ -388,7 +411,12 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getSameAsRelations() + "\n";
           break;
 
+        case "related cpf id":
+          preview += snacText + ": " + _constellation.getRelations() + "\n";
+          break;
+
           // TODO: Add Resource ID, Resource Role.
+          // TODO: Add Related CPFs
       }
     }
 
@@ -641,6 +669,209 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     Term t = new Term();
     t.setType("document_role");
+    t.setTerm(term);
+    t.setID(id);
+
+    return t;
+  }
+
+  private Term createRelationTypeTerm(String relationType) {
+    String term;
+    int id;
+    switch (relationType.toLowerCase()) {
+      case "acquaintanceof":
+        term = "acquaintanceOf";
+        id = 28227;
+        break;
+      case "almamaterof":
+        term = "almaMaterOf";
+        id = 28229;
+        break;
+      case "alumnusoralumnaof":
+        term = "alumnusOrAlumnaOf";
+        id = 28230;
+        break;
+      case "ancestorof":
+        term = "ancestorOf";
+        id = 28232;
+        break;
+      case "associatedwith":
+        term = "associatedWith";
+        id = 28234;
+        break;
+      case "auntoruncleof":
+        term = "auntOrUncleOf";
+        id = 28236;
+        break;
+      case "biological parent of":
+        term = "biological parent of";
+        id = 28237;
+        break;
+      case "child-in-law of":
+        term = "child-in-law of";
+        id = 28238;
+        break;
+      case "childof":
+        term = "childOf";
+        id = 28239;
+        break;
+      case "conferredhonorsto":
+        term = "conferredHonorsTo";
+        id = 28240;
+        break;
+      case "correspondedwith":
+        term = "correspondedWith";
+        id = 28243;
+        break;
+      case "createdby":
+        term = "createdBy";
+        id = 28245;
+        break;
+      case "creatorof":
+        term = "creatorOf";
+        id = 28246;
+        break;
+      case "descendantof":
+        term = "descendantOf";
+        id = 28248;
+        break;
+      case "employeeof":
+        term = "employeeOf";
+        id = 28250;
+        break;
+      case "employerof":
+        term = "employerOf";
+        id = 28251;
+        break;
+      case "foundedby":
+        term = "foundedBy";
+        id = 28253;
+        break;
+      case "founderof":
+        term = "founderOf";
+        id = 28254;
+        break;
+      case "grandchildof":
+        term = "grandchildOf";
+        id = 28255;
+        break;
+      case "grandparentof":
+        term = "grandparentOf";
+        id = 28256;
+        break;
+      case "hashonorarymember":
+        term = "hasHonoraryMember";
+        id = 28260;
+        break;
+      case "hasmember":
+        term = "hasMember";
+        id = 28261;
+        break;
+      case "hierarchical-child":
+        term = "hierarchical-child";
+        id = 28263;
+        break;
+      case "hierarchical-parent":
+        term = "hierarchical-parent";
+        id = 28264;
+        break;
+      case "honorarymemberof":
+        term = "honoraryMemberOf";
+        id = 28265;
+        break;
+      case "honoredby":
+        term = "honoredBy";
+        id = 28266;
+        break;
+      case "investigatedby":
+        term = "investigatedBy";
+        id = 28267;
+        break;
+      case "investigatorof":
+        term = "investigatorOf";
+        id = 28268;
+        break;
+      case "leaderof":
+        term = "leaderOf";
+        id = 28269;
+        break;
+      case "memberof":
+        term = "memberOf";
+        id = 28271;
+        break;
+      case "nieceornephewof":
+        term = "nieceOrNephewOf";
+        id = 28272;
+        break;
+      case "ownerof":
+        term = "ownerOf";
+        id = 28274;
+        break;
+      case "parent-in-law of":
+        term = "parent-in-law of";
+        id = 28275;
+        break;
+      case "parentof":
+        term = "parentOf";
+        id = 28276;
+        break;
+      case "participantin":
+        term = "participantIn";
+        id = 28277;
+        break;
+      case "politicalopponentof":
+        term = "politicalOpponentOf";
+        id = 28279;
+        break;
+      case "predecessorof":
+        term = "predecessorOf";
+        id = 28280;
+        break;
+      case "relativeof":
+        term = "relativeOf";
+        id = 28281;
+        break;
+      case "sibling-in-law of":
+        term = "sibling-in-law of";
+        id = 28282;
+        break;
+      case "sibling of":
+        term = "sibling of";
+        id = 28283;
+        break;
+      case "spouseof":
+        term = "spouseOf";
+        id = 28284;
+        break;
+      case "subordinateof":
+        term = "subordinateOf";
+        id = 28290;
+        break;
+      case "sucessorof":
+        term = "sucessorOf";
+        id = 28291;
+        break;
+      case "hasfamilyrelationto":
+        term = "hasFamilyRelationTo";
+        id = 400456;
+        break;
+      case "issuccessorof":
+        term = "isSuccessorOf";
+        id = 400459;
+        break;
+      case "ownedby":
+        term = "ownedBy";
+        id = 400478;
+        break;
+
+      default:
+        logger.warn("createRelationTypeTerm(): invalid/unhandled CPF relation type: [" + relationType + "]");
+        term = "associatedWith";
+        id = 28234;
+    }
+
+    Term t = new Term();
+    t.setType("relation_type");
     t.setTerm(term);
     t.setID(id);
 
