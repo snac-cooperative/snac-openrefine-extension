@@ -295,7 +295,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             // Get Relation Type.
             String cpfRelationTypeColumn = schema.getReverseColumnMappings().get("related cpf relation type");
-            
+
             if (cpfRelationTypeColumn != null) {
               String cpfRelationType = getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
               Term cpfRelationTypeTerm = createRelationTypeTerm(cpfRelationType);
@@ -454,67 +454,26 @@ public class SNACConstellationItem extends SNACUploadItem {
         return checkoutResponse;
       }
 
-      // update
+      // set update information
 
       this._constellation.setOperation("update");
       this._constellation.setID(checkoutCon.getID());
       this._constellation.setVersion(checkoutCon.getVersion());
       this._constellation.setArk(checkoutCon.getArk());
+    }
 
-      String updateJSON = this.toJSON();
+      // Perform insert or update and publish
+      String constellationJSON = this.toJSON();
 
       apiQuery =
-          "{\"command\": \"update_constellation\",\n"
+          "{\"command\": \"insert_and_publish_constellation\",\n"
               + apiKey
               + "\n\"constellation\":"
-              + updateJSON.substring(0, updateJSON.length() - 1)
+              + constellationJSON.substring(0, constellationJSON.length() - 1)
               + "}}";
 
       SNACAPIResponse updateResponse = client.post(apiQuery);
-
       return updateResponse;
-    } else {
-      // insert new constellation (insert/publish)
-
-      // insert
-
-      String insertJSON = this.toJSON();
-
-      apiQuery =
-          "{\"command\": \"insert_constellation\",\n"
-              + apiKey
-              + "\n\"constellation\":"
-              + insertJSON.substring(0, insertJSON.length() - 1)
-              + "}}";
-
-      SNACAPIResponse insertResponse = client.post(apiQuery);
-
-      Constellation insertCon = insertResponse.getConstellation();
-
-      if (insertCon == null) {
-        return insertResponse;
-      }
-
-      // publish
-
-      Constellation publishCon = new Constellation();
-      publishCon.setID(insertCon.getID());
-      publishCon.setVersion(insertCon.getVersion());
-
-      String publishJSON = Constellation.toJSON(publishCon);
-
-      apiQuery =
-          "{\"command\": \"publish_constellation\",\n"
-              + apiKey
-              + "\n\"constellation\":"
-              + publishJSON.substring(0, publishJSON.length() - 1)
-              + "}}";
-
-      SNACAPIResponse publishResponse = client.post(apiQuery);
-
-      // use API response from insert operation, as it contains more valuable info
-      return new SNACAPIResponse(publishResponse, insertResponse.getAPIResponse());
-    }
   }
 
   private Term createEntityTypeTerm(String entityType) {
