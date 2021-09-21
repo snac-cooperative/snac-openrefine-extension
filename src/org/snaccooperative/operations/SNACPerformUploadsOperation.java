@@ -118,11 +118,11 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         // FIXME: generate unique column postfixes to avoid potential schema confusion down the road
         // e.g. find lowest number N such that no columns exist with that postfix
 
-        String resultColumn = "SNAC Result";
-        String messageColumn = "SNAC Message";
-        String idColumn = "SNAC ID";
-        String uriColumn = "SNAC Link";
-        String responseColumn = "SNAC API Response";
+        String resultColumn = "*SNAC*: Result";
+        String messageColumn = "*SNAC*: Message";
+        String idColumn = "*SNAC*: ID";
+        String uriColumn = "*SNAC*: Link";
+        String responseColumn = "*SNAC*: API Response";
 
         int i = 0;
         boolean found = false;
