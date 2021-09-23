@@ -93,6 +93,9 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
       List<CellAtRow> links = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> responses = new ArrayList<CellAtRow>(items.size());
 
+      // Disable API Response  // TODO: Add settings flag to allow API Response
+      Boolean includeAPIResponseColumn = false;
+
       for (int i = 0; i < items.size(); i++) {
         SNACUploadItem item = items.get(i);
         int row = item.rowIndex();
@@ -103,7 +106,9 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         messages.add(new CellAtRow(row, new Cell(uploadResponse.getMessage(), null)));
         ids.add(new CellAtRow(row, new Cell(uploadResponse.getIDString(), null)));
         links.add(new CellAtRow(row, new Cell(uploadResponse.getURI(), null)));
-        responses.add(new CellAtRow(row, new Cell(uploadResponse.getAPIResponse(), null)));
+        if (includeAPIResponseColumn ) {
+          responses.add(new CellAtRow(row, new Cell(uploadResponse.getAPIResponse(), null)));
+        }
 
         _progress = i * 100 / items.size();
 
@@ -154,7 +159,9 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         addHistoryEntry(messageColumn, messages);
         addHistoryEntry(idColumn, ids);
         addHistoryEntry(uriColumn, links);
-        addHistoryEntry(responseColumn, responses);
+        if (includeAPIResponseColumn ) {
+          addHistoryEntry(responseColumn, responses);
+        }
 
         _project.processManager.onDoneProcess(this);
       }
