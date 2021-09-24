@@ -1,6 +1,8 @@
 # Snac Openrefine Extension
 The SNAC OpenRefine extension allows SNAC edits to be made via OpenRefine.
 
+### Documentation
+The [SNAC OpenRefine Extension Documentation](https://docs.google.com/document/d/1HjhKHAWXe6Xkh8F-qBnsl-psyaPd2UPBLX2OgaVbA2Q/edit?usp=sharing) details how to use the extension to make batch edits data in SNAC.
 
 ### Installation
 More complete instructions for installing OpenRefine Extensions can be found in the [official documentation](https://docs.openrefine.org/manual/installing/#installing-extensions).
