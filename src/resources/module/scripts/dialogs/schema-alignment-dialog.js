@@ -76,7 +76,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    this.SNACConstellationModel = [
       { name: "Entity Type",     required: true,  tooltip:  "The entity type (person, corporateBody, family)" },
       { name: "ID",              required: false, tooltip:  "SNAC ID" },
-      { name: "Name Entry",      required: true,  tooltip:  "Name Entry" },
+      { name: "Name Entry",      required: false,  tooltip:  "Name Entry" },
       { name: "Date",            required: false, tooltip:  "Date" },
       { name: "Date Type",       required: false, tooltip:  "Date Type" },
       { name: "Subject",         required: false, tooltip:  "Subject" },
