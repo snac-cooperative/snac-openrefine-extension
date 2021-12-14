@@ -187,7 +187,7 @@ public class CommandTest extends RefineTest{
     // @Test
     // public void testRecentlyPublished() throws Exception{
     //   DefaultHttpClient client = new DefaultHttpClient();
-    //   HttpPost post = new HttpPost("http://api.snaccooperative.org");
+    //   HttpPost post = new HttpPost("https://api.snaccooperative.org");
     //   post.setEntity(new StringEntity("{\"command\":\"recently_published\"}", "UTF-8"));
     //   HttpResponse response = client.execute(post);
     //   String result = EntityUtils.toString(response.getEntity());
@@ -207,7 +207,7 @@ public class CommandTest extends RefineTest{
     // @Test
     // public void testStringToJSONDownload1() throws Exception{
     //     DefaultHttpClient client = new DefaultHttpClient();
-    //     HttpPost post = new HttpPost("http://api.snaccooperative.org");
+    //     HttpPost post = new HttpPost("https://api.snaccooperative.org");
     //     post.setEntity(new StringEntity("{\"command\": \"search\", \"term\": \"Washington\",\"count\": 10,\"start\": 0,\"entity_type\": \"person\"}","UTF-8"));
     //     HttpResponse response = client.execute(post);
     //     String result = EntityUtils.toString(response.getEntity());
@@ -220,7 +220,7 @@ public class CommandTest extends RefineTest{
     // @Test
     // public void testStringToJSONDownload2() throws Exception{
     //     DefaultHttpClient client = new DefaultHttpClient();
-    //     HttpPost post = new HttpPost("http://api.snaccooperative.org");
+    //     HttpPost post = new HttpPost("https://api.snaccooperative.org");
     //     post.setEntity(new StringEntity("","UTF-8"));
     //     HttpResponse response = client.execute(post);
     //     String result = EntityUtils.toString(response.getEntity());

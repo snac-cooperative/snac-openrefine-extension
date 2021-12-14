@@ -40,6 +40,9 @@ public class SNACResourceItem extends SNACUploadItem {
     // Insert by default
     res.setOperation("insert");
 
+    // things to accumulate
+    List<Language> languages = new LinkedList<Language>();
+
     for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue().toLowerCase();
@@ -100,16 +103,9 @@ public class SNACResourceItem extends SNACUploadItem {
             continue;
 
           case "language":
-            // reduced to just adding language codes, as script does not seem to be used right now
-            String langCode = cache.getLanguageCode(cellValue);
-
-            if (langCode != null) {
-              Language lang = new Language();
-              Term langTerm = new Term();
-
-              langTerm.setType(cellValue);
-              lang.setLanguage(langTerm);
-              res.addLanguage(lang);
+            Language lang = cache.getLanguageCode(cellValue);
+            if (lang != null) {
+              languages.add(lang);
             }
 
             continue;
@@ -134,6 +130,8 @@ public class SNACResourceItem extends SNACUploadItem {
       }
     }
 
+    // add accumulated languages
+    res.setLanguages(languages);
     this._resource = res;
   }
 
@@ -194,21 +192,16 @@ public class SNACResourceItem extends SNACUploadItem {
           String _resourceLanguages = "";
 
           if (languageList.size() > 0) {
-            List<String> valid_lang = new LinkedList<String>();
             for (int i = 0; i < languageList.size(); i++) {
               if (languageList.get(i).getLanguage() == null) {
                 continue;
               }
-              String lang_var = languageList.get(i).getLanguage().getType();
+              String lang_var = languageList.get(i).getLanguage().getDescription();
               if (lang_var.equals("")) {
                 continue;
               }
-              valid_lang.add(_cache.getLanguageCode(lang_var) + " (" + lang_var + ")");
+              _resourceLanguages += lang_var + ", ";
             }
-            for (int j = 0; j < valid_lang.size() - 1; j++) {
-              _resourceLanguages += valid_lang.get(j) + ", ";
-            }
-            _resourceLanguages += valid_lang.get(valid_lang.size() - 1) + "\n";
           }
 
           resourceFields.put(snacText, _resourceLanguages);
@@ -216,6 +209,7 @@ public class SNACResourceItem extends SNACUploadItem {
 
         case "holding repository snac id":
           snacText = "Repository ID";
+          if (_resource.getRepository() != null) {
 
           // TODO: handle missing repository. Could check for cell value type and show error in Issues tab.
           int repo_id = _resource.getRepository().getID();
@@ -225,6 +219,7 @@ public class SNACResourceItem extends SNACUploadItem {
             repo_str = Integer.toString(repo_id);
           }
           resourceFields.put(snacText, repo_str);
+        }
       }
     }
 
