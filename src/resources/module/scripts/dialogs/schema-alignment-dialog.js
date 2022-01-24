@@ -85,7 +85,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "Occupation",      required: false, tooltip:  "Occupation" },
       { name: "Activity",        required: false, tooltip:  "Activity" },
       { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
-      { name: "Related Identity", required: false, tooltip:  "URL to this entity in another identity authority such as wikiData or VIAF" },
+      { name: "External Related CPF", required: false, tooltip:  "The URL to this entity in another identity authority such as wikiData or VIAF, aka 'SameAs Relation'" },
       { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },
       { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, etc)" },
       { name: "Source Citation", required: false, tooltip:  "Source citation" },

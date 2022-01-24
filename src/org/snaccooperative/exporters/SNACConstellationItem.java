@@ -250,10 +250,14 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "sameas relation":
+          case "external related cpf":
             SameAs sameAs = new SameAs();
             sameAs.setURI(cellValue);
             sameAs.setOperation("insert");
+
+            Term sameAsTerm = new Term();
+            sameAsTerm.setID(28225);
+            sameAs.setType(sameAsTerm);
 
             sameAsRelations.add(sameAs);
 
@@ -407,7 +411,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getSources() + "\n";
           break;
 
-        case "sameas relation":
+        case "external related cpf":
           preview += snacText + ": " + _constellation.getSameAsRelations() + "\n";
           break;
 
