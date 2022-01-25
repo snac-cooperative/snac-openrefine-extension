@@ -69,7 +69,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "Abstract",                   required: false, tooltip:  "Summary abstract of the resource" },
       { name: "Extent",                     required: false, tooltip:  "Extent" },
       { name: "Date",                       required: false, tooltip:  "Date or date range (YYYY or YYYY-YYYY)" },
-      { name: "Language",                   required: false, tooltip:  "Language" },
+      { name: "Language",                   required: false, tooltip:  "ISO 639 Language code. E.g. 'eng', 'ger', 'jpn'" },
       { name: "Holding Repository SNAC ID", required: true,  tooltip:  "Holding Repository SNAC ID" }
    ];
 
