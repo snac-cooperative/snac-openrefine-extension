@@ -82,9 +82,9 @@ public class SNACResourceItem extends SNACUploadItem {
             res.setTitle(cellValue);
             continue;
 
-          case "display entry":
-            res.setDisplayEntry(cellValue);
-            continue;
+          // case "display entry":
+          //   res.setDisplayEntry(cellValue);
+          //   continue;
 
           case "link":
             res.setLink(cellValue);
@@ -167,9 +167,9 @@ public class SNACResourceItem extends SNACUploadItem {
           resourceFields.put(snacText, _resource.getTitle());
           break;
 
-        case "display entry":
-          resourceFields.put(snacText, _resource.getDisplayEntry());
-          break;
+        // case "display entry":
+        //   resourceFields.put(snacText, _resource.getDisplayEntry());
+        //   break;
 
         case "link":
           resourceFields.put(snacText, _resource.getLink());

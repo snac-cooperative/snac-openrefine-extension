@@ -63,8 +63,8 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    this.SNACResourceModel = [
       { name: "ID",                         required: false, tooltip:  "SNAC Resource ID" },
       { name: "Type",                       required: true,  tooltip:  "The resource type (ArchivalResource, BibliographicResource, etc.)" },
-      { name: "Title",                      required: true,  tooltip:  "The official title (e.g.  Papers, 1809-1882)" },
-      { name: "Display Entry",              required: false, tooltip:  "The descriptive display name (e.g.  Jacob Miller Papers, 1809-1882)" },
+      { name: "Title",                      required: true,  tooltip:  "The official title (e.g. Jacob Miller Papers, 1809-1882)" },
+      // { name: "Display Entry",              required: false, tooltip:  "The descriptive display name (e.g.  Jacob Miller Papers, 1809-1882)" },
       { name: "Link",                       required: true,  tooltip:  "The preferred permanent link to finding aid" },
       { name: "Abstract",                   required: false, tooltip:  "Summary abstract of the resource" },
       { name: "Extent",                     required: false, tooltip:  "Extent" },
