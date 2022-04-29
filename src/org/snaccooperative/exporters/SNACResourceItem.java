@@ -57,7 +57,7 @@ public class SNACResourceItem extends SNACUploadItem {
         }
 
         switch (snacField) {
-          case "id":
+          case "snac resource id":
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
@@ -67,7 +67,7 @@ public class SNACResourceItem extends SNACUploadItem {
             }
             continue;
 
-          case "type":
+          case "resource type":
             Term typeTerm = createTypeTerm(cellValue);
 
             if (typeTerm == null) {
@@ -86,7 +86,7 @@ public class SNACResourceItem extends SNACUploadItem {
           //   res.setDisplayEntry(cellValue);
           //   continue;
 
-          case "link":
+          case "resource url":
             res.setLink(cellValue);
             continue;
 
@@ -151,15 +151,15 @@ public class SNACResourceItem extends SNACUploadItem {
       String snacField = snacText.toLowerCase();
 
       switch (snacField) {
-        case "id":
+        case "snac resource id":
           // Already added to Preview
           // resourceFields.put(snacText, String.valueOf(_resource.getID()));
           break;
 
-        case "type":
+        case "resource type":
           Term previewTerm = _resource.getDocumentType();
           if (previewTerm != null) {
-            resourceFields.put(snacText, previewTerm.getTerm() + " (" + previewTerm.getID() + ")");
+            resourceFields.put(snacText, previewTerm.getTerm());
           }
           break;
 
@@ -167,11 +167,7 @@ public class SNACResourceItem extends SNACUploadItem {
           resourceFields.put(snacText, _resource.getTitle());
           break;
 
-        // case "display entry":
-        //   resourceFields.put(snacText, _resource.getDisplayEntry());
-        //   break;
-
-        case "link":
+        case "resource url":
           resourceFields.put(snacText, _resource.getLink());
           break;
 

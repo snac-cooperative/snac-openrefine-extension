@@ -61,16 +61,15 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    snacDebug(`***** [ getSNACModel ] *****`);
 
    this.SNACResourceModel = [
-      { name: "ID",                         required: false, tooltip:  "SNAC Resource ID" },
-      { name: "Type",                       required: true,  tooltip:  "The resource type (ArchivalResource, BibliographicResource, etc.)" },
-      { name: "Title",                      required: true,  tooltip:  "The official title (e.g. Jacob Miller Papers, 1809-1882)" },
-      // { name: "Display Entry",              required: false, tooltip:  "The descriptive display name (e.g.  Jacob Miller Papers, 1809-1882)" },
-      { name: "Link",                       required: true,  tooltip:  "The preferred permanent link to finding aid" },
-      { name: "Abstract",                   required: false, tooltip:  "Summary abstract of the resource" },
-      { name: "Extent",                     required: false, tooltip:  "Extent" },
-      { name: "Date",                       required: false, tooltip:  "Date or date range (YYYY or YYYY-YYYY)" },
+      { name: "SNAC Resource ID", required: false, tooltip:  "SNAC identifier for Resource Description. Leave blank if Resource Description is NOT in SNAC." },
+      { name: "Resource Type",    required: true,  tooltip:  "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource" },
+      { name: "Title",            required: true,  tooltip:  "Title of a resource (that may or may not include dates) (e.g. Jacob Miller Papers, 1809-1882)" },
+      { name: "Resource URL",     required: true,  tooltip:  "URL of the local Resource Description" },
+      { name: "Abstract",         required: false, tooltip:  "Brief prose abstract of scope and contents of the resource" },
+      { name: "Extent",           required: false, tooltip:  "Extent of the resource" },
+      { name: "Date",             required: false, tooltip:  "Date or dates of the resource (YYYY or YYYY-YYYY)" },
       // { name: "Language",                   required: false, tooltip:  "ISO 639 Language code. E.g. 'eng', 'ger', 'jpn'" },
-      { name: "Holding Repository SNAC ID", required: true,  tooltip:  "Holding Repository SNAC ID" }
+      { name: "Holding Repository SNAC ID", required: true,  tooltip:  "SNAC identifier for the holding repository description. The holding repository must be created in SNAC before adding Resource Descriptions." }
    ];
 
    this.SNACConstellationModel = [
