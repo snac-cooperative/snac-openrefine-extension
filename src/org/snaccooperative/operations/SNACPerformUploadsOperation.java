@@ -168,7 +168,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
     }
 
     private void addHistoryEntry(String columnName, List<CellAtRow> cells) {
-      int columnIndex = _project.columnModel.getMaxCellIndex() + 1;
+      int columnIndex = _project.columnModel.columns.size();
 
       _project.history.addEntry(
           new HistoryEntry(
