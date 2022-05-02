@@ -13,6 +13,7 @@
   "snac-extension/upload-to-snac": "Upload to SNAC",
   "snac-schema/copy-reference": "copy",
   "snac-schema/dialog-explanation": "The SNAC schema below specifies how your tabular data will be transformed into SNAC Resources or CPFs. You can drag and drop the column names below in most input boxes: for each row, entries will be created or updated with the values in these columns.  Unmapped fields will be ignored.",
+  "snac-schema/dialog-explanation2": "<p>Note: External Related CPF URLs are limited to those found in <a href=\"https://tinyurl.com/2s3wjftd \" target=\"_blank\">this list</a> The URL should be based on the Formatter template in the linked document.</p>",
   "snac-schema/discard-button": "Discard changes",
   "snac-schema/discard-schema-changes-alt": "Discard the changes made to the schema.",
   "snac-schema/items-preview-tab-header": "Preview",

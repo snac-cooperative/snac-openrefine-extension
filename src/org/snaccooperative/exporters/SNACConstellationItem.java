@@ -75,7 +75,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         }
 
         switch (snacField) {
-          case "id":
+          case "snac cpf id":
             try {
               int id = Integer.parseInt(cellValue);
               con.setID(id);
@@ -83,7 +83,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             }
             continue;
 
-          case "entity type":
+          case "cpf type":
             Term entityTypeTerm = createEntityTypeTerm(cellValue);
 
             if (entityTypeTerm == null) {
@@ -104,9 +104,9 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "date":
-            // find and add required associated date type in this row
-            String dateTypeColumn = schema.getReverseColumnMappings().get("date type");
+          case "exist date":
+            // find and add required associated exist date type in this row
+            String dateTypeColumn = schema.getReverseColumnMappings().get("exist date type");
 
             if (dateTypeColumn == null) {
               logger.error("no date type column found");
@@ -135,7 +135,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "date type": // queried alongside "date"
+          case "exist date type": // queried alongside "exist date"
             continue;
 
           case "subject":
@@ -250,7 +250,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "external related cpf":
+          case "external related cpf url":
             SameAs sameAs = new SameAs();
             sameAs.setURI(cellValue);
             sameAs.setOperation("insert");
@@ -292,13 +292,13 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "resource role": // queried alongside "resource id"
             continue;
 
-          case "related cpf id":
+          case "related cpf snac id":
             ConstellationRelation cpfRelation = new ConstellationRelation();
             cpfRelation.setSourceConstellation(con.getID());
             cpfRelation.setTargetConstellation(Integer.parseInt(cellValue));
 
             // Get Relation Type.
-            String cpfRelationTypeColumn = schema.getReverseColumnMappings().get("related cpf relation type");
+            String cpfRelationTypeColumn = schema.getReverseColumnMappings().get("cpf to cpf relation type");
 
             if (cpfRelationTypeColumn != null) {
               String cpfRelationType = getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
@@ -309,7 +309,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             cpfRelations.add(cpfRelation);
             continue;
 
-          case "related cpf relation type": // Queried alongside related cpf id
+          case "cpf to cpf relation type": // Queried alongside related cpf snac id
             break;
 
           default:
@@ -367,11 +367,11 @@ public class SNACConstellationItem extends SNACUploadItem {
       String snacField = snacText.toLowerCase();
 
       switch (snacField) {
-        case "id":
+        case "snac cpf id":
           preview += snacText + ": " + _constellation.getID() + "\n";
           break;
 
-        case "entity type":
+        case "cpf type":
           Term previewTerm = _constellation.getEntityType();
           if (previewTerm != null) {
             preview += snacText + ": " + previewTerm.getTerm() + " (" + previewTerm.getID() + ")\n";
@@ -382,7 +382,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getNameEntries() + "\n";
           break;
 
-        case "date":
+        case "exist date":
           preview += snacText + ": " + _constellation.getDateList() + "\n";
           break;
 
@@ -411,11 +411,11 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getSources() + "\n";
           break;
 
-        case "external related cpf":
+        case "external related cpf url":
           preview += snacText + ": " + _constellation.getSameAsRelations() + "\n";
           break;
 
-        case "related cpf id":
+        case "related cpf snac id":
           preview += snacText + ": " + _constellation.getRelations() + "\n";
           break;
 

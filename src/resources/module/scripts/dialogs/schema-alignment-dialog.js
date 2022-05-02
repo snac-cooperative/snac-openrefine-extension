@@ -73,25 +73,25 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    ];
 
    this.SNACConstellationModel = [
-      { name: "Entity Type",     required: true,  tooltip:  "The entity type (person, corporateBody, family)" },
-      { name: "ID",              required: false, tooltip:  "SNAC ID" },
-      { name: "Name Entry",      required: false, tooltip:  "Name Entry" },
-      { name: "Date",            required: false, tooltip:  "Date" },
-      { name: "Date Type",       required: false, tooltip:  "Date Type (Birth, Death)" },
-      { name: "Subject",         required: false, tooltip:  "Subject" },
-      { name: "Place",           required: false, tooltip:  "Place" },
-      { name: "Place Role",      required: false, tooltip:  "Place Role (Birth, Death, Residence, Citizenship)" },
-      { name: "Occupation",      required: false, tooltip:  "Occupation" },
-      { name: "Activity",        required: false, tooltip:  "Activity" },
-      { name: "BiogHist",        required: false, tooltip:  "BiogHist" },
-      { name: "External Related CPF", required: false, tooltip:  "The URL to this entity in another identity authority such as wikiData or VIAF, aka 'SameAs Relation'" },
-      { name: "Resource ID",     required: false, tooltip:  "The SNAC Resource ID for the connected resource" },
-      { name: "Resource Role",   required: false, tooltip:  "The role of this Constellation with the Resource (creatorOf, referencedIn, editorOf, contributorOf)" },
-      { name: "Source Citation", required: false, tooltip:  "Source citation" },
-      { name: "Source Citation URL",     required: false, tooltip:  "The URL for this citation" },
-      { name: "Source Citation Found Data",   required: false, tooltip:  "Data as found to be cited" },
-      { name: "Related CPF ID",   required: false, tooltip:  "SNAC ID of related CPF entity" },
-      { name: "Related CPF relation type",   required: false, tooltip:  "Type of CPF relation (associatedWith, correspondedWith, etc)" }
+      { name: "CPF Type",        required: true,  tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
+      { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
+      { name: "Name Entry",      required: false, tooltip:  "Preferred Name Entry of the CPF entity." },
+      { name: "Date",            required: false, tooltip:  "Exist Date or Dates of the CPF entity." },
+      { name: "Date Type",       required: false, tooltip:  "Type of Exist Date. The following values may be used: Active, Birth, Death, Establishment, Disestablishment" },
+      { name: "Subject",         required: false, tooltip:  "Subject term associated with the CPF entity. Repeatable in relation to entity. " },
+      { name: "Place",           required: false, tooltip:  "Place name associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "Place Role",      required: false, tooltip:  "Role of the place in relation to the CPF entity. The following values may be used: Birth, Death, Residence" },
+      { name: "Occupation",      required: false, tooltip:  "Occupation term associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "Activity",        required: false, tooltip:  "Activity term associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "BiogHist",        required: false, tooltip:  "Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF. Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF." },
+      { name: "External Related CPF URL", required: false, tooltip:  "URL to a description of the CPF entity in an external authority. Such links are limited to those found in https://docs.google.com/spreadsheets/d/1R2kX5yyKd_jsOGRifgNd18xDRNi0AiY193NO6msv7t8/edit#gid=0 The URL should be based on the Formatter template in the linked document. Repeatable in relation to entity" },
+      { name: "Resource ID",     required: false, tooltip:  "SNAC ID for a related Resource in SNAC." },
+      { name: "Resource Role",   required: false, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
+      { name: "Source Citation", required: false, tooltip:  "Text citation for a source used in describing the CPF entity." },
+      { name: "Source Citation URL",     required: false, tooltip:  "URL, if available, for the Source Citation." },
+      { name: "Source Citation Found Data",   required: false, tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity." },
+      { name: "Related CPF SNAC ID",   required: false, tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity. Repeatable in relation to entity." },
+      { name: "CPF to CPF Relation Type",   required: false, tooltip:  "Nature of the relation of the CPF entity with the related CPF entity. The following values may be used: associatedWith, correspondedWith" }
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);
@@ -215,6 +215,7 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    var schemaTab = $(DOM.loadHTML("snac", "scripts/schema-alignment-tab.html")).appendTo(this._schemaPanel);
    var schemaElmts = this._schemaElmts = DOM.bind(schemaTab);
    schemaElmts.dialogExplanation.text($.i18n('snac-schema/dialog-explanation'));
+   schemaElmts.dialogExplanation2.html($.i18n('snac-schema/dialog-explanation2'));
    schemaElmts.saveButton
       .text($.i18n('snac-schema/save-button'))
       .attr('title', $.i18n('snac-schema/save-schema-alt'))
