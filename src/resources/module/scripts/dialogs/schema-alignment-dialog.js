@@ -586,7 +586,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
    var dragItemsResource = this.SNACResourceNames;
    this._refcolumnAreaResource = $('.schema-alignment-dialog-columns-area-resource--ref');
    this._refcolumnAreaResource.addClass('snac-tab');
-   this._refcolumnAreaResource.html('<h2>SNAC Model</h2>');
+   this._refcolumnAreaResource.html("<h2>SNAC Resource Description Model</h2>");
 
    var myTableDivResource = this.addResourceTable(schema);
    this._columnAreaResource.append(myTableDivResource);
@@ -621,7 +621,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
    var dragItemsConstellation = this.SNACConstellationNames;
    this._refcolumnAreaConestellation = $('.schema-alignment-dialog-columns-area-constellation--ref');
    this._refcolumnAreaConestellation.addClass('snac-tab');
-   this._refcolumnAreaConestellation.html('<h2>SNAC Model</h2>');
+   this._refcolumnAreaConestellation.html("<h2>SNAC CPF Model</h2>");
 
    var myTableDivConstellation = this.addConstellationTable(schema);
    this._columnAreaConstellation.append(myTableDivConstellation);
