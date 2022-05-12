@@ -498,7 +498,7 @@ SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableRes = function() {
-   var dragResourceIDs =$.makeArray($('[id="dragResource"]'));
+   var dragResources =$.makeArray($('.dragResource'));
 
    const selectedValue = [];  //Array to hold selected values
    $('.selectColumnRes').find(':selected').filter(function(i, el) { // Filter selected values and push to array
@@ -513,7 +513,7 @@ SNACSchemaAlignmentDialog.hideAndDisableRes = function() {
             return;
          } else {
             $(this).attr('disabled', true);
-            dragResourceIDs.forEach(r => {
+            dragResources.forEach(r => {
                if(r.value==this.innerHTML){
                   r.style.visibility = 'hidden';   // Hide value
                };
@@ -521,7 +521,7 @@ SNACSchemaAlignmentDialog.hideAndDisableRes = function() {
          }
       } else {
          $(this).attr('disabled', false);
-         dragResourceIDs.forEach(c => {
+         dragResources.forEach(c => {
             if(c.value==this.innerHTML){
                c.style.visibility = 'visible';  // Show value
             };
@@ -593,18 +593,18 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
    for (var i = 0; i < dragItemsResource.length; i++) {
       var cell = this._createDraggableColumn(dragItemsResource[i], false);
-      cell.attr('id', 'dragResource');
+      cell.addClass('dragResource');
       cell.val(dragItemsResource[i]).change();
       this._refcolumnAreaResource.append(cell);
    }
-   $('[id="dragResource"]').addClass('tooltip');
+   $('.dragResource').addClass('tooltip');
 
    for(var i = 0 ; i < this.SNACResourceTooltips.length; i++) {
       var toolTipSpan = document.createElement('span');
       var toolTiptext = document.createTextNode(this.SNACResourceTooltips[i]);
       toolTipSpan.classList.add('tooltiptext');
       toolTipSpan.appendChild(toolTiptext);
-      $('[id="dragResource"]')[i].appendChild(toolTipSpan);
+      $('.dragResource')[i].appendChild(toolTipSpan);
    }
 
    // ******* CONSTELLATIONS PAGE ******* //
