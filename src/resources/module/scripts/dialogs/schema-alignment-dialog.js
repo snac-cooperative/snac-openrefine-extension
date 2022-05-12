@@ -531,7 +531,7 @@ SNACSchemaAlignmentDialog.hideAndDisableRes = function() {
 };
 
 SNACSchemaAlignmentDialog.hideAndDisableConst = function() {
-   var dragConstellationIDs =$.makeArray($('[id="dragConstellation"]'));
+   var dragConstellations =$.makeArray($('.dragConstellation'));
 
    const selectedValue = [];  //Array to hold selected values
    $('.selectColumnConst').find(':selected').filter(function(i, el) { //Filter selected values and push to array
@@ -547,7 +547,7 @@ SNACSchemaAlignmentDialog.hideAndDisableConst = function() {
             return;
          } else {
             $(this).attr('disabled', true);
-            dragConstellationIDs.forEach(r => {
+            dragConstellations.forEach(r => {
                if(r.value==this.innerHTML){
                   r.style.visibility = 'hidden';   //Hide value
                };
@@ -555,7 +555,7 @@ SNACSchemaAlignmentDialog.hideAndDisableConst = function() {
          }
       } else {
          $(this).attr('disabled', false);
-         dragConstellationIDs.forEach(c => {
+         dragConstellations.forEach(c => {
             if(c.value==this.innerHTML){
                c.style.visibility = 'visible';  //Show value
             };
@@ -628,18 +628,18 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
    for (var i = 0; i < dragItemsConstellation.length; i++) {
       var cell = this._createDraggableColumn(dragItemsConstellation[i], false);
-      cell.attr('id', 'dragConstellation');
+      cell.addClass('dragConstellation');
       cell.val(dragItemsConstellation[i]).change();
       this._refcolumnAreaConestellation.append(cell);
    }
-   $('[id="dragConstellation"]').addClass('tooltip');
+   $('.dragConstellation').addClass('tooltip');
 
    for(var i = 0 ; i < this.SNACConstellationTooltips.length; i++) {
       var toolTipSpan = document.createElement('span');
       var toolTiptext = document.createTextNode(this.SNACConstellationTooltips[i]);
       toolTipSpan.classList.add('tooltiptext');
       toolTipSpan.appendChild(toolTiptext);
-      $('[id="dragConstellation"]')[i].appendChild(toolTipSpan);
+      $('.dragConstellation')[i].appendChild(toolTipSpan);
    }
 
    // Resource Validator Call onChange
