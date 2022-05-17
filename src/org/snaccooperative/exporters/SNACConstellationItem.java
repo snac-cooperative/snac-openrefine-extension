@@ -263,7 +263,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "resource id":
+          case "snac resource id":
             Resource resource = new Resource();
             resource.setID(Integer.parseInt(cellValue));
 
@@ -292,7 +292,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "resource role": // queried alongside "resource id"
             continue;
 
-          case "related cpf snac id":
+          case "related snac cpf id":
             ConstellationRelation cpfRelation = new ConstellationRelation();
             cpfRelation.setSourceConstellation(con.getID());
             cpfRelation.setTargetConstellation(Integer.parseInt(cellValue));
@@ -309,7 +309,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             cpfRelations.add(cpfRelation);
             continue;
 
-          case "cpf to cpf relation type": // Queried alongside related cpf snac id
+          case "cpf to cpf relation type": // Queried alongside related snac cpf id
             break;
 
           default:
@@ -415,7 +415,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getSameAsRelations() + "\n";
           break;
 
-        case "related cpf snac id":
+        case "related snac cpf id":
           preview += snacText + ": " + _constellation.getRelations() + "\n";
           break;
 
