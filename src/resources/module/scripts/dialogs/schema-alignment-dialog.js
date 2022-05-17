@@ -233,38 +233,51 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
 
    // init the radio buttons
 
-   var uploadingResourceButtonClicked = function() {
+   $('#uploadingResourceButton').on('click', function() {
+     // Show Resources
+     $(".schema-alignment-dialog-columns-area-resource").show();
+     $(".schema-alignment-dialog-columns-area-resource--ref").show();
 
-      // Show Resources
-      $('.schema-alignment-dialog-columns-area-resource').show();
+     // Hide Constellations
+     $(".schema-alignment-dialog-columns-area-constellation").hide();
+     $(".schema-alignment-dialog-columns-area-constellation--ref").hide();
+     // TODO:
+     // Hide Relations
+
       $('.schema-alignment-dialog-columns-area-resource--ref').show();
 
-      // Hide Constellations
-      $('.schema-alignment-dialog-columns-area-constellation').hide();
-      $('.schema-alignment-dialog-columns-area-constellation--ref').hide();
-   };
+     snacDebug(`uploadingRes calling _hasChanged()`);
+     self._hasChanged();
 
-   var uploadingConstellationButtonClicked = function() {
       // Hide Resources
-      $('.schema-alignment-dialog-columns-area-resource').hide();
-      $('.schema-alignment-dialog-columns-area-resource--ref').hide();
+      $(".schema-alignment-dialog-columns-area-resource").hide();
+      $(".schema-alignment-dialog-columns-area-resource--ref").hide();
 
       // Show Constellations
-      $('.schema-alignment-dialog-columns-area-constellation').show();
-      $('.schema-alignment-dialog-columns-area-constellation--ref').show();
-   };
+      $(".schema-alignment-dialog-columns-area-constellation").show();
+      $(".schema-alignment-dialog-columns-area-constellation--ref").show();
 
+      $(".dragConstellation").not(".relations-field").show()
 
-   $('#uploadingResourceButton').on('click', function() {
-      uploadingResourceButtonClicked();
-      snacDebug(`uploadingRes calling _hasChanged()`);
-      self._hasChanged();
+     snacDebug(`uploadingCon calling _hasChanged()`);
+     self._hasChanged();
    });
 
-   $('#uploadingConstellationButton').on('click', function() {
-      uploadingConstellationButtonClicked();
-      snacDebug(`uploadingCon calling _hasChanged()`);
-      self._hasChanged();
+   // TODO: Relations
+   // BOOKMARK
+   $('#uploadingRelationButton').on('click', function() {
+      // Hide Resources
+      $(".schema-alignment-dialog-columns-area-resource").hide();
+      $(".schema-alignment-dialog-columns-area-resource--ref").hide();
+
+      // Show Constellations
+      $(".schema-alignment-dialog-columns-area-constellation").show();
+      $(".schema-alignment-dialog-columns-area-constellation--ref").show();
+
+      $(".dragConstellation").not(".relations-field").hide();
+
+     snacDebug(`uploadingCon calling _hasChanged()`);
+     self._hasChanged();
    });
 
    // Init the column area
