@@ -271,8 +271,8 @@ public class SNACConstellationItem extends SNACUploadItem {
             resourceRelation.setOperation("insert");
             resourceRelation.setResource(resource);
 
-            // find and add optional associated resource role in this row
-            String resourceRoleColumn = schema.getReverseColumnMappings().get("resource role");
+            // find and add optional associated 'cpf to resource relation type' in this row
+            String resourceRoleColumn = schema.getReverseColumnMappings().get("cpf to resource relation type");
 
             if (resourceRoleColumn != null) {
               String resourceRole =
@@ -289,7 +289,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "resource role": // queried alongside "resource id"
+          case "cpf to resource relation type": // queried alongside "resource id"
             continue;
 
           case "related snac cpf id":
@@ -419,7 +419,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           preview += snacText + ": " + _constellation.getRelations() + "\n";
           break;
 
-          // TODO: Add Resource ID, Resource Role.
+          // TODO: Add Resource ID, cpf to resource relation type.
           // TODO: Add Related CPFs
       }
     }
@@ -626,7 +626,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
       default:
         logger.warn(
-            "createResourceRoleTerm(): invalid/unhandled resource role: [" + resourceRole + "]");
+            "createResourceRoleTerm(): invalid/unhandled cpf to resource relation type: [" + resourceRole + "]");
         return null;
     }
 

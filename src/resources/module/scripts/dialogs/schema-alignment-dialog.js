@@ -95,7 +95,7 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
       { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
       { name: "CPF to CPF Relation Type",   required: false, tooltip:  "Nature of the relation of the CPF entity with the related CPF entity. The following values may be used: associatedWith, correspondedWith" },
       { name: "Related SNAC CPF ID",   required: false, tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity. Repeatable in relation to entity." },
-      { name: "Resource Role",   required: false, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
+      { name: "CPF to Resource Relation Type",   required: false, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
       { name: "SNAC Resource ID",     required: false, tooltip:  "SNAC ID for a related Resource in SNAC." }  //TODO: SNAC RESOURCE ID rename
    ];
 
