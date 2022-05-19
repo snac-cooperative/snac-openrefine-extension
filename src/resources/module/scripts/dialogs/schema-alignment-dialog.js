@@ -73,25 +73,30 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    ];
 
    this.SNACConstellationModel = [
-      { name: "CPF Type",        required: true,  relation: true, tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
-      { name: "SNAC CPF ID",     required: false, relation: true, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
-      { name: "Name Entry",      required: false, relation: false, tooltip:  "Preferred Name Entry of the CPF entity." },
-      { name: "Date",            required: false, relation: false, tooltip:  "Exist Date or Dates of the CPF entity." },
-      { name: "Date Type",       required: false, relation: false, tooltip:  "Type of Exist Date. The following values may be used: Active, Birth, Death, Establishment, Disestablishment" },
-      { name: "Subject",         required: false, relation: false, tooltip:  "Subject term associated with the CPF entity. Repeatable in relation to entity. " },
-      { name: "Place",           required: false, relation: false, tooltip:  "Place name associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "Place Role",      required: false, relation: false, tooltip:  "Role of the place in relation to the CPF entity. The following values may be used: Birth, Death, Residence" },
-      { name: "Occupation",      required: false, relation: false, tooltip:  "Occupation term associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "Activity",        required: false, relation: false, tooltip:  "Activity term associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "BiogHist",        required: false, relation: false, tooltip:  "Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF. Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF." },
-      { name: "External Related CPF URL", required: false, relation: false, tooltip:  "URL to a description of the CPF entity in an external authority. Such links are limited to those found in the approved list linked above. Repeatable in relation to entity" },
-      { name: "SNAC Resource ID",     required: false, relation: true, tooltip:  "SNAC ID for a related Resource in SNAC." },  //TODO: SNAC RESOURCE ID rename
-      { name: "Resource Role",   required: false, relation: true, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
-      { name: "Source Citation", required: false, relation: false, tooltip:  "Text citation for a source used in describing the CPF entity." },
-      { name: "Source Citation URL",     required: false, relation: false, tooltip:  "URL, if available, for the Source Citation." },
-      { name: "Source Citation Found Data",   required: false, relation: false, tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity." },
-      { name: "Related SNAC CPF ID",   required: false, relation: true, tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity. Repeatable in relation to entity." },
-      { name: "CPF to CPF Relation Type",   required: false, relation: true, tooltip:  "Nature of the relation of the CPF entity with the related CPF entity. The following values may be used: associatedWith, correspondedWith" }
+      { name: "CPF Type",        required: true, tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
+      { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
+      { name: "Name Entry",      required: false, tooltip:  "Preferred Name Entry of the CPF entity." },
+      { name: "Date",            required: false, tooltip:  "Exist Date or Dates of the CPF entity." },
+      { name: "Date Type",       required: false, tooltip:  "Type of Exist Date. The following values may be used: Active, Birth, Death, Establishment, Disestablishment" },
+      { name: "Subject",         required: false, tooltip:  "Subject term associated with the CPF entity. Repeatable in relation to entity. " },
+      { name: "Place",           required: false, tooltip:  "Place name associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "Place Role",      required: false, tooltip:  "Role of the place in relation to the CPF entity. The following values may be used: Birth, Death, Residence" },
+      { name: "Occupation",      required: false, tooltip:  "Occupation term associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "Activity",        required: false, tooltip:  "Activity term associated with the CPF entity. Repeatable in relation to entity." },
+      { name: "BiogHist",        required: false, tooltip:  "Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF. Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF." },
+      { name: "External Related CPF URL", required: false, tooltip:  "URL to a description of the CPF entity in an external authority. Such links are limited to those found in the approved list linked above. Repeatable in relation to entity" },
+      { name: "Source Citation", required: false, tooltip:  "Text citation for a source used in describing the CPF entity." },
+      { name: "Source Citation URL",     required: false, tooltip:  "URL, if available, for the Source Citation." },
+      { name: "Source Citation Found Data",   required: false, tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity." },
+   ];
+
+      this.SNACRelationModel = [
+      { name: "CPF Type",        required: true, tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
+      { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
+      { name: "CPF to CPF Relation Type",   required: false, tooltip:  "Nature of the relation of the CPF entity with the related CPF entity. The following values may be used: associatedWith, correspondedWith" },
+      { name: "Related SNAC CPF ID",   required: false, tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity. Repeatable in relation to entity." },
+      { name: "Resource Role",   required: false, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
+      { name: "SNAC Resource ID",     required: false, tooltip:  "SNAC ID for a related Resource in SNAC." }  //TODO: SNAC RESOURCE ID rename
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);
@@ -101,7 +106,11 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    this.SNACConstellationNames = this.SNACConstellationModel.map(x => x.name);
    this.SNACConstellationNamesRequired = this.SNACConstellationModel.filter(x => x.required === true).map(x => x.name);
    this.SNACConstellationTooltips = this.SNACConstellationModel.map(x => x.tooltip);
-   // this.SNACRelations = this.SNACConstellationModel.filter(x => x.relations).map(x => x.name);
+
+   this.SNACRelationNames = this.SNACRelationModel.map(x => x.name);
+   this.SNACRelationNamesRequired = this.SNACRelationModel.filter(x => x.required === true).map(x => x.name);
+   this.SNACRelationTooltips = this.SNACRelationModel.map(x => x.tooltip);
+
 
    snacDebug(`this.SNACResourceNames:`);
    snacDebug(this.SNACResourceNames);
@@ -115,6 +124,12 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    snacDebug(this.SNACConstellationNamesRequired);
    snacDebug(`this.SNACConstellationTooltips:`);
    snacDebug(this.SNACConstellationTooltips);
+   snacDebug(`this.SNACRelationNames:`);
+   snacDebug(this.SNACRelationNames);
+   snacDebug(`this.SNACRelationNamesRequired:`);
+   snacDebug(this.SNACRelationNamesRequired);
+   snacDebug(`this.SNACRelationTooltips:`);
+   snacDebug(this.SNACRelationTooltips);
 
    // probably should get the above info from the backend instead at some point, a la:
 /*
@@ -243,9 +258,9 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
      $(".schema-alignment-dialog-columns-area-constellation").hide();
      $(".schema-alignment-dialog-columns-area-constellation--ref").hide();
 
-     // TODO:
      // Hide Relations
-
+     $(".schema-alignment-dialog-columns-area-relation").hide();
+     $(".schema-alignment-dialog-columns-area-relation--ref").hide();
 
      snacDebug(`uploadingRes calling _hasChanged()`);
      self._hasChanged();
@@ -256,31 +271,32 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
       $(".schema-alignment-dialog-columns-area-resource").hide();
       $(".schema-alignment-dialog-columns-area-resource--ref").hide();
 
+      // Hide Relations
+      $(".schema-alignment-dialog-columns-area-relation").hide();
+      $(".schema-alignment-dialog-columns-area-relation--ref").hide();
+
       // Show Constellations
       $(".schema-alignment-dialog-columns-area-constellation").show();
       $(".schema-alignment-dialog-columns-area-constellation--ref").show();
-
-      // Relations
-      $(".dragConstellation").not(".relations-field").show()
 
      snacDebug(`uploadingCon calling _hasChanged()`);
      self._hasChanged();
    });
 
-   // TODO: Relations
-   // BOOKMARK
    $('#uploadingRelationButton').on('click', function() {
-      // Hide Resources
-      $(".schema-alignment-dialog-columns-area-resource").hide();
-      $(".schema-alignment-dialog-columns-area-resource--ref").hide();
+     // Hide Resources
+     $(".schema-alignment-dialog-columns-area-resource").hide();
+     $(".schema-alignment-dialog-columns-area-resource--ref").hide();
 
-      // Show Constellations
-      $(".schema-alignment-dialog-columns-area-constellation").show();
-      $(".schema-alignment-dialog-columns-area-constellation--ref").show();
+     // Hide Constellations
+     $(".schema-alignment-dialog-columns-area-constellation").hide();
+     $(".schema-alignment-dialog-columns-area-constellation--ref").hide();
 
-      $(".dragConstellation").not(".relations-field").hide();
+     // Show Relations
+     $(".schema-alignment-dialog-columns-area-relation").show();
+     $(".schema-alignment-dialog-columns-area-relation--ref").show();
 
-     snacDebug(`uploadingCon calling _hasChanged()`);
+     snacDebug(`uploadingRelation calling _hasChanged()`);
      self._hasChanged();
    });
 
@@ -516,6 +532,103 @@ SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
    return myTableDiv;
 }
 
+//Create a table for the relation page function
+SNACSchemaAlignmentDialog.addRelationTable = function (schema) {
+   snacDebug(`***** [ addRelationTable ] *****`);
+
+   snacDebug(`addRelationTable(): schema: [${JSON.stringify(schema)}]`);
+
+   var columns = theProject.columnModel.columns;
+   var SNACcolumns = this.SNACRelationNames;
+
+   var columnMappings = {}
+
+   if (schema && schema.schemaType == "relation") {
+      columnMappings = schema.columnMappings;
+   }
+
+   snacDebug(`addRelationTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
+
+   var myTableDiv = document.getElementById('myDynamicTableRelation');
+   if (myTableDiv == null){
+      var myClassDiv = document.getElementsByClassName('snac-columns-container');
+      var myTableDiv = document.createElement('div');
+      myTableDiv.setAttribute('id', 'myDynamicTableRelation');
+      myClassDiv[0].parentNode.insertBefore(myTableDiv, myClassDiv[0]);
+   }
+
+   var table = document.createElement('TABLE');
+   var tableBody = document.createElement('TBODY');
+   table.appendChild(tableBody);
+   myTableDiv.appendChild(table);
+
+   makeDropdown = () => {
+      let dropdownOptionsArray = [document.getElementsByClassName('dropdown-default-relation')[0]];
+      for (var i = 0; i < 10; i++) {
+         let dropdownOptions = document.getElementsByClassName('dropdown-option-relation')[i];
+         dropdownOptionsArray.push(dropdownOptions)
+      }
+      return dropdownOptionsArray;
+   }
+
+   // Create Constellation
+   for (var i = 0; i < columns.length; i++) {
+      var tr = document.createElement('TR');
+      tableBody.appendChild(tr);
+      var column = columns[i];
+
+      for (var j = 0; j < 2; j+=2) {
+         var td = document.createElement('TD');
+         td.width = '100';
+         var reconConfig = column.reconConfig;
+         var cell = this._createDraggableColumn(column.name,
+         reconConfig && reconConfig.identifierSpace === this.snacPrefix && column.reconStats);
+         var dragDivElement = cell[0];
+         var dragNode = document.createElement('div');
+         dragNode.className += 'wbs-draggable-column wbs-unreconciled-column-undraggable';
+         dragNode.style = 'width: 150px';
+         dragNode.id = i;
+         dragNode.append(dragDivElement.innerHTML);
+         td.appendChild(dragNode);
+         tr.appendChild(td);
+      }
+
+      var selectList = $('<select></select>')
+         .addClass('selectColumn')
+         .addClass('selectColumnRelation')
+         .addClass(column.name + "RelationDropDown")
+         .attr('style', 'width: 180px');
+
+      //Create and append the options
+      var defaultoption = document.createElement('option');
+      defaultoption.setAttribute('value', 'default');
+      defaultoption.text = 'Select an Option';
+      defaultoption.classList.add('dropdown-default-relation');
+      selectList.append(defaultoption);
+
+      for (var j = 0; j < SNACcolumns.length; j++) {
+         var option = document.createElement('option');
+         option.setAttribute('value', SNACcolumns[j]);
+         option.text = SNACcolumns[j];
+         option.classList.add('dropdown-option-relation');
+         selectList.append(option);
+      }
+
+      if(columnMappings[column.name] != "" && columnMappings[column.name]!= undefined){
+         selectList[0].value = columnMappings[column.name];
+      }
+
+      for (var j = 1; j < 2; j+=2) {
+         var td = document.createElement('TD');
+         td.appendChild(selectList[0]);
+         tr.appendChild(td);
+      }
+   }
+
+   return myTableDiv;
+}
+
+// TODO: Collapse hideAndDisable functions into one function
 SNACSchemaAlignmentDialog.hideAndDisableRes = function() {
    var dragResources =$.makeArray($('.dragResource'));
 
@@ -583,158 +696,264 @@ SNACSchemaAlignmentDialog.hideAndDisableConst = function() {
    });
 };
 
+SNACSchemaAlignmentDialog.hideAndDisableRelation = function() {
+   var dragRelations =$.makeArray($('.dragRelation'));
+
+   const selectedValue = [];  //Array to hold selected values
+   $('.selectColumnRelation').find(':selected').filter(function(i, el) { //Filter selected values and push to array
+      return $(el).val();
+   }).each(function(i, el) {
+      selectedValue.push($(el).val());
+   });
+
+   // loop all the options
+   $('.selectColumnRelation').find('.dropdown-option-relation').each(function(i, option) {
+      if (selectedValue.indexOf($(option).val()) > -1) { //Re-enable option if array does not contain current value
+         if ($(option).is(':checked')) {  //Disable if current value is selected, else skip
+            return;
+         } else {
+            $(this).attr('disabled', true);
+            //TODO: replace with filter
+            dragRelations.forEach(r => {
+               if(r.value==this.innerHTML){
+                  r.style.visibility = 'hidden';   //Hide value
+               };
+            });
+         }
+      } else {
+         $(this).attr('disabled', false);
+         //TODO: replace with filter
+         dragRelations.forEach(c => {
+            if(c.value==this.innerHTML){
+               c.style.visibility = 'visible';  //Show value
+            };
+         });
+      }
+   });
+};
+
+
 SNACSchemaAlignmentDialog.updateColumns = function(schema) {
-   snacDebug(`***** [ updateColumns ] *****`);
+  snacDebug(`***** [ updateColumns ] *****`);
 
-   var self = this;
+  var self = this;
 
-   snacDebug(`updateColumns(): schema: [${JSON.stringify(schema)}]`);
+  snacDebug(`updateColumns(): schema: [${JSON.stringify(schema)}]`);
 
-   var columns = theProject.columnModel.columns;
+  var columns = theProject.columnModel.columns;
 
-   // ******* RESOURCES PAGE ******* //
-   this._columnAreaResource = $('.schema-alignment-dialog-columns-area-resource');
-   this._columnAreaResource.addClass('snac-tab');
-   this._columnAreaResource.empty();
-   this._columnAreaResource.html('<h2>Columns</h2>');
+  // TODO: Consider collapsing resources/constellations/relations in a refactor
 
-   this._dropdownAreaResource = $('.schema-alignment-dialog-dropdown-area-resource');
-   this._dropdownAreaResource.addClass('snac-tab');
-   this._dropdownAreaResource.empty();
+  // ******* RESOURCES PAGE ******* //
+  this._columnAreaResource = $(
+    ".schema-alignment-dialog-columns-area-resource"
+  );
+  this._columnAreaResource.addClass("snac-tab");
+  this._columnAreaResource.empty();
+  this._columnAreaResource.html("<h2>Columns</h2>");
 
-   this._refcolumnAreaResource = $('.schema-alignment-dialog-columns-area-resource--ref');
-   this._refcolumnAreaResource.addClass('snac-tab');
-   this._refcolumnAreaResource.html("<h2>SNAC Resource Description Model</h2>");
+  this._dropdownAreaResource = $(
+    ".schema-alignment-dialog-dropdown-area-resource"
+  );
+  this._dropdownAreaResource.addClass("snac-tab");
+  this._dropdownAreaResource.empty();
 
-   var myTableDivResource = this.addResourceTable(schema);
-   this._columnAreaResource.append(myTableDivResource);
+  this._refcolumnAreaResource = $(
+    ".schema-alignment-dialog-columns-area-resource--ref"
+  );
+  this._refcolumnAreaResource.addClass("snac-tab");
+  this._refcolumnAreaResource.html("<h2>SNAC Resource Description Model</h2>");
+
+  var myTableDivResource = this.addResourceTable(schema);
+  this._columnAreaResource.append(myTableDivResource);
+
+  this.SNACResourceModel.forEach((resource) => {
+    var cell = this._createDraggableColumn(resource.name, false);
+    cell.addClass("dragResource");
+    cell.val(resource.name).change();
+    this._refcolumnAreaResource.append(cell);
+  });
+  $(".dragResource").addClass("tooltip");
+
+  for (var i = 0; i < this.SNACResourceTooltips.length; i++) {
+    var toolTipSpan = document.createElement("span");
+    var toolTiptext = document.createTextNode(this.SNACResourceTooltips[i]);
+    toolTipSpan.classList.add("tooltiptext");
+    toolTipSpan.appendChild(toolTiptext);
+    $(".dragResource")[i].appendChild(toolTipSpan);
+  }
+
+  // ******* CONSTELLATIONS PAGE ******* //
+  this._columnAreaConstellation = $(
+    ".schema-alignment-dialog-columns-area-constellation"
+  );
+  this._columnAreaConstellation.addClass("snac-tab");
+  this._columnAreaConstellation.empty();
+  this._columnAreaConstellation.html("<h2>Columns</h2>");
+
+  this._dropdownAreaConestellation = $(
+    ".schema-alignment-dialog-dropdown-area-constellation"
+  );
+  this._dropdownAreaConestellation.addClass("snac-tab");
+  this._dropdownAreaConestellation.empty();
+
+  // Based on SNACConstellationCreator
+  this._refcolumnAreaConestellation = $(
+    ".schema-alignment-dialog-columns-area-constellation--ref"
+  );
+  this._refcolumnAreaConestellation.addClass("snac-tab");
+  this._refcolumnAreaConestellation.html("<h2>SNAC CPF Model</h2>");
+
+  var myTableDivConstellation = this.addConstellationTable(schema);
+  this._columnAreaConstellation.append(myTableDivConstellation);
+
+  // Create draggable constellation column
+  this.SNACConstellationModel.forEach((field) => {
+    var cell = this._createDraggableColumn(field.name, false);
+    cell.addClass("dragConstellation");
+    cell.val(field.name).change();
+    this._refcolumnAreaConestellation.append(cell);
+  });
+
+  $(".dragConstellation").addClass("tooltip");
+
+  for (var i = 0; i < this.SNACConstellationTooltips.length; i++) {
+    var toolTipSpan = document.createElement("span");
+    var toolTiptext = document.createTextNode(
+      this.SNACConstellationTooltips[i]
+    );
+    toolTipSpan.classList.add("tooltiptext");
+    toolTipSpan.appendChild(toolTiptext);
+    $(".dragConstellation")[i].appendChild(toolTipSpan);
+  }
+
+  // ******* RELATIONS PAGE ******* //
+  this._columnAreaRelation = $(
+    ".schema-alignment-dialog-columns-area-relation"
+  );
+  this._columnAreaRelation.addClass("snac-tab");
+  this._columnAreaRelation.empty();
+  this._columnAreaRelation.html("<h2>Columns</h2>");
+
+  this._dropdownAreaConestellation = $(
+    ".schema-alignment-dialog-dropdown-area-relation"
+  );
+  this._dropdownAreaConestellation.addClass("snac-tab");
+  this._dropdownAreaConestellation.empty();
+
+  // Based on SNACRelationCreator
+  this._refcolumnAreaConestellation = $(
+    ".schema-alignment-dialog-columns-area-relation--ref"
+  );
+  this._refcolumnAreaConestellation.addClass("snac-tab");
+  this._refcolumnAreaConestellation.html("<h2>SNAC Join Model</h2>");
+
+  var myTableDivRelation = this.addRelationTable(schema);
+  this._columnAreaRelation.append(myTableDivRelation);
+
+  // Create draggable Relation column
+  this.SNACRelationModel.forEach((field) => {
+    var cell = this._createDraggableColumn(field.name, false);
+    cell.addClass("dragRelation");
+    cell.val(field.name).change();
+    this._refcolumnAreaConestellation.append(cell);
+  });
+
+  $(".dragRelation").addClass("tooltip");
+
+  for (var i = 0; i < this.SNACRelationTooltips.length; i++) {
+    var toolTipSpan = document.createElement("span");
+    var toolTiptext = document.createTextNode(
+      this.SNACRelationTooltips[i]
+    );
+    toolTipSpan.classList.add("tooltiptext");
+    toolTipSpan.appendChild(toolTiptext);
+    $(".dragRelation")[i].appendChild(toolTipSpan);
+  }
+  // ******* END RELATIONS PAGE ******* //
 
 
+  // Resource Validator Call onChange
+  $(".selectColumnRes").on("change", function () {
+    self.hideAndDisableRes();
+    snacDebug(`selectColumnRes calling _hasChanged()`);
+    self._hasChanged();
+  });
 
-   this.SNACResourceModel.forEach( (resource) => {
-      var cell = this._createDraggableColumn(resource.name, false);
-      cell.addClass('dragResource');
-      cell.val(resource.name).change();
-      this._refcolumnAreaResource.append(cell);
-   })
-   $('.dragResource').addClass('tooltip');
+  // Constellation Validator Call onChange
+  $(".selectColumnConst").on("change", function () {
+    self.hideAndDisableConst();
+    snacDebug(`selectColumnConst calling _hasChanged()`);
+    self._hasChanged();
+  });
 
-   for(var i = 0 ; i < this.SNACResourceTooltips.length; i++) {
-      var toolTipSpan = document.createElement('span');
-      var toolTiptext = document.createTextNode(this.SNACResourceTooltips[i]);
-      toolTipSpan.classList.add('tooltiptext');
-      toolTipSpan.appendChild(toolTiptext);
-      $('.dragResource')[i].appendChild(toolTipSpan);
-   }
+  // TODO: DONE: Add selectColumnRelations
+  // Relation Validator Call onChange
+  $(".selectColumnRelation").on("change", function () {
+    self.hideAndDisableRelation();
+    snacDebug(`selectColumnRelation calling _hasChanged()`);
+    self._hasChanged();
+  });
 
-   // Bookmark
-   // ******* CONSTELLATIONS PAGE ******* //
-   this._columnAreaConstellation = $('.schema-alignment-dialog-columns-area-constellation');
-   this._columnAreaConstellation.addClass('snac-tab');
-   this._columnAreaConstellation.empty();
-   this._columnAreaConstellation.html('<h2>Columns</h2>');
 
-   this._dropdownAreaConestellation = $('.schema-alignment-dialog-dropdown-area-constellation');
-   this._dropdownAreaConestellation.addClass('snac-tab');
-   this._dropdownAreaConestellation.empty()
-
-   // Based on SNACConstellationCreator
-   this._refcolumnAreaConestellation = $('.schema-alignment-dialog-columns-area-constellation--ref');
-   this._refcolumnAreaConestellation.addClass('snac-tab');
-   this._refcolumnAreaConestellation.html("<h2>SNAC CPF Model</h2>");
-
-   // this._refcolumnAreaConestellation.html("<h2>SNAC CPF JOIN MODEL</h2>"); TODO:
-
-   var myTableDivConstellation = this.addConstellationTable(schema);
-   this._columnAreaConstellation.append(myTableDivConstellation);
-
-   // Create draggable constellation column
-   this.SNACConstellationModel.forEach((field) => {
-     var cell = this._createDraggableColumn(field.name, false);
-     cell.addClass('dragConstellation');
-     cell.val(field.name).change();
-     if (field.relation) {
-        cell.addClass('relations-field')
-     }
-     this._refcolumnAreaConestellation.append(cell);
-   });
-
-   $('.dragConstellation').addClass('tooltip');
-
-   for(var i = 0 ; i < this.SNACConstellationTooltips.length; i++) {
-      var toolTipSpan = document.createElement('span');
-      var toolTiptext = document.createTextNode(this.SNACConstellationTooltips[i]);
-      toolTipSpan.classList.add('tooltiptext');
-      toolTipSpan.appendChild(toolTiptext);
-      $('.dragConstellation')[i].appendChild(toolTipSpan);
-   }
-
-   // Resource Validator Call onChange
-   $('.selectColumnRes').on('change', function(){
-      self.hideAndDisableRes();
-      snacDebug(`selectColumnRes calling _hasChanged()`);
-      self._hasChanged();
-   });
-
-   // Constellation Validator Call onChange
-   $('.selectColumnConst').on('change', function(){
-      self.hideAndDisableConst();
-      snacDebug(`selectColumnConst calling _hasChanged()`);
-      self._hasChanged();
-   });
-
-/*
+  /*
    $(document).ready(function() {
       self.hideAndDisableRes();
       self.hideAndDisableConst();
    });
 */
 
-   //Allow names column (first column) to be droppable
-   $('.wbs-unreconciled-column-undraggable').droppable({
-      hoverClass: 'active',
-      drop: function(event, ui) {
-         var id = $(this).attr('id');
-         $('.selectColumn')[id].value = $(ui.draggable).val();
-         self.hideAndDisableRes();
-         self.hideAndDisableConst();
-         snacDebug(`selectColumn[${id}] (names) calling _hasChanged()`);
-         self._hasChanged();
-      }
-   });
+  //Allow names column (first column) to be droppable
+  $(".wbs-unreconciled-column-undraggable").droppable({
+    hoverClass: "active",
+    drop: function (event, ui) {
+      var id = $(this).attr("id");
+      $(".selectColumn")[id].value = $(ui.draggable).val();
+      self.hideAndDisableRes();
+      self.hideAndDisableConst();
+      self.hideAndDisableRelation();
+      snacDebug(`selectColumn[${id}] (names) calling _hasChanged()`);
+      self._hasChanged();
+    },
+  });
 
-   //Allow dropdown column to be droppable
-   $('.selectColumn').droppable({
-      hoverClass: 'active',
-      drop: function(event, ui) {
-         this.value = $(ui.draggable).val();
-         self.hideAndDisableRes();
-         self.hideAndDisableConst();
-         snacDebug(`selectColumn (dropdowns) calling _hasChanged()`);
-         self._hasChanged();
-      },
-   });
-   $('.wbs-reconciled-column').draggable({
-      helper: "clone",
-      cursor: "crosshair",
-      snap: ".wbs-item-input input, .wbs-target-input input",
-      zIndex: 100,
-   });
-   $('.wbs-unreconciled-column').draggable({
-      helper: "clone",
-      helper: function(e) {
-         var original = $(e.target).hasClass("ui-draggable") ? $(e.target) :  $(e.target).closest(".ui-draggable");
-         return original.clone().css({
-         width: original.width() // or outerWidth*
-         });
-      },
-      cursor: "crosshair",
-      snap: ".wbs-target-input input",
-      zIndex: 100,
-   });
 
-   this.hideAndDisableRes();
-   this.hideAndDisableConst();
+  //Allow dropdown column to be droppable
+  $(".selectColumn").droppable({
+    hoverClass: "active",
+    drop: function (event, ui) {
+      this.value = $(ui.draggable).val();
+      self.hideAndDisableRes();
+      self.hideAndDisableConst();
+      self.hideAndDisableRelation();
+      snacDebug(`selectColumn (dropdowns) calling _hasChanged()`);
+      self._hasChanged();
+    },
+  });
+  $(".wbs-reconciled-column").draggable({
+    helper: "clone",
+    cursor: "crosshair",
+    snap: ".wbs-item-input input, .wbs-target-input input",
+    zIndex: 100,
+  });
+  $(".wbs-unreconciled-column").draggable({
+    helper: "clone",
+    helper: function (e) {
+      var original = $(e.target).hasClass("ui-draggable")
+        ? $(e.target)
+        : $(e.target).closest(".ui-draggable");
+      return original.clone().css({
+        width: original.width(), // or outerWidth*
+      });
+    },
+    cursor: "crosshair",
+    snap: ".wbs-target-input input",
+    zIndex: 100,
+  });
+
+  this.hideAndDisableRes();
+  this.hideAndDisableConst();
+  this.hideAndDisableRelation();
 }
 
 SNACSchemaAlignmentDialog.switchTab = function(targetTab) {
@@ -794,9 +1013,10 @@ SNACSchemaAlignmentDialog._reset = function(schema) {
 
    $('#snac-columns-container').empty();
    this.updateColumns(schema);
-
    if (this._schema.schemaType == "constellation") {
       $('#uploadingConstellationButton').trigger('click');
+   } else if (this._schema.schemaType == 'relation') {
+      $('#uploadingRelationButton').trigger('click');
    } else {
       $('#uploadingResourceButton').trigger('click');
 
@@ -888,8 +1108,11 @@ SNACSchemaAlignmentDialog.getJSON = function() {
       schemaType = "resource";
       dropDownColumn = $('.selectColumnRes');
 
+   } else if ($('#uploadingRelationButton').is(':checked')) {
+      schemaType = 'relation';
+      dropDownColumn = $('.selectColumnRelation');
    } else {
-      schemaType = "constellation";
+      schemaType = 'constellation';
       dropDownColumn = $('.selectColumnConst');
    }
 
@@ -923,8 +1146,10 @@ SNACSchemaAlignmentDialog.schemaIsValid = function() {
 
    if (schema.schemaType == "constellation") {
       required = this.SNACConstellationNamesRequired;
-   } else {
+   } else if (schema.schemaType == "resource") {
       required = this.SNACResourceNamesRequired;
+   } else {
+      required = this.SNACRelationNamesRequired; // TODO: Replace with a validateRelations() function
    }
 
    var warnings = [];

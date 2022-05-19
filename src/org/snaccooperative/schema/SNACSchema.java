@@ -150,6 +150,10 @@ public class SNACSchema implements OverlayModel {
           item = new SNACConstellationItem(project, _schema, _cache, record);
           break;
 
+        case "relation":
+          item = new SNACConstellationItem(project, _schema, _cache, record);
+          break;
+
         case "resource":
           item = new SNACResourceItem(project, _schema, _cache, record);
           break;
