@@ -232,6 +232,7 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    var schemaElmts = this._schemaElmts = DOM.bind(schemaTab);
    schemaElmts.dialogExplanation.text($.i18n('snac-schema/dialog-explanation'));
    schemaElmts.dialogExplanation2.html($.i18n('snac-schema/dialog-explanation2'));
+   schemaElmts.extensionVersion.text($.i18n('snac-schema/extension-version'));
    schemaElmts.saveButton
       .text($.i18n('snac-schema/save-button'))
       .attr('title', $.i18n('snac-schema/save-schema-alt'))
