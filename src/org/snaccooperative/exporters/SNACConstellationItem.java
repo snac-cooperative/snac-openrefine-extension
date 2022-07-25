@@ -205,6 +205,7 @@ public class SNACConstellationItem extends SNACUploadItem {
               source.setText(foundData);
             }
 
+            source.setOperation("insert");
             sources.add(source);
 
             continue;
