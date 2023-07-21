@@ -9,7 +9,7 @@ More complete instructions for installing OpenRefine Extensions can be found in 
 
 To install this extension,
 1. Download the extension from the [latest release](https://github.com/snac-cooperative/snac-openrefine-extension/releases/latest).
-2. Extract the zip contents into OpenRefine's extensions directory.  You may have to create the `extensions` directory if it does not already exist in your workspace (see below).  If you already have the snac extension, you whould delete the original before unzipping.
+2. Extract the zip contents into OpenRefine's extensions directory.  You may have to create the `extensions` directory if it does not already exist in your workspace (see below).  If you already have the snac extension, you should delete the original before unzipping.
 3. Start (or restart) OpenRefine.
 
 ### Finding Workspace directory

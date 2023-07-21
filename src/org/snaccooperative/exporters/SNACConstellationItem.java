@@ -13,18 +13,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
 import org.snaccooperative.commands.SNACAPIResponse;
+import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.BiogHist;
 import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.ConstellationRelation;
 import org.snaccooperative.data.NameEntry;
 import org.snaccooperative.data.Occupation;
 import org.snaccooperative.data.Place;
-import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.ResourceRelation;
 import org.snaccooperative.data.SNACDate;
-import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.SameAs;
+import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Subject;
 import org.snaccooperative.data.Term;
 import org.snaccooperative.schema.SNACSchema;
@@ -35,13 +35,21 @@ public class SNACConstellationItem extends SNACUploadItem {
 
   protected Project _project;
   protected SNACSchema _schema;
+  protected SNACAPIClient _client;
   protected SNACLookupCache _cache;
   protected Constellation _constellation;
   protected int _rowIndex;
+  protected List<Integer> _relatedConstellations;
+  protected List<Integer> _relatedResources;
 
   public SNACConstellationItem(
-      Project project, SNACSchema schema, SNACLookupCache cache, Record record) {
+      Project project,
+      SNACSchema schema,
+      SNACAPIClient client,
+      SNACLookupCache cache,
+      Record record) {
     this._schema = schema;
+    this._client = client;
     this._cache = cache;
     this._rowIndex = record.fromRowIndex;
 
@@ -60,6 +68,9 @@ public class SNACConstellationItem extends SNACUploadItem {
     List<SameAs> sameAsRelations = new LinkedList<SameAs>();
     List<ResourceRelation> resourceRelations = new LinkedList<ResourceRelation>();
     List<ConstellationRelation> cpfRelations = new LinkedList<ConstellationRelation>();
+
+    _relatedConstellations = new LinkedList<Integer>();
+    _relatedResources = new LinkedList<Integer>();
 
     for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
@@ -109,7 +120,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             String dateTypeColumn = schema.getReverseColumnMappings().get("exist date type");
 
             if (dateTypeColumn == null) {
-              logger.error("no date type column found");
+              logger.warn("no exist date type column found");
               continue;
             }
 
@@ -117,7 +128,7 @@ public class SNACConstellationItem extends SNACUploadItem {
                 getCellValueForRowByColumnName(project, row, dateTypeColumn).toLowerCase();
 
             if (dateType == "") {
-              logger.error("no matching date type for date: [" + cellValue + "]");
+              logger.warn("no matching exist date type for date: [" + cellValue + "]");
               continue;
             }
 
@@ -184,7 +195,6 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "place role": // queried alongside "place"
             continue;
 
-
           case "source citation":
             Source source = new Source();
 
@@ -199,7 +209,8 @@ public class SNACConstellationItem extends SNACUploadItem {
             }
 
             // set found data
-            String foundColumn = schema.getReverseColumnMappings().get("source citation found data");
+            String foundColumn =
+                schema.getReverseColumnMappings().get("source citation found data");
             if (foundColumn != null) {
               String foundData = getCellValueForRowByColumnName(project, row, foundColumn);
               source.setText(foundData);
@@ -265,15 +276,19 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "snac resource id":
+            int targetResource = Integer.parseInt(cellValue);
+            _relatedResources.add(targetResource);
+
             Resource resource = new Resource();
-            resource.setID(Integer.parseInt(cellValue));
+            resource.setID(targetResource);
 
             ResourceRelation resourceRelation = new ResourceRelation();
             resourceRelation.setOperation("insert");
             resourceRelation.setResource(resource);
 
             // find and add optional associated 'cpf to resource relation type' in this row
-            String resourceRoleColumn = schema.getReverseColumnMappings().get("cpf to resource relation type");
+            String resourceRoleColumn =
+                schema.getReverseColumnMappings().get("cpf to resource relation type");
 
             if (resourceRoleColumn != null) {
               String resourceRole =
@@ -294,15 +309,20 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "related snac cpf id":
+            int targetConstellation = Integer.parseInt(cellValue);
+            _relatedConstellations.add(targetConstellation);
+
             ConstellationRelation cpfRelation = new ConstellationRelation();
             cpfRelation.setSourceConstellation(con.getID());
-            cpfRelation.setTargetConstellation(Integer.parseInt(cellValue));
+            cpfRelation.setTargetConstellation(targetConstellation);
 
             // Get Relation Type.
-            String cpfRelationTypeColumn = schema.getReverseColumnMappings().get("cpf to cpf relation type");
+            String cpfRelationTypeColumn =
+                schema.getReverseColumnMappings().get("cpf to cpf relation type");
 
             if (cpfRelationTypeColumn != null) {
-              String cpfRelationType = getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
+              String cpfRelationType =
+                  getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
               Term cpfRelationTypeTerm = createRelationTypeTerm(cpfRelationType);
               cpfRelation.setType(cpfRelationTypeTerm);
             }
@@ -358,6 +378,8 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setSources(sources);
 
     this._constellation = con;
+
+    logger.debug("built constellation: [" + this.toJSON() + "]");
   }
 
   public String getPreviewText() {
@@ -436,10 +458,60 @@ public class SNACConstellationItem extends SNACUploadItem {
     return Constellation.toJSON(this._constellation);
   }
 
-  public SNACAPIResponse performUpload(String url, String key) {
-    SNACAPIClient client = new SNACAPIClient(url);
+  private SNACAPIResponse verifyRelatedIDs() {
+    // Before uploading, we verify existence of any related CPF and resource
+    // IDs in the selected SNAC environment.  This is because SNAC will
+    // accept related CPF IDs that do not actually exist, then crash when
+    // reloading the original CPF, leaving the original CPF in a locked state.
+    // Invalid resource IDs may not cause the same kind of fatal error,
+    // but we check them anyway to keep the data clean.
 
-    String apiKey = "\"apikey\":\"" + key + "\",";
+    // These existence checks should really be made in SNAC proper, but
+    // it's easier (and effective) to perform them here for now.
+
+    List<String> relationErrors = new LinkedList<String>();
+
+    logger.info("verifying existence of related constellations...");
+
+    for (int i = 0; i < _relatedConstellations.size(); i++) {
+      int id = _relatedConstellations.get(i);
+      logger.info("verifying existence of related constellation: " + id);
+      if (!_cache.constellationExists(id)) {
+        relationErrors.add("* Related CPF ID " + id + " not found in SNAC");
+      }
+    }
+
+    logger.info("verifying existence of related resources...");
+
+    for (int i = 0; i < _relatedResources.size(); i++) {
+      int id = _relatedResources.get(i);
+      logger.info("verifying existence of related resource: " + id);
+      if (!_cache.resourceExists(id)) {
+        relationErrors.add("* Related Resource ID " + id + " not found in SNAC");
+      }
+    }
+
+    if (relationErrors.size() > 0) {
+      String errMsg = String.join("\n\n", relationErrors);
+      logger.warn("constellation upload error: [" + errMsg + "]");
+      return new SNACAPIResponse(this._client, errMsg);
+    }
+
+    return null;
+  }
+
+  public SNACAPIResponse performUpload() {
+    logger.info("preparing to upload constellation to SNAC...");
+
+    // verify any related IDs before uploading
+    SNACAPIResponse verifyErr = verifyRelatedIDs();
+    if (verifyErr != null) {
+      return verifyErr;
+    }
+
+    // so far so good, proceed with upload
+
+    String apiStr = "\"apikey\": \"" + this._client.apiKey() + "\"";
     String apiQuery = "";
 
     int myID = _constellation.getID();
@@ -449,13 +521,16 @@ public class SNACConstellationItem extends SNACUploadItem {
 
       // checkout current version
 
-      apiQuery = "{\"command\": \"edit\",\n" + apiKey + "\n" + "\"constellationid\":" + myID + "}";
+      logger.info("checking out existing constellation [" + myID + "]...");
 
-      SNACAPIResponse checkoutResponse = client.post(apiQuery);
+      apiQuery = "{ \"command\": \"edit\", " + apiStr + ", \"constellationid\": " + myID + " }";
+
+      SNACAPIResponse checkoutResponse = this._client.post(apiQuery);
 
       Constellation checkoutCon = checkoutResponse.getConstellation();
 
       if (checkoutCon == null) {
+        logger.error("error checking out constellation");
         return checkoutResponse;
       }
 
@@ -467,18 +542,23 @@ public class SNACConstellationItem extends SNACUploadItem {
       this._constellation.setArk(checkoutCon.getArk());
     }
 
-      // Perform insert or update and publish
-      String constellationJSON = this.toJSON();
+    logger.info("uploading constellation...");
 
-      apiQuery =
-          "{\"command\": \"insert_and_publish_constellation\",\n"
-              + apiKey
-              + "\n\"constellation\":"
-              + constellationJSON.substring(0, constellationJSON.length() - 1)
-              + "}}";
+    // Perform insert or update and publish
+    String constellationJSON = this.toJSON();
 
-      SNACAPIResponse updateResponse = client.post(apiQuery);
-      return updateResponse;
+    apiQuery =
+        "{ \"command\": \"insert_and_publish_constellation\", "
+            + apiStr
+            + ", \"constellation\": "
+            + constellationJSON
+            + " }";
+
+    SNACAPIResponse updateResponse = this._client.post(apiQuery);
+
+    logger.info("constellation upload complete");
+
+    return updateResponse;
   }
 
   private Term createEntityTypeTerm(String entityType) {
@@ -502,7 +582,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn("createEntityTypeTerm(): invalid/unhandled entity type: [" + entityType + "]");
+        logger.warn("invalid/unhandled entity type: [" + entityType + "]");
         return null;
     }
 
@@ -550,7 +630,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn("createDateTypeTerm(): invalid/unhandled date type: [" + dateType + "]");
+        logger.warn("invalid/unhandled date type: [" + dateType + "]");
         return null;
     }
 
@@ -588,7 +668,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn("createPlaceRoleTerm(): invalid/unhandled place role: [" + placeRole + "]");
+        logger.warn("invalid/unhandled place role: [" + placeRole + "]");
         return null;
     }
 
@@ -626,8 +706,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn(
-            "createResourceRoleTerm(): invalid/unhandled cpf to resource relation type: [" + resourceRole + "]");
+        logger.warn("invalid/unhandled cpf to resource relation type: [" + resourceRole + "]");
         return null;
     }
 
@@ -829,7 +908,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn("createRelationTypeTerm(): invalid/unhandled CPF relation type: [" + relationType + "]");
+        logger.warn("invalid/unhandled cpf to cpf relation type: [" + relationType + "]");
         term = "associatedWith";
         id = 28234;
     }

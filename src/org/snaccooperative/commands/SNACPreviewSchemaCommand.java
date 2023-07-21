@@ -47,6 +47,8 @@ public class SNACPreviewSchemaCommand extends Command {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
+    logger.info("generating SNAC preview...");
+
     try {
       Project project = getProject(request);
       Engine engine = getEngine(request, project);
@@ -61,6 +63,7 @@ public class SNACPreviewSchemaCommand extends Command {
         try {
           schema = SNACSchema.reconstruct(schemaJSON);
         } catch (IOException e) {
+          logger.error("SNAC preview generation: could not reconstruct schema: [" + e + "]");
           respondError(response, "SNAC schema could not be parsed.");
           return;
         }
@@ -68,6 +71,7 @@ public class SNACPreviewSchemaCommand extends Command {
         schema = (SNACSchema) project.overlayModels.get("snacSchema");
       }
       if (schema == null) {
+        logger.error("SNAC preview generation: missing schema");
         respondError(response, "No SNAC schema provided.");
         return;
       }
@@ -84,8 +88,11 @@ public class SNACPreviewSchemaCommand extends Command {
         previewItems.addPreviewItem(item.getPreviewText());
       }
 
+      logger.info("SNAC preview generation succeeded");
+
       respondJSON(response, previewItems);
     } catch (Exception e) {
+      logger.error("SNAC preview generation: exception: [" + e + "]");
       respondException(response, e);
     }
   }

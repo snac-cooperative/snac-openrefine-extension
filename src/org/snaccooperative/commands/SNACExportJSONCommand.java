@@ -51,6 +51,8 @@ public class SNACExportJSONCommand extends Command {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
+    logger.info("exporting SNAC JSON...");
+
     try {
       Project project = getProject(request);
       Engine engine = getEngine(request, project);
@@ -65,6 +67,7 @@ public class SNACExportJSONCommand extends Command {
         try {
           schema = SNACSchema.reconstruct(schemaJSON);
         } catch (IOException e) {
+          logger.error("SNAC JSON export: could not reconstruct schema: [" + e + "]");
           respondError(response, "SNAC schema could not be parsed.");
           return;
         }
@@ -72,6 +75,7 @@ public class SNACExportJSONCommand extends Command {
         schema = (SNACSchema) project.overlayModels.get("snacSchema");
       }
       if (schema == null) {
+        logger.error("SNAC JSON export: missing schema");
         respondError(response, "No SNAC schema provided.");
         return;
       }
@@ -86,14 +90,18 @@ public class SNACExportJSONCommand extends Command {
         try {
           jsonItems.add((JSONObject) jsonParser.parse(items.get(i).toJSON()));
         } catch (ParseException e) {
+          logger.warn("SNAC JSON export: skipping item " + (i + 1) + ": [" + e + "]");
           continue;
         }
       }
 
       jsonResp.put(schema.getSchemaType() + "s", jsonItems);
 
+      logger.info("SNAC JSON export succeeded");
+
       respondJSON(response, jsonResp);
     } catch (Exception e) {
+      logger.error("SNAC JSON export: exception: [" + e + "]");
       respondException(response, e);
     }
   }

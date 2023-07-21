@@ -1,5 +1,6 @@
 package org.snaccooperative.commands;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -21,8 +22,15 @@ public class SNACAPIResponse {
   protected int _id;
   protected int _version;
 
-  public SNACAPIResponse(String apiResponse) {
+  public SNACAPIResponse(SNACAPIClient client, String apiResponse) {
     this._apiResponse = apiResponse;
+    this._result = "";
+    this._message = "";
+    this._uri = "";
+    this._resource = null;
+    this._constellation = null;
+    this._id = 0;
+    this._version = 0;
 
     // attempt to parse json; if it does not parse, it's either
     // a badly-formed response or (most likely) an exception
@@ -45,6 +53,7 @@ public class SNACAPIResponse {
       Object resource = jsonResponse.get("resource");
       Object constellation = jsonResponse.get("constellation");
       Object results = jsonResponse.get("results");
+      Object relatedConstellations = jsonResponse.get("related_constellations");
 
       // populate result/message
       if (result instanceof String) {
@@ -72,8 +81,11 @@ public class SNACAPIResponse {
           this._result = "error";
           this._message = errorFull;
         } else {
-          if (results instanceof JSONObject) {
-            // things like vocabulary lookups may just have a "results" section
+          if ((results instanceof JSONObject) || (relatedConstellations instanceof JSONArray)) {
+            // "results": things like vocabulary lookups or elasticsearch queries may just have this
+            // section
+            // "related_constellations": a "read_resource" for a non-existent resource may just have
+            // this section
             this._result = "success";
           } else {
             this._result = "unknown";
@@ -89,16 +101,22 @@ public class SNACAPIResponse {
         this._resource = res;
         this._id = res.getID();
         this._version = res.getVersion();
-        this._uri = "https://snaccooperative.org/vocab_administrator/resources/" + res.getID();
+        this._uri = client.webURL() + "vocab_administrator/resources/" + res.getID();
       } else if (constellation instanceof JSONObject) {
         Constellation con = Constellation.fromJSON(((JSONObject) constellation).toString());
         this._constellation = con;
         this._id = con.getID();
         this._version = con.getVersion();
-        this._uri = con.getArk();
+
+        // only use ARK for prod CPF, since they are only valid there
+        if (client.isProd()) {
+          this._uri = con.getArk();
+        } else {
+          this._uri = client.webURL() + "view/" + con.getID();
+        }
       }
     } catch (ParseException e) {
-      // assume apiResponse is an exception string, not a badly-formed API responsee
+      // assume apiResponse is an exception string, not a badly-formed API response
       this._result = "exception";
       this._message = apiResponse;
     }
@@ -169,5 +187,9 @@ public class SNACAPIResponse {
 
   public Constellation getConstellation() {
     return _constellation;
+  }
+
+  public Boolean isSuccess() {
+    return _result.toLowerCase().contains("success");
   }
 }

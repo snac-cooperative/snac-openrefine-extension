@@ -5,10 +5,10 @@ import static org.snaccooperative.schema.SNACSchemaUtilities.getCellValueForRowB
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
 import com.google.refine.model.Row;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +26,19 @@ public class SNACResourceItem extends SNACUploadItem {
 
   protected Project _project;
   protected SNACSchema _schema;
+  protected SNACAPIClient _client;
   protected SNACLookupCache _cache;
   protected Resource _resource;
   protected int _rowIndex;
 
   public SNACResourceItem(
-      Project project, SNACSchema schema, SNACLookupCache cache, Record record) {
+      Project project,
+      SNACSchema schema,
+      SNACAPIClient client,
+      SNACLookupCache cache,
+      Record record) {
     this._schema = schema;
+    this._client = client;
     this._cache = cache;
     this._rowIndex = record.fromRowIndex;
 
@@ -82,9 +88,9 @@ public class SNACResourceItem extends SNACUploadItem {
             res.setTitle(cellValue);
             continue;
 
-          // case "display entry":
-          //   res.setDisplayEntry(cellValue);
-          //   continue;
+            // case "display entry":
+            //   res.setDisplayEntry(cellValue);
+            //   continue;
 
           case "resource url":
             res.setLink(cellValue);
@@ -103,7 +109,7 @@ public class SNACResourceItem extends SNACUploadItem {
             continue;
 
           case "language":
-            Language lang = cache.getLanguageCode(cellValue);
+            Language lang = cache.getLanguage(cellValue);
             if (lang != null) {
               languages.add(lang);
             }
@@ -132,7 +138,10 @@ public class SNACResourceItem extends SNACUploadItem {
 
     // add accumulated languages
     res.setLanguages(languages);
+
     this._resource = res;
+
+    logger.debug("built resource: [" + this.toJSON() + "]");
   }
 
   public String getPreviewText() {
@@ -207,15 +216,16 @@ public class SNACResourceItem extends SNACUploadItem {
           snacText = "Repository ID";
           if (_resource.getRepository() != null) {
 
-          // TODO: handle missing repository. Could check for cell value type and show error in Issues tab.
-          int repo_id = _resource.getRepository().getID();
-          String repo_str = "";
+            // TODO: handle missing repository. Could check for cell value type and show error in
+            // Issues tab.
+            int repo_id = _resource.getRepository().getID();
+            String repo_str = "";
 
-          if (repo_id != 0) {
-            repo_str = Integer.toString(repo_id);
+            if (repo_id != 0) {
+              repo_str = Integer.toString(repo_id);
+            }
+            resourceFields.put(snacText, repo_str);
           }
-          resourceFields.put(snacText, repo_str);
-        }
       }
     }
 
@@ -239,20 +249,19 @@ public class SNACResourceItem extends SNACUploadItem {
     return Resource.toJSON(this._resource);
   }
 
-  public SNACAPIResponse performUpload(String url, String key) {
-    SNACAPIClient client = new SNACAPIClient(url);
+  public SNACAPIResponse performUpload() {
 
-    String insertJSON = this.toJSON();
+    logger.info("preparing to upload resource to SNAC...");
 
+    String resourceJSON = this.toJSON();
+
+    String apiStr = "\"apikey\": \"" + this._client.apiKey() + "\"";
     String apiQuery =
-        "{\"command\": \"insert_resource\",\n \"resource\":"
-            + insertJSON
-            + ",\"apikey\":\""
-            + key
-            + "\""
-            + "}";
+        "{ \"command\": \"insert_resource\", " + apiStr + ", \"resource\": " + resourceJSON + " }";
 
-    SNACAPIResponse insertResponse = client.post(apiQuery);
+    SNACAPIResponse insertResponse = this._client.post(apiQuery);
+
+    logger.info("resource upload complete");
 
     return insertResponse;
   }
@@ -287,7 +296,7 @@ public class SNACResourceItem extends SNACUploadItem {
         break;
 
       default:
-        logger.warn("createTypeTerm(): invalid/unhandled type: [" + type + "]");
+        logger.warn("invalid/unhandled resource type: [" + type + "]");
         return null;
     }
 

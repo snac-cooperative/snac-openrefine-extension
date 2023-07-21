@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.commands.SNACAPIClient;
 import org.snaccooperative.exporters.SNACConstellationItem;
 import org.snaccooperative.exporters.SNACLookupCache;
 import org.snaccooperative.exporters.SNACResourceItem;
@@ -116,12 +117,19 @@ public class SNACSchema implements OverlayModel {
   }
 
   public List<SNACUploadItem> evaluateRecords(Project project, Engine engine) {
+    // currently, only upload tasks need to know what environment they should
+    // run in.  all other tasks (preview schema, export JSON) do not interact
+    // with SNAC, so we just use an invalid value for the environment.
+    return evaluateRecords(project, engine, "");
+  }
+
+  public List<SNACUploadItem> evaluateRecords(Project project, Engine engine, String snacEnv) {
     Mode prevMode = engine.getMode();
     engine.setMode(Mode.RecordBased);
 
     List<SNACUploadItem> items = new ArrayList<SNACUploadItem>();
     FilteredRecords filteredRecords = engine.getFilteredRecords();
-    filteredRecords.accept(project, new SNACRecordVisitor(items, this));
+    filteredRecords.accept(project, new SNACRecordVisitor(items, this, snacEnv));
 
     engine.setMode(prevMode);
 
@@ -131,11 +139,15 @@ public class SNACSchema implements OverlayModel {
   protected class SNACRecordVisitor implements RecordVisitor {
     private List<SNACUploadItem> _items;
     private SNACSchema _schema;
-    private SNACLookupCache _cache = new SNACLookupCache();
+    private SNACAPIClient _client;
+    private SNACLookupCache _cache;
 
-    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema) {
+    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema, String snacEnv) {
       this._items = items;
       this._schema = schema;
+
+      this._client = new SNACAPIClient(snacEnv);
+      this._cache = new SNACLookupCache(this._client);
     }
 
     @Override
@@ -147,15 +159,15 @@ public class SNACSchema implements OverlayModel {
 
       switch (_schema.getSchemaType()) {
         case "constellation":
-          item = new SNACConstellationItem(project, _schema, _cache, record);
+          item = new SNACConstellationItem(project, _schema, _client, _cache, record);
           break;
 
         case "relation":
-          item = new SNACConstellationItem(project, _schema, _cache, record);
+          item = new SNACConstellationItem(project, _schema, _client, _cache, record);
           break;
 
         case "resource":
-          item = new SNACResourceItem(project, _schema, _cache, record);
+          item = new SNACResourceItem(project, _schema, _client, _cache, record);
           break;
 
         default:

@@ -49,7 +49,10 @@ public class SNACSaveSchemaCommand extends Command {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
 
+    logger.info("saving SNAC schema...");
+
     if (!hasValidCSRFToken(request)) {
+      logger.error("SNAC schema save: invalid CSRF token");
       respondCSRFError(response);
       return;
     }
@@ -59,6 +62,7 @@ public class SNACSaveSchemaCommand extends Command {
 
       String schemaJSON = request.getParameter("schema");
       if (schemaJSON == null) {
+        logger.error("SNAC schema save: missing schema");
         respondError(response, "No SNAC schema provided.");
         return;
       }
@@ -68,15 +72,21 @@ public class SNACSaveSchemaCommand extends Command {
       AbstractOperation op = new SNACSaveSchemaOperation(schema);
       Process process = op.createProcess(project, new Properties());
 
+      logger.info("SNAC schema save initiated");
+
       performProcessAndRespond(request, response, project, process);
+
+      logger.info("SNAC schema save completed");
 
     } catch (IOException e) {
       // We do not use respondException here because this is an expected
       // exception which happens every time a user tries to save an incomplete
       // schema - the exception should not be logged.
+      logger.warn("SNAC schema save: incomplete schema?: [" + e + "]");
       respondError(response, "SNAC schema could not be parsed.");
     } catch (Exception e) {
       // This is an unexpected exception, so we log it.
+      logger.error("SNAC schema save: exception: [" + e + "]");
       respondException(response, e);
     }
   }

@@ -9,5 +9,5 @@ public abstract class SNACUploadItem {
 
   public abstract String toJSON();
 
-  public abstract SNACAPIResponse performUpload(String url, String key);
+  public abstract SNACAPIResponse performUpload();
 }

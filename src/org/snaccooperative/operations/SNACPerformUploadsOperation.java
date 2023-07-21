@@ -18,7 +18,6 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIResponse;
-import org.snaccooperative.connection.SNACConnector;
 import org.snaccooperative.exporters.SNACUploadItem;
 import org.snaccooperative.schema.SNACSchema;
 
@@ -70,22 +69,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
     @Override
     public void run() {
-      SNACConnector keyManager = SNACConnector.getInstance();
-      String apiKey = keyManager.getKey();
-
-      String apiURL = "";
-
-      switch (_snacEnv.toLowerCase()) {
-        case "prod":
-          apiURL = "https://api.snaccooperative.org/";
-          break;
-
-        case "dev":
-        default:
-          apiURL = "https://snac-dev.iath.virginia.edu/api/";
-      }
-
-      List<SNACUploadItem> items = _schema.evaluateRecords(_project, _engine);
+      List<SNACUploadItem> items = _schema.evaluateRecords(_project, _engine, _snacEnv);
 
       List<CellAtRow> results = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> messages = new ArrayList<CellAtRow>(items.size());
@@ -100,13 +84,22 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         SNACUploadItem item = items.get(i);
         int row = item.rowIndex();
 
-        SNACAPIResponse uploadResponse = item.performUpload(apiURL, apiKey);
+        SNACAPIResponse uploadResponse = item.performUpload();
+
+        logger.info(
+            "["
+                + (i + 1)
+                + "/"
+                + items.size()
+                + "] upload result: ["
+                + uploadResponse.getResult()
+                + "]");
 
         results.add(new CellAtRow(row, new Cell(uploadResponse.getResult(), null)));
         messages.add(new CellAtRow(row, new Cell(uploadResponse.getMessage(), null)));
         ids.add(new CellAtRow(row, new Cell(uploadResponse.getIDString(), null)));
         links.add(new CellAtRow(row, new Cell(uploadResponse.getURI(), null)));
-        if (includeAPIResponseColumn ) {
+        if (includeAPIResponseColumn) {
           responses.add(new CellAtRow(row, new Cell(uploadResponse.getAPIResponse(), null)));
         }
 
@@ -159,7 +152,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         addHistoryEntry(messageColumn, messages);
         addHistoryEntry(idColumn, ids);
         addHistoryEntry(uriColumn, links);
-        if (includeAPIResponseColumn ) {
+        if (includeAPIResponseColumn) {
           addHistoryEntry(responseColumn, responses);
         }
 
