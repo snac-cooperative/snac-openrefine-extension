@@ -20,38 +20,37 @@ import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIResponse;
 import org.snaccooperative.exporters.SNACUploadItem;
 import org.snaccooperative.schema.SNACSchema;
-import org.snaccooperative.util.SNACPreferencesManager;
 
-public class SNACPerformUploadsOperation extends EngineDependentOperation {
+public class SNACPerformValidationOperation extends EngineDependentOperation {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsOperation");
+  static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationOperation");
 
   @JsonCreator
-  public SNACPerformUploadsOperation(
+  public SNACPerformValidationOperation(
       @JsonProperty("engineConfig") EngineConfig engineConfig) {
     super(engineConfig);
   }
 
   @Override
   protected String getBriefDescription(Project project) {
-    return "Upload data to SNAC";
+    return "Validate data against SNAC";
   }
 
   @Override
   public Process createProcess(Project project, Properties options) throws Exception {
-    return new SNACPerformUploadsProcess(
+    return new SNACPerformValidationProcess(
         project, createEngine(project), getBriefDescription(project));
   }
 
-  public class SNACPerformUploadsProcess extends LongRunningProcess implements Runnable {
+  public class SNACPerformValidationProcess extends LongRunningProcess implements Runnable {
 
-    final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsProcess");
+    final Logger logger = LoggerFactory.getLogger("SNACPerformValidationProcess");
 
     protected Project _project;
     protected Engine _engine;
     protected SNACSchema _schema;
 
-    public SNACPerformUploadsProcess(Project project, Engine engine, String description) {
+    public SNACPerformValidationProcess(Project project, Engine engine, String description) {
       super(description);
       this._project = project;
       this._engine = engine;
@@ -69,41 +68,26 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
       List<CellAtRow> results = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> messages = new ArrayList<CellAtRow>(items.size());
-      List<CellAtRow> ids = new ArrayList<CellAtRow>(items.size());
-      List<CellAtRow> links = new ArrayList<CellAtRow>(items.size());
-      List<CellAtRow> responses = new ArrayList<CellAtRow>(items.size());
-
-      SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
-
-      Boolean includeAPIResponseColumn = prefsManager.includeAPIResponse();
 
       for (int i = 0; i < items.size(); i++) {
         SNACUploadItem item = items.get(i);
         int row = item.rowIndex();
 
-        SNACAPIResponse uploadResponse = item.performUpload();
+logger.info("validating item " + (i + 1) + "...");
+        SNACAPIResponse validationResponse = item.performValidation();
+logger.info("validated  item " + (i + 1) + ".");
 
         logger.info(
             "["
                 + (i + 1)
                 + "/"
                 + items.size()
-                + "] upload result: ["
-                + uploadResponse.getResult()
+                + "] validation result: ["
+                + validationResponse.getResult()
                 + "]");
 
-        results.add(new CellAtRow(row, new Cell(uploadResponse.getResult(), null)));
-        messages.add(new CellAtRow(row, new Cell(uploadResponse.getMessage(), null)));
-        ids.add(new CellAtRow(row, new Cell(uploadResponse.getIDString(), null)));
-        links.add(new CellAtRow(row, new Cell(uploadResponse.getURI(), null)));
-        if (includeAPIResponseColumn) {
-          String apiResponse = uploadResponse.getAPIResponse();
-          // attempt to filter out mocked API responses
-          if (apiResponse.equals(uploadResponse.getMessage())) {
-            apiResponse = "";
-          }
-          responses.add(new CellAtRow(row, new Cell(apiResponse, null)));
-        }
+        results.add(new CellAtRow(row, new Cell(validationResponse.getResult(), null)));
+        messages.add(new CellAtRow(row, new Cell(validationResponse.getMessage(), null)));
 
         _progress = i * 100 / items.size();
 
@@ -115,11 +99,8 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
       _progress = 100;
 
       if (!_canceled) {
-        String resultColumn = "*SNAC*: Result";
-        String messageColumn = "*SNAC*: Message";
-        String idColumn = "*SNAC*: ID";
-        String uriColumn = "*SNAC*: Link";
-        String responseColumn = "*SNAC*: API Response";
+        String resultColumn = "*SNAC*: Validation Result";
+        String messageColumn = "*SNAC*: Validation Message";
 
         int i = 0;
         boolean found = false;
@@ -134,26 +115,15 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
           }
 
           if ((_project.columnModel.getColumnByName(resultColumn + postfix) == null)
-              && (_project.columnModel.getColumnByName(messageColumn + postfix) == null)
-              && (_project.columnModel.getColumnByName(idColumn + postfix) == null)
-              && (_project.columnModel.getColumnByName(uriColumn + postfix) == null)
-              && (_project.columnModel.getColumnByName(responseColumn + postfix) == null)) {
+              && (_project.columnModel.getColumnByName(messageColumn + postfix) == null)) {
             found = true;
             resultColumn = resultColumn + postfix;
             messageColumn = messageColumn + postfix;
-            idColumn = idColumn + postfix;
-            uriColumn = uriColumn + postfix;
-            responseColumn = responseColumn + postfix;
           }
         }
 
         addHistoryEntry(resultColumn, results);
         addHistoryEntry(messageColumn, messages);
-        addHistoryEntry(idColumn, ids);
-        addHistoryEntry(uriColumn, links);
-        if (includeAPIResponseColumn) {
-          addHistoryEntry(responseColumn, responses);
-        }
 
         _project.processManager.onDoneProcess(this);
       }
@@ -166,8 +136,8 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
           new HistoryEntry(
               HistoryEntry.allocateID(),
               _project,
-              "SNAC Upload: Add Column \"" + columnName + "\"",
-              SNACPerformUploadsOperation.this,
+              "SNAC Validation: Add Column \"" + columnName + "\"",
+              SNACPerformValidationOperation.this,
               new ColumnAdditionChange(columnName, columnIndex, cells)));
     }
   }

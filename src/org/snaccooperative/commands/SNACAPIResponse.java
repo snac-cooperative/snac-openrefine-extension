@@ -32,6 +32,13 @@ public class SNACAPIResponse {
     this._id = 0;
     this._version = 0;
 
+    // if supplied with an apiResponse of "success", create a simple success object
+    if (apiResponse.equals("success")) {
+      this._result = apiResponse;
+      this._message = "";
+      return;
+    }
+
     // attempt to parse json; if it does not parse, it's either
     // a badly-formed response or (most likely) an exception
 
@@ -101,7 +108,7 @@ public class SNACAPIResponse {
         this._resource = res;
         this._id = res.getID();
         this._version = res.getVersion();
-        this._uri = client.webURL() + "vocab_administrator/resources/" + res.getID();
+        this._uri = client.urlForResourceID(res.getID());
       } else if (constellation instanceof JSONObject) {
         Constellation con = Constellation.fromJSON(((JSONObject) constellation).toString());
         this._constellation = con;
@@ -112,7 +119,7 @@ public class SNACAPIResponse {
         if (client.isProd()) {
           this._uri = con.getArk();
         } else {
-          this._uri = client.webURL() + "view/" + con.getID();
+          this._uri = client.urlForConstellationID(con.getID());
         }
       }
     } catch (ParseException e) {

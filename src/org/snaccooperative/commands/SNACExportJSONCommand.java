@@ -88,6 +88,7 @@ public class SNACExportJSONCommand extends Command {
 
       for (int i = 0; i < items.size(); i++) {
         try {
+          // FIXME: "unchecked call to add(E) as a member of the raw type java.util.ArrayList"
           jsonItems.add((JSONObject) jsonParser.parse(items.get(i).toJSON()));
         } catch (ParseException e) {
           logger.warn("SNAC JSON export: skipping item " + (i + 1) + ": [" + e + "]");
@@ -95,6 +96,7 @@ public class SNACExportJSONCommand extends Command {
         }
       }
 
+      // FIXME: "unchecked call to put(K,V) as a member of the raw type java.util.HashMap"
       jsonResp.put(schema.getSchemaType() + "s", jsonItems);
 
       logger.info("SNAC JSON export succeeded");

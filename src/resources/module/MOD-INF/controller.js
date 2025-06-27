@@ -28,6 +28,7 @@ function init() {
 
     OperationRegistry.registerOperation(module, "save-schema", Packages.org.snaccooperative.operations.SNACSaveSchemaOperation);
     OperationRegistry.registerOperation(module, "perform-uploads", Packages.org.snaccooperative.operations.SNACPerformUploadsOperation);
+    OperationRegistry.registerOperation(module, "perform-validation", Packages.org.snaccooperative.operations.SNACPerformValidationOperation);
 
     /*
      * Commands
@@ -35,8 +36,9 @@ function init() {
     RefineServlet.registerCommand(module, "save-schema", new SNACSaveSchemaCommand());
     RefineServlet.registerCommand(module, "preview-schema", new SNACPreviewSchemaCommand());
     RefineServlet.registerCommand(module, "perform-uploads", new SNACPerformUploadsCommand());
+    RefineServlet.registerCommand(module, "perform-validation", new SNACPerformValidationCommand());
     RefineServlet.registerCommand(module, "export-json", new SNACExportJSONCommand());
-    RefineServlet.registerCommand(module, "apikey", new SNACLoginCommand());
+    RefineServlet.registerCommand(module, "preferences", new SNACPreferencesCommand());
 
     /*
      * Resources
@@ -47,7 +49,9 @@ function init() {
       [
         "scripts/menu-bar-extension.js",
         "scripts/dialogs/manage-key-dialog.js",
+        "scripts/dialogs/manage-preferences-dialog.js",
         "scripts/dialogs/manage-upload-dialog.js",
+        "scripts/dialogs/manage-validation-dialog.js",
         "scripts/dialogs/schema-alignment-dialog.js",
         "scripts/dialogs/import-schema-dialog.js",
       ]);
@@ -57,7 +61,9 @@ function init() {
       module,
       [
         "styles/dialogs/manage-key-dialog.less",
+        "styles/dialogs/manage-preferences-dialog.less",
         "styles/dialogs/manage-upload-dialog.less",
+        "styles/dialogs/manage-validation-dialog.less",
         "styles/dialogs/schema-alignment-dialog.css",
       ]);
 }

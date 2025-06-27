@@ -25,6 +25,7 @@
 package org.snaccooperative.commands;
 
 import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
+import org.snaccooperative.util.SNACPreferencesManager;
 
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
@@ -78,9 +79,11 @@ public class SNACPreviewSchemaCommand extends Command {
 
       List<SNACUploadItem> items = schema.evaluateRecords(project, engine);
 
-      SNACPreviewItems previewItems = new SNACPreviewItems(items.size());
+      SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
-      int maxPreviewItems = Math.min(items.size(), 10);
+      int maxPreviewItems = Math.min(items.size(), prefsManager.getMaxPreviewItems());
+
+      SNACPreviewItems previewItems = new SNACPreviewItems(maxPreviewItems);
 
       for (int i = 0; i < maxPreviewItems; i++) {
         SNACUploadItem item = items.get(i);

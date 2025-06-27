@@ -636,3 +636,25 @@ div.schema-alignment-dialog-preview {
   .tooltip:hover .tooltiptext {
     visibility: visible;
   }
+
+.snac-schema-preview-row:hover {
+  background-color: #dbe9fa;
+}
+
+.snac-schema-preview-column-field {
+  padding: 3px;
+  font-weight: bold;
+}
+
+.snac-schema-preview-column-value {
+  padding: 3px;
+  padding-left: 15px;
+}
+
+.snac-schema-preview-list-item {
+  margin-left: 1em;
+}
+
+.snac-reload-preview {
+  margin-left: 10px;
+}

@@ -46,7 +46,9 @@
 					<source>1.8</source>
 					<target>1.8</target>
 					<encoding>UTF-8</encoding>
-					<showDeprecation>false</showDeprecation>
+					<compilerArgs>
+						<arg>-Xlint:deprecation,unchecked</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -113,8 +115,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.openrefine</groupId>
-			<artifactId>main</artifactId>
-			<version>3.4.1</version>
+			<artifactId>core</artifactId>
+			<version>3.9.3</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -154,7 +156,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.12.3</version>
+			<version>2.18.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>

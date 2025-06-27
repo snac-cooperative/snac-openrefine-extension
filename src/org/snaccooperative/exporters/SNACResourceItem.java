@@ -5,10 +5,11 @@ import static org.snaccooperative.schema.SNACSchemaUtilities.getCellValueForRowB
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
 import com.google.refine.model.Row;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,15 @@ public class SNACResourceItem extends SNACUploadItem {
   static final Logger logger = LoggerFactory.getLogger("SNACResourceItem");
 
   protected Project _project;
+  protected Record _record;
   protected SNACSchema _schema;
   protected SNACAPIClient _client;
   protected SNACLookupCache _cache;
-  protected Resource _resource;
   protected int _rowIndex;
+
+  protected Resource _resource;
+  protected List<Integer> _relatedConstellations;
+  protected List<String> _validationErrors;
 
   public SNACResourceItem(
       Project project,
@@ -37,26 +42,35 @@ public class SNACResourceItem extends SNACUploadItem {
       SNACAPIClient client,
       SNACLookupCache cache,
       Record record) {
+    this._project = project;
     this._schema = schema;
     this._client = client;
     this._cache = cache;
+    this._record = record;
+
     this._rowIndex = record.fromRowIndex;
+  }
+
+  private void buildResource() {
+    _resource = null;
+
+    _relatedConstellations = new LinkedList<Integer>();
+    _validationErrors = new ArrayList<String>();
 
     Resource res = new Resource();
-    // Insert by default
     res.setOperation("insert");
 
     // things to accumulate
     List<Language> languages = new LinkedList<Language>();
 
-    for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
+    for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue().toLowerCase();
 
-      for (int i = record.fromRowIndex; i < record.toRowIndex; i++) {
-        Row row = project.rows.get(i);
+      for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
+        Row row = _project.rows.get(i);
 
-        String cellValue = getCellValueForRowByColumnName(project, row, csvColumn);
+        String cellValue = getCellValueForRowByColumnName(_project, row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -70,13 +84,16 @@ public class SNACResourceItem extends SNACUploadItem {
               res.setOperation("update");
             } catch (NumberFormatException e) {
               // If no numeric ID, leave operation as "insert"
+              _validationErrors.add("Invalid SNAC Resource ID: [" + cellValue + "]");
             }
             continue;
 
           case "resource type":
-            Term typeTerm = createTypeTerm(cellValue);
+            Term typeTerm = _cache.getDocumentTypeTerm(cellValue);
 
             if (typeTerm == null) {
+              logger.warn("skipping unknown resource type [" + cellValue + "]");
+              _validationErrors.add("Invalid SNAC Resource Type: [" + cellValue + "]");
               continue;
             }
 
@@ -108,11 +125,85 @@ public class SNACResourceItem extends SNACUploadItem {
             res.setDate(cellValue);
             continue;
 
-          case "language":
-            Language lang = cache.getLanguage(cellValue);
-            if (lang != null) {
-              languages.add(lang);
+          case "language code": // queried alongside script code
+            // NOTE: SNAC language type can contain any combination of language code and/or script code.
+            // Here, we check for the cases that contain a language code.
+
+            Term languageCodeTerm = _cache.getLanguageCodeTerm(cellValue);
+
+            if (languageCodeTerm == null) {
+              logger.warn("skipping unknown language code [" + cellValue + "]");
+              _validationErrors.add("Invalid Language Code: [" + cellValue + "]");
+              continue;
             }
+
+            // initialize language code portion
+            Language lang = new Language();
+            lang.setOperation("insert");
+            lang.setLanguage(languageCodeTerm);
+
+            // find and add optional associated script code in this row
+            String scriptCodeColumn = _schema.getReverseColumnMappings().get("script code");
+
+            if (scriptCodeColumn != null) {
+              String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
+
+              if (!scriptCode.equals("")) {
+                Term scriptCodeTerm = _cache.getScriptCodeTerm(scriptCode);
+                if (scriptCodeTerm != null) {
+                  // add script code portion
+                  lang.setScript(scriptCodeTerm);
+                } else {
+                  logger.warn("omitting invalid script code [" + scriptCode + "]");
+                  _validationErrors.add("Invalid Script Code: [" + scriptCode + "] for Language Code: [" + cellValue + "]");
+                  continue;
+                }
+              } else {
+                //logger.info("no associated script code value found; skipping");
+              }
+            } else {
+              //logger.info("no associated script code column found; skipping");
+            }
+
+            languages.add(lang);
+
+            continue;
+
+          case "script code": // queried alongside language code
+            // NOTE: SNAC language type can contain any combination of language code and/or script code.
+            // Here, we check for the case when there is just a script code.
+
+            // check whether there is an associated language code in this row; if so, skip
+            String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
+
+            if (languageCodeColumn != null) {
+              String languageCode = getCellValueForRowByColumnName(_project, row, languageCodeColumn);
+
+              if (!languageCode.equals("")) {
+                // found associated language code; this scenario is handled in the "language code" section
+                //logger.info("skipping script code with associated language code");
+                continue;
+              } else {
+                //logger.info("no associated language code value found; proceeding");
+              }
+            } else {
+              //logger.info("no associated language code column found; proceeding");
+            }
+
+            Term scriptCodeTerm = _cache.getScriptCodeTerm(cellValue);
+
+            if (scriptCodeTerm == null) {
+              logger.warn("skipping unknown script code [" + cellValue + "]");
+              _validationErrors.add("Invalid Script Code: [" + cellValue + "]");
+              continue;
+            }
+
+            // initialize script code portion
+            Language script = new Language();
+            script.setOperation("insert");
+            script.setScript(scriptCodeTerm);
+
+            languages.add(script);
 
             continue;
 
@@ -125,8 +216,10 @@ public class SNACResourceItem extends SNACUploadItem {
               if (id != 0) {
                 cons.setID(id);
                 res.setRepository(cons);
+                _relatedConstellations.add(id);
               }
             } catch (NumberFormatException e) {
+              _validationErrors.add("Invalid Holding Repository SNAC ID: [" + cellValue + "]");
             }
             continue;
 
@@ -144,99 +237,135 @@ public class SNACResourceItem extends SNACUploadItem {
     logger.debug("built resource: [" + this.toJSON() + "]");
   }
 
+  private void buildResourceVerbatim() {
+    _cache.disableTermCache();
+    buildResource();
+  }
+
+  private void buildResourceAgainstSNAC() {
+    _cache.enableTermCache();
+    buildResource();
+  }
+
   public String getPreviewText() {
-    String preview = "";
+    buildResourceVerbatim();
 
-    if (_resource.getOperation() == "update") {
-      preview += "------Editing Resource with ID:" + _resource.getID() + "------\n";
-    } else {
-      preview += "------Inserting new resource" + "------\n";
-    }
-
-    Map<String, String> resourceFields = new HashMap<>();
+    Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacText = entry.getValue();
       String snacField = snacText.toLowerCase();
 
       switch (snacField) {
-        case "snac resource id":
-          // Already added to Preview
-          // resourceFields.put(snacText, String.valueOf(_resource.getID()));
-          break;
-
         case "resource type":
           Term previewTerm = _resource.getDocumentType();
           if (previewTerm != null) {
-            resourceFields.put(snacText, previewTerm.getTerm());
+            outFields.put(snacText, previewTerm.getTerm());
           }
           break;
 
         case "title":
-          resourceFields.put(snacText, _resource.getTitle());
+          outFields.put(snacText, _resource.getTitle());
           break;
 
         case "resource url":
-          resourceFields.put(snacText, _resource.getLink());
+          outFields.put(snacText, htmlLink(_resource.getLink(), _resource.getLink()));
           break;
 
         case "abstract":
-          resourceFields.put(snacText, _resource.getAbstract());
+          outFields.put(snacText, _resource.getAbstract());
           break;
 
         case "extent":
-          resourceFields.put(snacText, _resource.getExtent());
+          outFields.put(snacText, _resource.getExtent());
           break;
 
         case "date":
-          resourceFields.put(snacText, _resource.getDate());
+          outFields.put(snacText, _resource.getDate());
           break;
 
-        case "language":
-          List<Language> languageList = _resource.getLanguages();
-          String _resourceLanguages = "";
+        case "language code":
+          List<String> langList = new ArrayList<>();
 
-          if (languageList.size() > 0) {
-            for (int i = 0; i < languageList.size(); i++) {
-              if (languageList.get(i).getLanguage() == null) {
-                continue;
+          for (int i = 0; i < _resource.getLanguages().size(); i++) {
+            Term lang = _resource.getLanguages().get(i).getLanguage();
+
+            String langFull = "";
+
+            if (lang != null) {
+              String langCode = lang.getTerm();
+              String langDesc = lang.getDescription();
+
+              langFull = langCode;
+              if (!langDesc.equals("")) {
+                langFull += " (" + langDesc + ")";
               }
-              String lang_var = languageList.get(i).getLanguage().getDescription();
-              if (lang_var.equals("")) {
-                continue;
+            }
+
+            Term script = _resource.getLanguages().get(i).getScript();
+
+            String scriptFull = "";
+
+            if (script != null) {
+              String scriptCode = script.getTerm();
+              String scriptDesc = script.getDescription();
+
+              scriptFull = scriptCode;
+              if (!scriptDesc.equals("")) {
+                scriptFull += " (" + scriptDesc + ")";
               }
-              _resourceLanguages += lang_var + ", ";
+            }
+
+            if (langFull.equals("")) {
+              if (scriptFull.equals("")) {
+                // no language or script?  shouldn't happen
+              } else {
+                langList.add("Script: " + scriptFull);
+              }
+            } else {
+              if (scriptFull.equals("")) {
+                langList.add("Language: " + langFull);
+              } else {
+                langList.add("Language: " + langFull + " / Script: " + scriptFull);
+              }
             }
           }
 
-          resourceFields.put(snacText, _resourceLanguages);
+          if (langList.size() > 0) {
+            outFields.put(snacText, htmlOrderedList(langList));
+          }
+
           break;
 
         case "holding repository snac id":
           snacText = "Repository ID";
           if (_resource.getRepository() != null) {
-
-            // TODO: handle missing repository. Could check for cell value type and show error in
-            // Issues tab.
             int repo_id = _resource.getRepository().getID();
-            String repo_str = "";
-
             if (repo_id != 0) {
-              repo_str = Integer.toString(repo_id);
+              outFields.put(snacText, htmlLink(_client.urlForConstellationID(repo_id), Integer.toString(repo_id)));
             }
-            resourceFields.put(snacText, repo_str);
           }
       }
     }
 
-    // TODO: Print preview in set order for consistency.
-    for (String key : resourceFields.keySet()) {
-      preview += key + ": " + resourceFields.get(key) + "\n";
-      System.out.println(key + " => " + resourceFields.get(key));
+    if (_resource.getOperation() == "update") {
+      outFields.put("*** Operation ***", "Edit Resource with ID: " + 
+        htmlLink(_client.urlForResourceID(_resource.getID()), Integer.toString(_resource.getID())));
+    } else {
+      outFields.put("*** Operation ***", "Insert new Resource");
     }
 
-    System.out.print("OPERATION: ");
-    System.out.println(_resource.getOperation());
+    String preview = "";
+    // FIXME: output in predetermined order (not just alphabetical)?
+    for (String key : outFields.keySet()) {
+      String out = outFields.get(key);
+      if (out == null || out.equals("")) {
+        continue;
+      }
+      preview += htmlTableRow(htmlTableColumnField(key) + htmlTableColumnValue(out));
+      //logger.info(key + " => " + out);
+    }
+    preview = htmlTable(preview);
 
     return preview;
   }
@@ -249,9 +378,57 @@ public class SNACResourceItem extends SNACUploadItem {
     return Resource.toJSON(this._resource);
   }
 
-  public SNACAPIResponse performUpload() {
+  private SNACAPIResponse verifyRelatedIDs() {
+    // Before uploading, we verify existence of any related holding
+    // repository IDs in the selected SNAC environment.
 
+    List<String> relationErrors = new LinkedList<String>();
+
+    logger.info("verifying existence of holding repository constellations...");
+
+    for (int i = 0; i < _relatedConstellations.size(); i++) {
+      int id = _relatedConstellations.get(i);
+      logger.info("verifying existence of holding repository constellation: " + id);
+      if (!_cache.constellationExists(id)) {
+        relationErrors.add("* Holding Repository SNAC ID " + id + " not found in SNAC");
+      }
+    }
+
+    if (relationErrors.size() > 0) {
+      String errMsg = String.join("\n\n", relationErrors);
+      logger.warn("resource validation error: [" + errMsg + "]");
+      return new SNACAPIResponse(this._client, errMsg);
+    }
+
+    return new SNACAPIResponse(this._client, "success");
+  }
+
+  public SNACAPIResponse performValidation() {
+    buildResourceAgainstSNAC();
+
+    logger.info("validating resource data...");
+
+    // return error if validation errors were encountered earlier
+    if (_validationErrors.size() > 0) {
+      for (int i = 0; i < _validationErrors.size(); i++) {
+        _validationErrors.set(i, "* " + _validationErrors.get(i));
+      }
+      String errMsg = String.join("\n", _validationErrors);
+      return new SNACAPIResponse(this._client, errMsg);
+    }
+
+    // verify any related IDs
+    return verifyRelatedIDs();
+  }
+
+  public SNACAPIResponse performUpload() {
     logger.info("preparing to upload resource to SNAC...");
+
+    // validate resource data before uploading
+    SNACAPIResponse validationError = performValidation();
+    if (validationError != null && !validationError.getResult().equals("success")) {
+      return validationError;
+    }
 
     String resourceJSON = this.toJSON();
 
@@ -266,45 +443,4 @@ public class SNACResourceItem extends SNACUploadItem {
     return insertResponse;
   }
 
-  private Term createTypeTerm(String type) {
-    String term;
-    int id;
-
-    switch (type.toLowerCase()) {
-      case "archivalresource":
-      case "696":
-        term = "ArchivalResource";
-        id = 696;
-        break;
-
-      case "bibliographicresource":
-      case "697":
-        term = "BibliographicResource";
-        id = 697;
-        break;
-
-      case "digitalarchivalresource":
-      case "400479":
-        term = "DigitalArchivalResource";
-        id = 400479;
-        break;
-
-      case "oralhistoryresource":
-      case "400623":
-        term = "OralHistoryResource";
-        id = 400623;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled resource type: [" + type + "]");
-        return null;
-    }
-
-    Term t = new Term();
-    t.setType("document_type");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
 }

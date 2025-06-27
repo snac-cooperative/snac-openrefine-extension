@@ -9,63 +9,57 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.connection.SNACConnector;
+import org.snaccooperative.util.SNACPreferencesManager;
+import org.snaccooperative.util.SNACEnvironment;
 
 public class SNACAPIClient {
 
   static final Logger logger = LoggerFactory.getLogger("SNACAPIClient");
 
+  protected SNACEnvironment _env;
+
   protected CloseableHttpClient _client;
   protected HttpPost _post;
-  protected String _webURL;
-  protected String _apiURL;
-  protected String _apiKey;
-  protected Boolean _isProd;
 
-  public SNACAPIClient(String snacEnv) {
-    SNACConnector keyManager = SNACConnector.getInstance();
+  public SNACAPIClient() {
+    SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
-    this._webURL = "";
-    this._apiURL = "";
-    this._apiKey = keyManager.getKey();
-    this._isProd = false;
-
-    switch (snacEnv.toLowerCase()) {
-      case "prod":
-        this._webURL = "https://snaccooperative.org/";
-        this._apiURL = "https://api.snaccooperative.org/";
-        this._isProd = true;
-        break;
-
-      case "dev":
-        this._webURL = "https://snac-dev.iath.virginia.edu/";
-        this._apiURL = "https://snac-dev.iath.virginia.edu/api/";
-        this._isProd = false;
-        break;
-    }
+    _env = prefsManager.getEnvironment();
 
     this._client = HttpClientBuilder.create().build();
-    this._post = new HttpPost(this._apiURL);
+    this._post = new HttpPost(_env.getAPIURL());
+  }
 
-    logger.debug("web url: [" + this._webURL + "]");
-    logger.debug("api url: [" + this._apiURL + "]");
-    logger.debug("api key: [" + this._apiKey + "]");
+  public String id() {
+    return _env.getID();
+  }
+
+  public String name() {
+    return _env.getName();
   }
 
   public String webURL() {
-    return this._webURL;
+    return _env.getWebURL();
   }
 
   public String apiURL() {
-    return this._apiURL;
+    return _env.getAPIURL();
   }
 
   public String apiKey() {
-    return this._apiKey;
+    return _env.getAPIKey();
   }
 
   public Boolean isProd() {
-    return this._isProd;
+    return _env.isProd();
+  }
+
+  public String urlForConstellationID(int id) {
+    return webURL() + "view/" + id;
+  }
+
+  public String urlForResourceID(int id) {
+    return webURL() + "vocab_administrator/resources/" + id;
   }
 
   public SNACAPIResponse post(String apiJSON) {

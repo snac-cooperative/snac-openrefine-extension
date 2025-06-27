@@ -7,15 +7,15 @@ import com.google.refine.model.Project;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.operations.SNACPerformUploadsOperation;
+import org.snaccooperative.operations.SNACPerformValidationOperation;
 
-public class SNACPerformUploadsCommand extends EngineDependentCommand {
+public class SNACPerformValidationCommand extends EngineDependentCommand {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsCommand");
+  static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationCommand");
 
   @Override
   protected AbstractOperation createOperation(
       Project project, HttpServletRequest request, EngineConfig engineConfig) throws Exception {
-    return new SNACPerformUploadsOperation(engineConfig);
+    return new SNACPerformValidationOperation(engineConfig);
   }
 }

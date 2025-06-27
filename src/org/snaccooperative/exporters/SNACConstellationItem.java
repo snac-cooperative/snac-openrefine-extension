@@ -5,9 +5,11 @@ import static org.snaccooperative.schema.SNACSchemaUtilities.getCellValueForRowB
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
 import com.google.refine.model.Row;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,7 @@ import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.ConstellationRelation;
 import org.snaccooperative.data.NameEntry;
 import org.snaccooperative.data.Occupation;
+import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Place;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.ResourceRelation;
@@ -34,13 +37,16 @@ public class SNACConstellationItem extends SNACUploadItem {
   static final Logger logger = LoggerFactory.getLogger("SNACConstellationItem");
 
   protected Project _project;
+  protected Record _record;
   protected SNACSchema _schema;
   protected SNACAPIClient _client;
   protected SNACLookupCache _cache;
-  protected Constellation _constellation;
   protected int _rowIndex;
+
+  protected Constellation _constellation;
   protected List<Integer> _relatedConstellations;
   protected List<Integer> _relatedResources;
+  protected List<String> _validationErrors;
 
   public SNACConstellationItem(
       Project project,
@@ -48,10 +54,21 @@ public class SNACConstellationItem extends SNACUploadItem {
       SNACAPIClient client,
       SNACLookupCache cache,
       Record record) {
+    this._project = project;
     this._schema = schema;
     this._client = client;
     this._cache = cache;
+    this._record = record;
+
     this._rowIndex = record.fromRowIndex;
+  }
+
+  private void buildConstellation() {
+    _constellation = null;
+
+    _relatedConstellations = new LinkedList<Integer>();
+    _relatedResources = new LinkedList<Integer>();
+    _validationErrors = new ArrayList<String>();
 
     Constellation con = new Constellation();
     con.setOperation("insert");
@@ -64,22 +81,20 @@ public class SNACConstellationItem extends SNACUploadItem {
     List<Source> sources = new LinkedList<Source>();
     List<Occupation> occupations = new LinkedList<Occupation>();
     List<Activity> activities = new LinkedList<Activity>();
+    List<Language> languages = new LinkedList<Language>();
     List<BiogHist> biogHists = new LinkedList<BiogHist>();
     List<SameAs> sameAsRelations = new LinkedList<SameAs>();
     List<ResourceRelation> resourceRelations = new LinkedList<ResourceRelation>();
     List<ConstellationRelation> cpfRelations = new LinkedList<ConstellationRelation>();
 
-    _relatedConstellations = new LinkedList<Integer>();
-    _relatedResources = new LinkedList<Integer>();
-
-    for (Map.Entry<String, String> entry : schema.getColumnMappings().entrySet()) {
+    for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue().toLowerCase();
 
-      for (int i = record.fromRowIndex; i < record.toRowIndex; i++) {
-        Row row = project.rows.get(i);
+      for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
+        Row row = _project.rows.get(i);
 
-        String cellValue = getCellValueForRowByColumnName(project, row, csvColumn);
+        String cellValue = getCellValueForRowByColumnName(_project, row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -91,13 +106,15 @@ public class SNACConstellationItem extends SNACUploadItem {
               int id = Integer.parseInt(cellValue);
               con.setID(id);
             } catch (NumberFormatException e) {
+              _validationErrors.add("Invalid SNAC CPF ID: [" + cellValue + "]");
             }
             continue;
 
           case "cpf type":
-            Term entityTypeTerm = createEntityTypeTerm(cellValue);
+            Term entityTypeTerm = _cache.getEntityTypeTerm(cellValue);
 
             if (entityTypeTerm == null) {
+              _validationErrors.add("Invalid CPF Type: [" + cellValue + "]");
               continue;
             }
 
@@ -106,53 +123,81 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "name entry":
-            NameEntry name = new NameEntry();
-            name.setOriginal(cellValue);
-            name.setPreferenceScore(99); // TODO: Make only the first NE preferred?
-            name.setOperation("insert");
+            NameEntry preferredName = new NameEntry();
+            preferredName.setOriginal(cellValue);
+            preferredName.setPreferenceScore(99);
+            preferredName.setOperation("insert");
 
-            nameEntries.add(name);
+            nameEntries.add(preferredName);
+
+            continue;
+
+          case "variant name entry":
+            NameEntry variantName = new NameEntry();
+            variantName.setOriginal(cellValue);
+            variantName.setPreferenceScore(0);
+            variantName.setOperation("insert");
+
+            nameEntries.add(variantName);
 
             continue;
 
           case "exist date":
             // find and add required associated exist date type in this row
-            String dateTypeColumn = schema.getReverseColumnMappings().get("exist date type");
+            String dateTypeColumn = _schema.getReverseColumnMappings().get("exist date type");
 
             if (dateTypeColumn == null) {
               logger.warn("no exist date type column found");
+              _validationErrors.add("Missing required Exist Date Type column for Exist Date: [" + cellValue + "]");
               continue;
             }
 
             String dateType =
-                getCellValueForRowByColumnName(project, row, dateTypeColumn).toLowerCase();
+                getCellValueForRowByColumnName(_project, row, dateTypeColumn);
 
             if (dateType == "") {
               logger.warn("no matching exist date type for date: [" + cellValue + "]");
+              _validationErrors.add("Invalid Exist Date Type: [" + dateType + "] for Exist Date: [" + cellValue + "]");
               continue;
             }
 
-            Term dateTypeTerm = createDateTypeTerm(dateType);
+            Term dateTypeTerm = _cache.getDateTypeTerm(dateType);
 
             if (dateTypeTerm == null) {
+              _validationErrors.add("Invalid Exist Date Type: [" + dateType + "] for Exist Date: [" + cellValue + "]");
               continue;
+            }
+
+            // find and add optional exist date descriptive note in this row
+            String dateNoteColumn = _schema.getReverseColumnMappings().get("exist date descriptive note");
+
+            String dateNote = "";
+            if (dateNoteColumn != null) {
+              dateNote = getCellValueForRowByColumnName(_project, row, dateNoteColumn);
             }
 
             SNACDate date = new SNACDate();
             date.setDate(cellValue, cellValue, dateTypeTerm);
+            date.setNote(dateNote);
             date.setOperation("insert");
 
             dates.add(date);
 
             continue;
 
+          case "exist date descriptive note": // queried alongside "exist date"
+            continue;
+
           case "exist date type": // queried alongside "exist date"
             continue;
 
           case "subject":
-            Term subjectTerm = new Term();
-            subjectTerm.setType("subject");
-            subjectTerm.setTerm(cellValue);
+            Term subjectTerm = _cache.getSubjectTerm(cellValue);
+
+            if (subjectTerm == null) {
+              _validationErrors.add("Invalid Subject: [" + cellValue + "]");
+              continue;
+            }
 
             Subject subject = new Subject();
             subject.setTerm(subjectTerm);
@@ -163,28 +208,41 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "place":
-            // Init AssociatedPlace Term
-            Term associated = new Term();
-            associated.setType("place_match"); // TODO: fix place
-            associated.setID(705); // TODO: fix place
-            associated.setTerm("AssociatedPlace"); // TODO: fix place
-
-            // Set the value of the place via a term. //
             Place place = new Place();
             place.setOriginal(cellValue);
-            place.setType(associated);
             place.setOperation("insert");
 
+            // we need to supply a place type, so use this if no other is supplied
+            String placeType = "AssociatedPlace";
+
+            // find and add optional associated place type in this row
+            String placeTypeColumn = _schema.getReverseColumnMappings().get("place type");
+            if (placeTypeColumn != null) {
+              placeType = getCellValueForRowByColumnName(_project, row, placeTypeColumn);
+            }
+
+            Term placeTypeTerm = _cache.getPlaceTypeTerm(placeType);
+
+            if (placeTypeTerm != null) {
+              place.setType(placeTypeTerm);
+            } else {
+              _validationErrors.add("Invalid Place Type: [" + placeType + "] for Place: [" + cellValue + "]");
+              continue;
+            }
+
             // find and add optional associated place role in this row
-            String placeRoleColumn = schema.getReverseColumnMappings().get("place role");
+            String placeRoleColumn = _schema.getReverseColumnMappings().get("place role");
 
             if (placeRoleColumn != null) {
-              String placeRole = getCellValueForRowByColumnName(project, row, placeRoleColumn);
+              String placeRole = getCellValueForRowByColumnName(_project, row, placeRoleColumn);
 
-              Term placeRoleTerm = createPlaceRoleTerm(placeRole);
+              Term placeRoleTerm = _cache.getPlaceRoleTerm(placeRole);
 
               if (placeRoleTerm != null) {
                 place.setRole(placeRoleTerm);
+              } else {
+                _validationErrors.add("Invalid Place Role: [" + placeRole + "] for Place: [" + cellValue + "]");
+                continue;
               }
             }
 
@@ -195,6 +253,9 @@ public class SNACConstellationItem extends SNACUploadItem {
           case "place role": // queried alongside "place"
             continue;
 
+          case "place type": // queried alongside "place"
+            continue;
+
           case "source citation":
             Source source = new Source();
 
@@ -202,17 +263,17 @@ public class SNACConstellationItem extends SNACUploadItem {
             source.setCitation(cellValue);
 
             // set url
-            String urlColumn = schema.getReverseColumnMappings().get("source citation url");
+            String urlColumn = _schema.getReverseColumnMappings().get("source citation url");
             if (urlColumn != null) {
-              String url = getCellValueForRowByColumnName(project, row, urlColumn);
+              String url = getCellValueForRowByColumnName(_project, row, urlColumn);
               source.setURI(url);
             }
 
             // set found data
             String foundColumn =
-                schema.getReverseColumnMappings().get("source citation found data");
+                _schema.getReverseColumnMappings().get("source citation found data");
             if (foundColumn != null) {
-              String foundData = getCellValueForRowByColumnName(project, row, foundColumn);
+              String foundData = getCellValueForRowByColumnName(_project, row, foundColumn);
               source.setText(foundData);
             }
 
@@ -228,9 +289,12 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "occupation":
-            Term occupationTerm = new Term();
-            occupationTerm.setType("occupation");
-            occupationTerm.setTerm(cellValue);
+            Term occupationTerm = _cache.getOccupationTerm(cellValue);
+
+            if (occupationTerm == null) {
+              _validationErrors.add("Invalid Occupation: [" + cellValue + "]");
+              continue;
+            }
 
             Occupation occupation = new Occupation();
             occupation.setTerm(occupationTerm);
@@ -241,9 +305,12 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "activity":
-            Term activityTerm = new Term();
-            activityTerm.setType("activity");
-            activityTerm.setTerm(cellValue);
+            Term activityTerm = _cache.getActivityTerm(cellValue);
+
+            if (activityTerm == null) {
+              _validationErrors.add("Invalid Activity: [" + cellValue + "]");
+              continue;
+            }
 
             Activity activity = new Activity();
             activity.setTerm(activityTerm);
@@ -253,7 +320,94 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
+          case "language code": // queried alongside script code
+            // NOTE: SNAC language type can contain any combination of language code and/or script code.
+            // Here, we check for the cases that contain a language code.
+
+            Term languageCodeTerm = _cache.getLanguageCodeTerm(cellValue);
+
+            if (languageCodeTerm == null) {
+              logger.warn("skipping unknown language code [" + cellValue + "]");
+              _validationErrors.add("Invalid Language Code: [" + cellValue + "]");
+              continue;
+            }
+
+            // initialize language code portion
+            Language lang = new Language();
+            lang.setOperation("insert");
+            lang.setLanguage(languageCodeTerm);
+
+            // find and add optional associated script code in this row
+            String scriptCodeColumn = _schema.getReverseColumnMappings().get("script code");
+
+            if (scriptCodeColumn != null) {
+              String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
+
+              if (!scriptCode.equals("")) {
+                Term scriptCodeTerm = _cache.getScriptCodeTerm(scriptCode);
+                if (scriptCodeTerm != null) {
+                  // add script code portion
+                  lang.setScript(scriptCodeTerm);
+                } else {
+                  logger.warn("omitting invalid script code [" + scriptCode + "]");
+                  _validationErrors.add("Invalid Script Code: [" + scriptCode + "] for Language Code: [" + cellValue + "]");
+                  continue;
+                }
+              } else {
+                //logger.info("no associated script code value found; skipping");
+              }
+            } else {
+              //logger.info("no associated script code column found; skipping");
+            }
+
+            languages.add(lang);
+
+            continue;
+
+          case "script code": // queried alongside language code
+            // NOTE: SNAC language type can contain any combination of language code and/or script code.
+            // Here, we check for the case when there is just a script code.
+
+            // check whether there is an associated language code in this row; if so, skip
+            String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
+
+            if (languageCodeColumn != null) {
+              String languageCode = getCellValueForRowByColumnName(_project, row, languageCodeColumn);
+
+              if (!languageCode.equals("")) {
+                // found associated language code; this scenario is handled in the "language code" section
+                //logger.info("skipping script code with associated language code");
+                continue;
+              } else {
+                //logger.info("no associated language code value found; proceeding");
+              }
+            } else {
+              //logger.info("no associated language code column found; proceeding");
+            }
+
+            Term scriptCodeTerm = _cache.getScriptCodeTerm(cellValue);
+
+            if (scriptCodeTerm == null) {
+              logger.warn("skipping unknown script code [" + cellValue + "]");
+              _validationErrors.add("Invalid Script Code: [" + cellValue + "]");
+              continue;
+            }
+
+            // initialize script code portion
+            Language script = new Language();
+            script.setOperation("insert");
+            script.setScript(scriptCodeTerm);
+
+            languages.add(script);
+
+            continue;
+
           case "bioghist":
+            if (biogHists.size() > 0) {
+              _validationErrors.add("Only one BiogHist entry is supported");
+              continue;
+            }
+
             BiogHist biogHist = new BiogHist();
             biogHist.setText(cellValue);
             biogHist.setOperation("insert");
@@ -263,45 +417,58 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "external related cpf url":
+            // external related CPF URLs are always sameAs relations
+            String defaultExternalRelatedCPFUrlType = "sameAs";
+            Term sameAsTerm = _cache.getRecordTypeTerm(defaultExternalRelatedCPFUrlType);
+
+            if (sameAsTerm == null) {
+              _validationErrors.add("Invalid Record Type: [" + defaultExternalRelatedCPFUrlType + "] for External Related CPF URL: [" + cellValue + "]");
+              continue;
+            }
+
             SameAs sameAs = new SameAs();
             sameAs.setURI(cellValue);
-            sameAs.setOperation("insert");
-
-            Term sameAsTerm = new Term();
-            sameAsTerm.setID(28225);
             sameAs.setType(sameAsTerm);
+            sameAs.setOperation("insert");
 
             sameAsRelations.add(sameAs);
 
             continue;
 
           case "snac resource id":
-            int targetResource = Integer.parseInt(cellValue);
-            _relatedResources.add(targetResource);
+            try {
+              int targetResource = Integer.parseInt(cellValue);
+              Resource resource = new Resource();
+              resource.setID(targetResource);
 
-            Resource resource = new Resource();
-            resource.setID(targetResource);
+              ResourceRelation resourceRelation = new ResourceRelation();
+              resourceRelation.setOperation("insert");
+              resourceRelation.setResource(resource);
 
-            ResourceRelation resourceRelation = new ResourceRelation();
-            resourceRelation.setOperation("insert");
-            resourceRelation.setResource(resource);
+              // find and add optional associated 'cpf to resource relation type' in this row
+              String resourceRoleColumn =
+                  _schema.getReverseColumnMappings().get("cpf to resource relation type");
 
-            // find and add optional associated 'cpf to resource relation type' in this row
-            String resourceRoleColumn =
-                schema.getReverseColumnMappings().get("cpf to resource relation type");
+              if (resourceRoleColumn != null) {
+                String resourceRole =
+                    getCellValueForRowByColumnName(_project, row, resourceRoleColumn);
 
-            if (resourceRoleColumn != null) {
-              String resourceRole =
-                  getCellValueForRowByColumnName(project, row, resourceRoleColumn);
+                Term resourceRoleTerm = _cache.getDocumentRoleTerm(resourceRole);
 
-              Term resourceRoleTerm = createResourceRoleTerm(resourceRole);
-
-              if (resourceRoleTerm != null) {
-                resourceRelation.setRole(resourceRoleTerm);
+                if (resourceRoleTerm != null) {
+                  resourceRelation.setRole(resourceRoleTerm);
+                } else {
+                  _validationErrors.add("Invalid CPF to Resource Relation Type: [" + resourceRole + "] for SNAC Resource ID: [" + cellValue + "]");
+                  continue;
+                }
               }
-            }
 
-            resourceRelations.add(resourceRelation);
+              resourceRelations.add(resourceRelation);
+              _relatedResources.add(targetResource);
+            } catch (NumberFormatException e) {
+              _validationErrors.add("Invalid Related SNAC CPF ID: [" + cellValue + "]");
+              continue;
+            }
 
             continue;
 
@@ -309,25 +476,38 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "related snac cpf id":
-            int targetConstellation = Integer.parseInt(cellValue);
-            _relatedConstellations.add(targetConstellation);
+            try {
+              int targetConstellation = Integer.parseInt(cellValue);
+              ConstellationRelation cpfRelation = new ConstellationRelation();
+              cpfRelation.setSourceConstellation(con.getID());
+              cpfRelation.setTargetConstellation(targetConstellation);
 
-            ConstellationRelation cpfRelation = new ConstellationRelation();
-            cpfRelation.setSourceConstellation(con.getID());
-            cpfRelation.setTargetConstellation(targetConstellation);
+              // Get Relation Type.
+              String cpfRelationTypeColumn =
+                  _schema.getReverseColumnMappings().get("cpf to cpf relation type");
 
-            // Get Relation Type.
-            String cpfRelationTypeColumn =
-                schema.getReverseColumnMappings().get("cpf to cpf relation type");
+              if (cpfRelationTypeColumn != null) {
+                String cpfRelationType =
+                    getCellValueForRowByColumnName(_project, row, cpfRelationTypeColumn);
 
-            if (cpfRelationTypeColumn != null) {
-              String cpfRelationType =
-                  getCellValueForRowByColumnName(project, row, cpfRelationTypeColumn);
-              Term cpfRelationTypeTerm = createRelationTypeTerm(cpfRelationType);
-              cpfRelation.setType(cpfRelationTypeTerm);
+                Term cpfRelationTypeTerm = _cache.getRelationTypeTerm(cpfRelationType);
+
+                if (cpfRelationTypeTerm != null) {
+                  cpfRelation.setType(cpfRelationTypeTerm);
+                  cpfRelation.setOperation("insert");
+                } else {
+                  _validationErrors.add("Invalid CPF to CPF Relation Type: [" + cpfRelationType + "] for Related SNAC CPF ID: [" + cellValue + "]");
+                  continue;
+                }
+              }
+
+              cpfRelations.add(cpfRelation);
+              _relatedConstellations.add(targetConstellation);
+            } catch (NumberFormatException e) {
+              _validationErrors.add("Invalid Related SNAC CPF ID: [" + cellValue + "]");
+              continue;
             }
-            cpfRelation.setOperation("insert");
-            cpfRelations.add(cpfRelation);
+
             continue;
 
           case "cpf to cpf relation type": // Queried alongside related snac cpf id
@@ -370,6 +550,7 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setPlaces(places);
     con.setOccupations(occupations);
     con.setActivities(activities);
+    con.setLanguagesUsed(languages);
     con.setBiogHists(biogHists);
     con.setSameAsRelations(sameAsRelations);
     con.setResourceRelations(resourceRelations);
@@ -382,70 +563,231 @@ public class SNACConstellationItem extends SNACUploadItem {
     logger.debug("built constellation: [" + this.toJSON() + "]");
   }
 
+  private void buildConstellationVerbatim() {
+    _cache.disableTermCache();
+    buildConstellation();
+  }
+
+  private void buildConstellationAgainstSNAC() {
+    _cache.enableTermCache();
+    buildConstellation();
+  }
+
   public String getPreviewText() {
-    String preview = "";
+    buildConstellationVerbatim();
+
+    Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacText = entry.getValue();
       String snacField = snacText.toLowerCase();
 
       switch (snacField) {
-        case "snac cpf id":
-          preview += snacText + ": " + _constellation.getID() + "\n";
-          break;
-
         case "cpf type":
           Term previewTerm = _constellation.getEntityType();
           if (previewTerm != null) {
-            preview += snacText + ": " + previewTerm.getTerm() + " (" + previewTerm.getID() + ")\n";
+            outFields.put(snacText, previewTerm.getTerm());
           }
           break;
 
         case "name entry":
-          preview += snacText + ": " + _constellation.getNameEntries() + "\n";
+          List<String> namesAndPreferenceScores = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getNameEntries().size(); i++) {
+            NameEntry name = _constellation.getNameEntries().get(i);
+            String nameAndPreferenceScore = name.toString();
+            if (name.getPreferenceScore() == 99) {
+              nameAndPreferenceScore += " (preferred)";
+            } else {
+              nameAndPreferenceScore += " (variant)";
+            }
+            namesAndPreferenceScores.add(nameAndPreferenceScore.replaceFirst("^Name Entry: ",""));
+          }
+          outFields.put(snacText, htmlOrderedList(namesAndPreferenceScores));
           break;
 
         case "exist date":
-          preview += snacText + ": " + _constellation.getDateList() + "\n";
+          List<String> dates = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getDateList().size(); i++) {
+            dates.add(_constellation.getDateList().get(i).toString().replaceFirst("^Date: ",""));
+          }
+          outFields.put(snacText, htmlOrderedList(dates));
           break;
 
         case "subject":
-          preview += snacText + ": " + _constellation.getSubjects() + "\n";
+          List<String> subjects = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getSubjects().size(); i++) {
+            subjects.add(_constellation.getSubjects().get(i).getTerm().getTerm());
+          }
+          outFields.put(snacText, htmlOrderedList(subjects));
           break;
 
         case "place":
-          preview += snacText + ": " + _constellation.getPlaces() + "\n";
-          // TODO: Display place_role
+          List<String> placesAndRoles = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getPlaces().size(); i++) {
+            Place place = _constellation.getPlaces().get(i);
+            // assumes we are not working with geo terms
+            String placeAndRoleAndType = place.toString();
+            if (place.getRole() != null) {
+              placeAndRoleAndType += " (" + place.getRole().getTerm() + ")";
+            }
+            if (place.getType() != null) {
+              placeAndRoleAndType += " (" + place.getType().getTerm() + ")";
+            }
+            placesAndRoles.add(placeAndRoleAndType.replaceFirst("^Place: ",""));
+          }
+          outFields.put(snacText, htmlOrderedList(placesAndRoles));
           break;
 
         case "occupation":
-          preview += snacText + ": " + _constellation.getOccupations() + "\n";
+          List<String> occupations = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getOccupations().size(); i++) {
+            occupations.add(_constellation.getOccupations().get(i).getTerm().getTerm());
+          }
+          outFields.put(snacText, htmlOrderedList(occupations));
           break;
 
         case "activity":
-          preview += snacText + ": " + _constellation.getActivities() + "\n";
+          List<String> activities = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getActivities().size(); i++) {
+            activities.add(_constellation.getActivities().get(i).getTerm().getTerm());
+          }
+          outFields.put(snacText, htmlOrderedList(activities));
+          break;
+
+        case "language code":
+          List<String> langList = new ArrayList<>();
+
+          for (int i = 0; i < _constellation.getLanguagesUsed().size(); i++) {
+            Term lang = _constellation.getLanguagesUsed().get(i).getLanguage();
+
+            String langFull = "";
+
+            if (lang != null) {
+              String langCode = lang.getTerm();
+              String langDesc = lang.getDescription();
+
+              langFull = langCode;
+              if (!langDesc.equals("")) {
+                langFull += " (" + langDesc + ")";
+              }
+            }
+
+            Term script = _constellation.getLanguagesUsed().get(i).getScript();
+
+            String scriptFull = "";
+
+            if (script != null) {
+              String scriptCode = script.getTerm();
+              String scriptDesc = script.getDescription();
+
+              scriptFull = scriptCode;
+              if (!scriptDesc.equals("")) {
+                scriptFull += " (" + scriptDesc + ")";
+              }
+            }
+
+            if (langFull.equals("")) {
+              if (scriptFull.equals("")) {
+                // no language or script?  shouldn't happen
+              } else {
+                langList.add("Script: " + scriptFull);
+              }
+            } else {
+              if (scriptFull.equals("")) {
+                langList.add("Language: " + langFull);
+              } else {
+                langList.add("Language: " + langFull + " / Script: " + scriptFull);
+              }
+            }
+          }
+
+          if (langList.size() > 0) {
+            outFields.put(snacText, htmlOrderedList(langList));
+          }
+
           break;
 
         case "bioghist":
-          preview += snacText + ": " + _constellation.getBiogHists() + "\n";
+          List<String> bioghists = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getBiogHists().size(); i++) {
+            bioghists.add(_constellation.getBiogHists().get(i).getText());
+          }
+          outFields.put(snacText, htmlOrderedList(bioghists));
           break;
 
         case "source citation":
-          preview += snacText + ": " + _constellation.getSources() + "\n";
+          List<String> sources = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getSources().size(); i++) {
+            Source source = _constellation.getSources().get(i);
+            String sourceAndFoundData = source.getCitation();
+            if (source.getURI() != null) {
+              sourceAndFoundData += " (" + htmlLink(source.getURI(), source.getURI()) + ")";
+            }
+            if (source.getText() != null) {
+              sourceAndFoundData += " (Found Data: " + source.getText() + ")";
+            }
+            sources.add(sourceAndFoundData);
+          }
+          outFields.put(snacText, htmlOrderedList(sources));
           break;
 
         case "external related cpf url":
-          preview += snacText + ": " + _constellation.getSameAsRelations() + "\n";
+          List<String> sameAsURIs = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getSameAsRelations().size(); i++) {
+            SameAs sameAs = _constellation.getSameAsRelations().get(i);
+            sameAsURIs.add(htmlLink(sameAs.getURI(), sameAs.getURI()));
+          }
+          outFields.put(snacText, htmlOrderedList(sameAsURIs));
           break;
 
         case "related snac cpf id":
-          preview += snacText + ": " + _constellation.getRelations() + "\n";
+          List<String> relations = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getRelations().size(); i++) {
+            ConstellationRelation relation = _constellation.getRelations().get(i);
+            int relationID = relation.getTargetConstellation();
+            String relationAndType = htmlLink(_client.urlForConstellationID(relationID), Integer.toString(relationID));
+            if (relation.getType() != null) {
+              relationAndType += " (" + relation.getType().getTerm() + ")";
+            }
+            relations.add(relationAndType);
+          }
+          outFields.put(snacText, htmlOrderedList(relations));
           break;
 
-          // TODO: Add Resource ID, cpf to resource relation type.
-          // TODO: Add Related CPFs
+        case "snac resource id":
+          List<String> resourceRelations = new ArrayList<String>();
+          for (int i = 0; i < _constellation.getResourceRelations().size(); i++) {
+            ResourceRelation resourceRelation = _constellation.getResourceRelations().get(i);
+            int resourceRelationID = resourceRelation.getResource().getID();
+            String resourceRelationAndRole = htmlLink(_client.urlForResourceID(resourceRelationID), Integer.toString(resourceRelationID));
+            if (resourceRelation.getRole() != null) {
+              resourceRelationAndRole += " (" + resourceRelation.getRole().getTerm() + ")";
+            }
+            resourceRelations.add(resourceRelationAndRole);
+          }
+          outFields.put(snacText, htmlOrderedList(resourceRelations));
+          break;
       }
     }
+
+    if (_constellation.getOperation() == "update") {
+      outFields.put("*** Operation ***", "Edit Constellation with ID: " + 
+        htmlLink(_client.urlForConstellationID(_constellation.getID()), Integer.toString(_constellation.getID())));
+    } else {
+      outFields.put("*** Operation ***", "Insert new Constellation");
+    }
+
+    String preview = "";
+    // FIXME: output in predetermined order (not just alphabetical)?
+    for (String key : outFields.keySet()) {
+      String out = outFields.get(key);
+      if (out == null || out.equals("")) {
+        continue;
+      }
+      preview += htmlTableRow(htmlTableColumnField(key) + htmlTableColumnValue(out));
+      //logger.info(key + " => " + out);
+    }
+    preview = htmlTable(preview);
 
     return preview;
   }
@@ -493,20 +835,38 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     if (relationErrors.size() > 0) {
       String errMsg = String.join("\n\n", relationErrors);
-      logger.warn("constellation upload error: [" + errMsg + "]");
+      logger.warn("constellation validation error: [" + errMsg + "]");
       return new SNACAPIResponse(this._client, errMsg);
     }
 
-    return null;
+    return new SNACAPIResponse(this._client, "success");
+  }
+
+  public SNACAPIResponse performValidation() {
+    buildConstellationAgainstSNAC();
+
+    logger.info("validating constellation data...");
+
+    // return error if validation errors were encountered earlier
+    if (_validationErrors.size() > 0) {
+      for (int i = 0; i < _validationErrors.size(); i++) {
+        _validationErrors.set(i, "* " + _validationErrors.get(i));
+      }
+      String errMsg = String.join("\n", _validationErrors);
+      return new SNACAPIResponse(this._client, errMsg);
+    }
+
+    // verify any related IDs
+    return verifyRelatedIDs();
   }
 
   public SNACAPIResponse performUpload() {
     logger.info("preparing to upload constellation to SNAC...");
 
-    // verify any related IDs before uploading
-    SNACAPIResponse verifyErr = verifyRelatedIDs();
-    if (verifyErr != null) {
-      return verifyErr;
+    // validate constellation data before uploading
+    SNACAPIResponse validationError = performValidation();
+    if (validationError != null && !validationError.getResult().equals("success")) {
+      return validationError;
     }
 
     // so far so good, proceed with upload
@@ -561,363 +921,4 @@ public class SNACConstellationItem extends SNACUploadItem {
     return updateResponse;
   }
 
-  private Term createEntityTypeTerm(String entityType) {
-    String term;
-    int id;
-
-    switch (entityType.toLowerCase()) {
-      case "person":
-        term = "person";
-        id = 700;
-        break;
-
-      case "family":
-        term = "family";
-        id = 699;
-        break;
-
-      case "corporatebody":
-        term = "corporateBody";
-        id = 698;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled entity type: [" + entityType + "]");
-        return null;
-    }
-
-    Term t = new Term();
-    t.setType("entity_type");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
-
-  private Term createDateTypeTerm(String dateType) {
-    String term;
-    int id;
-
-    switch (dateType.toLowerCase()) {
-      case "active":
-        term = "Active";
-        id = 688;
-        break;
-
-      case "death":
-        term = "Death";
-        id = 690;
-        break;
-
-      case "birth":
-        term = "Birth";
-        id = 689;
-        break;
-
-      case "suspiciousdate":
-        term = "SuspiciousDate";
-        id = 691;
-        break;
-
-      case "establishment":
-        term = "Establishment";
-        id = 400484;
-        break;
-
-      case "disestablishment":
-        term = "Disestablishment";
-        id = 400485;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled date type: [" + dateType + "]");
-        return null;
-    }
-
-    Term t = new Term();
-    t.setType("date_type");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
-
-  private Term createPlaceRoleTerm(String placeRole) {
-    String term;
-    int id;
-
-    switch (placeRole.toLowerCase()) {
-      case "birth":
-        term = "Birth";
-        id = 400238;
-        break;
-
-      case "death":
-        term = "Death";
-        id = 400239;
-        break;
-
-      case "residence":
-        term = "Residence";
-        id = 400241;
-        break;
-
-      case "work":
-        term = "Work";
-        id = 400625;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled place role: [" + placeRole + "]");
-        return null;
-    }
-
-    Term t = new Term();
-    t.setType("place_role");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
-
-  private Term createResourceRoleTerm(String resourceRole) {
-    String term;
-    int id;
-
-    switch (resourceRole.toLowerCase()) {
-      case "creatorof":
-        term = "creatorOf";
-        id = 692;
-        break;
-
-      case "referencedin":
-        term = "referencedIn";
-        id = 693;
-        break;
-
-      case "editorof":
-        term = "editorOf";
-        id = 694;
-        break;
-
-      case "contributorof":
-        term = "contributorOf";
-        id = 695;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled cpf to resource relation type: [" + resourceRole + "]");
-        return null;
-    }
-
-    Term t = new Term();
-    t.setType("document_role");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
-
-  private Term createRelationTypeTerm(String relationType) {
-    String term;
-    int id;
-    switch (relationType.toLowerCase()) {
-      case "acquaintanceof":
-        term = "acquaintanceOf";
-        id = 28227;
-        break;
-      case "almamaterof":
-        term = "almaMaterOf";
-        id = 28229;
-        break;
-      case "alumnusoralumnaof":
-        term = "alumnusOrAlumnaOf";
-        id = 28230;
-        break;
-      case "ancestorof":
-        term = "ancestorOf";
-        id = 28232;
-        break;
-      case "associatedwith":
-        term = "associatedWith";
-        id = 28234;
-        break;
-      case "auntoruncleof":
-        term = "auntOrUncleOf";
-        id = 28236;
-        break;
-      case "biological parent of":
-        term = "biological parent of";
-        id = 28237;
-        break;
-      case "child-in-law of":
-        term = "child-in-law of";
-        id = 28238;
-        break;
-      case "childof":
-        term = "childOf";
-        id = 28239;
-        break;
-      case "conferredhonorsto":
-        term = "conferredHonorsTo";
-        id = 28240;
-        break;
-      case "correspondedwith":
-        term = "correspondedWith";
-        id = 28243;
-        break;
-      case "createdby":
-        term = "createdBy";
-        id = 28245;
-        break;
-      case "creatorof":
-        term = "creatorOf";
-        id = 28246;
-        break;
-      case "descendantof":
-        term = "descendantOf";
-        id = 28248;
-        break;
-      case "employeeof":
-        term = "employeeOf";
-        id = 28250;
-        break;
-      case "employerof":
-        term = "employerOf";
-        id = 28251;
-        break;
-      case "foundedby":
-        term = "foundedBy";
-        id = 28253;
-        break;
-      case "founderof":
-        term = "founderOf";
-        id = 28254;
-        break;
-      case "grandchildof":
-        term = "grandchildOf";
-        id = 28255;
-        break;
-      case "grandparentof":
-        term = "grandparentOf";
-        id = 28256;
-        break;
-      case "hashonorarymember":
-        term = "hasHonoraryMember";
-        id = 28260;
-        break;
-      case "hasmember":
-        term = "hasMember";
-        id = 28261;
-        break;
-      case "hierarchical-child":
-        term = "hierarchical-child";
-        id = 28263;
-        break;
-      case "hierarchical-parent":
-        term = "hierarchical-parent";
-        id = 28264;
-        break;
-      case "honorarymemberof":
-        term = "honoraryMemberOf";
-        id = 28265;
-        break;
-      case "honoredby":
-        term = "honoredBy";
-        id = 28266;
-        break;
-      case "investigatedby":
-        term = "investigatedBy";
-        id = 28267;
-        break;
-      case "investigatorof":
-        term = "investigatorOf";
-        id = 28268;
-        break;
-      case "leaderof":
-        term = "leaderOf";
-        id = 28269;
-        break;
-      case "memberof":
-        term = "memberOf";
-        id = 28271;
-        break;
-      case "nieceornephewof":
-        term = "nieceOrNephewOf";
-        id = 28272;
-        break;
-      case "ownerof":
-        term = "ownerOf";
-        id = 28274;
-        break;
-      case "parent-in-law of":
-        term = "parent-in-law of";
-        id = 28275;
-        break;
-      case "parentof":
-        term = "parentOf";
-        id = 28276;
-        break;
-      case "participantin":
-        term = "participantIn";
-        id = 28277;
-        break;
-      case "politicalopponentof":
-        term = "politicalOpponentOf";
-        id = 28279;
-        break;
-      case "predecessorof":
-        term = "predecessorOf";
-        id = 28280;
-        break;
-      case "relativeof":
-        term = "relativeOf";
-        id = 28281;
-        break;
-      case "sibling-in-law of":
-        term = "sibling-in-law of";
-        id = 28282;
-        break;
-      case "sibling of":
-        term = "sibling of";
-        id = 28283;
-        break;
-      case "spouseof":
-        term = "spouseOf";
-        id = 28284;
-        break;
-      case "subordinateof":
-        term = "subordinateOf";
-        id = 28290;
-        break;
-      case "sucessorof":
-        term = "sucessorOf";
-        id = 28291;
-        break;
-      case "hasfamilyrelationto":
-        term = "hasFamilyRelationTo";
-        id = 400456;
-        break;
-      case "issuccessorof":
-        term = "isSuccessorOf";
-        id = 400459;
-        break;
-      case "ownedby":
-        term = "ownedBy";
-        id = 400478;
-        break;
-
-      default:
-        logger.warn("invalid/unhandled cpf to cpf relation type: [" + relationType + "]");
-        term = "associatedWith";
-        id = 28234;
-    }
-
-    Term t = new Term();
-    t.setType("relation_type");
-    t.setTerm(term);
-    t.setID(id);
-
-    return t;
-  }
 }

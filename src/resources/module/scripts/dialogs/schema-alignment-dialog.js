@@ -35,8 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 FIXME ISSUES:
 
-* discard does not re-render preview (double-check this is still an issue)
-* preview called multiple times per change
+* editing cells does not re-render preview: added a "reload preview" button as a workaround
 
 */
 
@@ -48,7 +47,7 @@ SNACSchemaAlignment._cleanName = function(s) {
 
 var SNACSchemaAlignmentDialog = {
    _ignoreChanges: true,
-   _debug: false
+   _debug: true
 };
 
 var snacDebug = function(x) {
@@ -61,42 +60,192 @@ SNACSchemaAlignmentDialog.getSNACModel = function() {
    snacDebug(`***** [ getSNACModel ] *****`);
 
    this.SNACResourceModel = [
-      { name: "SNAC Resource ID", required: false, tooltip:  "SNAC identifier for Resource Description. Leave blank if Resource Description is NOT in SNAC." },
-      { name: "Resource Type",    required: true,  tooltip:  "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource" },
-      { name: "Title",            required: true,  tooltip:  "Title of a resource (that may or may not include dates) (e.g. Jacob Miller Papers, 1809-1882)" },
-      { name: "Resource URL",     required: true,  tooltip:  "URL of the local Resource Description" },
-      { name: "Abstract",         required: false, tooltip:  "Brief prose abstract of scope and contents of the resource" },
-      { name: "Extent",           required: false, tooltip:  "Extent of the resource" },
-      { name: "Date",             required: false, tooltip:  "Date or dates of the resource (YYYY or YYYY-YYYY)" },
-      // { name: "Language",                   required: false, tooltip:  "ISO 639 Language code. E.g. 'eng', 'ger', 'jpn'" },
-      { name: "Holding Repository SNAC ID", required: true,  tooltip:  "SNAC identifier for the holding repository description. The holding repository must be created in SNAC before adding Resource Descriptions." }
+      {
+         name:     "SNAC Resource ID",
+         required: false,
+         tooltip:  "SNAC identifier for Resource Description.  Leave blank if Resource Description is NOT in SNAC."
+      },
+      {
+         name:     "Resource Type",
+         required: true,
+         tooltip:  "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource"
+      },
+      {
+         name:     "Title",
+         required: true,
+         tooltip:  "Title of a resource (that may or may not include dates) (e.g. Jacob Miller Papers, 1809-1882)"
+      },
+      {
+         name:     "Resource URL",
+         required: true,
+         tooltip:  "URL of the local Resource Description"
+      },
+      {
+         name:     "Abstract",
+         required: false,
+         tooltip:  "Brief prose abstract of scope and contents of the resource"
+      },
+      {
+         name:     "Extent",
+         required: false,
+         tooltip:  "Extent of the resource"
+      },
+      {
+         name:     "Date",
+         required: false,
+         tooltip:  "Date or dates of the resource (YYYY or YYYY-YYYY)"
+      },
+      {
+         name:     "Language Code",
+         required: false,
+         tooltip:  "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Repeatable in relation to resource."
+      },
+      {
+         name:     "Script Code",
+         required: false,
+         tooltip:  "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Repeatable in relation to resource."
+      },
+      {
+         name:     "Holding Repository SNAC ID",
+         required: true,
+         tooltip:  "SNAC identifier for the holding repository description.  The holding repository must be created in SNAC before adding Resource Descriptions."
+      }
    ];
 
    this.SNACConstellationModel = [
-      { name: "CPF Type",        required: true, tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
-      { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
-      { name: "Name Entry",      required: false, tooltip:  "Preferred Name Entry of the CPF entity." },
-      { name: "Exist Date",      required: false, tooltip:  "Exist Date or Dates of the CPF entity." },
-      { name: "Exist Date Type", required: false, tooltip:  "Type of Exist Date. The following values may be used: Active, Birth, Death, Establishment, Disestablishment" },
-      { name: "Subject",         required: false, tooltip:  "Subject term associated with the CPF entity. Repeatable in relation to entity. " },
-      { name: "Place",           required: false, tooltip:  "Place name associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "Place Role",      required: false, tooltip:  "Role of the place in relation to the CPF entity. The following values may be used: Birth, Death, Residence" },
-      { name: "Occupation",      required: false, tooltip:  "Occupation term associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "Activity",        required: false, tooltip:  "Activity term associated with the CPF entity. Repeatable in relation to entity." },
-      { name: "BiogHist",        required: false, tooltip:  "Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF. Biography or History note associated with the CPF entity. By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF." },
-      { name: "External Related CPF URL", required: false, tooltip:  "URL to a description of the CPF entity in an external authority. Such links are limited to those found in the approved list linked above. Repeatable in relation to entity" },
-      { name: "Source Citation", required: false, tooltip:  "Text citation for a source used in describing the CPF entity." },
-      { name: "Source Citation URL",     required: false, tooltip:  "URL, if available, for the Source Citation." },
-      { name: "Source Citation Found Data",   required: false, tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity." },
+      {
+         name:     "CPF Type",
+         required: true,
+         tooltip:  "Type of CPF entity.  Possible values are: corporateBody, person, family"
+      },
+      {
+         name:     "SNAC CPF ID",
+         required: false,
+         tooltip:  "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC."
+      },
+      {
+         name:     "Name Entry",
+         required: false,
+         tooltip:  "Preferred Name Entry of the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Variant Name Entry",
+         required: false,
+         tooltip:  "Variant Name Entry of the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Exist Date",
+         required: false,
+         tooltip:  "Exist Date or Dates of the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Exist Date Type",
+         required: false,
+         tooltip:  "Type of Exist Date.  Repeatable in relation to entity.  The following values may be used: Active, Birth, Death, Establishment, Disestablishment"
+      },
+      {
+         name:     "Exist Date Descriptive Note",
+         required: false,
+         tooltip:  "Descriptive Note of Exist Date.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Subject",
+         required: false,
+         tooltip:  "Subject term associated with the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Place",
+         required: false,
+         tooltip:  "Place name associated with the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Place Role",
+         required: false,
+         tooltip:  "Role of the place in relation to the CPF entity.  The following values may be used: Birth, Death, Residence, Citizenship, Work"
+      },
+      {
+         name:     "Place Type",
+         required: false,
+         tooltip:  "Type of the place in relation to the CPF entity.  The following values may be used: AssociatedPlace, Address.  Defaults to AssociatedPlace if not supplied."
+      },
+      {
+         name:     "Occupation",
+         required: false,
+         tooltip:  "Occupation term associated with the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Activity",
+         required: false,
+         tooltip:  "Activity term associated with the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Language Code",
+         required: false,
+         tooltip:  "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Script Code",
+         required: false,
+         tooltip:  "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Repeatable in relation to entity."
+      },
+      {
+         name:     "BiogHist",
+         required: false,
+         tooltip:  "Biography or History note associated with the CPF entity.  By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF.  Repeatable in relation to entity."
+      },
+      {
+         name:     "External Related CPF URL",
+         required: false,
+         tooltip:  "URL to a description of the CPF entity in an external authority.  Such links are limited to those found in the approved list linked above.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Source Citation",
+         required: false,
+         tooltip:  "Text citation for a source used in describing the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Source Citation URL",
+         required: false,
+         tooltip:  "URL, if available, for the Source Citation.  Repeatable in relation to entity."
+      },
+      {
+         name:     "Source Citation Found Data",
+         required: false,
+         tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity.  Repeatable in relation to entity."
+      }
    ];
 
-      this.SNACRelationModel = [
-      { name: "CPF Type",        required: true, tooltip:  "Type of CPF entity. Possible values are: corporateBody, person, family" },
-      { name: "SNAC CPF ID",     required: false, tooltip:  "SNAC identifier for the CPF entity. Leave blank if the CPF is NOT in SNAC." },
-      { name: "CPF to CPF Relation Type",   required: false, tooltip:  "Nature of the relation of the CPF entity with the related CPF entity. The following values may be used: associatedWith, correspondedWith" },
-      { name: "Related SNAC CPF ID",   required: false, tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity. Repeatable in relation to entity." },
-      { name: "CPF to Resource Relation Type",   required: false, tooltip:  "Role of the CPF entity in relation to the Resource. The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"},
-      { name: "SNAC Resource ID",     required: false, tooltip:  "SNAC ID for a related Resource in SNAC." }  //TODO: SNAC RESOURCE ID rename
+   this.SNACRelationModel = [
+      {
+         name:     "CPF Type",
+         required: true,
+         tooltip:  "Type of CPF entity.  Possible values are: corporateBody, person, family"
+      },
+      {
+         name:     "SNAC CPF ID",
+         required: false,
+         tooltip:  "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC."
+      },
+      {
+         name:     "CPF to CPF Relation Type",
+         required: false,
+         tooltip:  "Nature of the relation of the CPF entity with the related CPF entity.  Repeatable in relation to entity.  The following values may be used: associatedWith, correspondedWith"
+      },
+      {
+         name:     "Related SNAC CPF ID",
+         required: false,
+         tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity.  Repeatable in relation to entity."
+      },
+      {
+         name:     "CPF to Resource Relation Type",
+         required: false,
+         tooltip:  "Role of the CPF entity in relation to the Resource.  Repeatable in relation to entity.  The following values may be used: contributorOf, creatorOf, editorOf, referencedIn"
+      },
+      {
+         name:     "SNAC Resource ID",  //TODO: SNAC RESOURCE ID rename
+         required: false,
+         tooltip:  "SNAC ID for a related Resource in SNAC.  Repeatable in relation to entity."
+      }
    ];
 
    this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);
@@ -219,7 +368,7 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
 
    $('.main-view-panel-tabs-snac').hide();
 
-   $('.main-view-panel-tab-header').click(function(e) {
+   $('.main-view-panel-tab-header').on('click', function(e) {
       var targetTab = $(this).attr('href');
       self.switchTab(targetTab);
       e.preventDefault();
@@ -232,19 +381,18 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    var schemaElmts = this._schemaElmts = DOM.bind(schemaTab);
    schemaElmts.dialogExplanation.text($.i18n('snac-schema/dialog-explanation'));
    schemaElmts.dialogExplanation2.html($.i18n('snac-schema/dialog-explanation2'));
-   schemaElmts.extensionVersion.text($.i18n('snac-schema/extension-version'));
    schemaElmts.saveButton
       .text($.i18n('snac-schema/save-button'))
       .attr('title', $.i18n('snac-schema/save-schema-alt'))
       .prop('disabled', true)
       .addClass('disabled')
-      .click(function() { self._save(); });
+      .on('click', function() { self._save(); });
    schemaElmts.discardButton
       .text($.i18n('snac-schema/discard-button'))
       .attr('title', $.i18n('snac-schema/discard-schema-changes-alt'))
       .prop('disabled', true)
       .addClass('disabled')
-      .click(function() { self._discardChanges(); });
+      .on('click', function() { self._discardChanges(); });
 
    this.snacPrefix = "http://www.snaccooperative.org/entity/"; // hardcoded for now
 
@@ -323,7 +471,11 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
    */
    var previewTab = $(DOM.loadHTML("snac", "scripts/preview-tab.html")).appendTo(this._previewPanel);
    var previewElmts = this._previewElmts = DOM.bind(previewTab);
+   previewElmts.reloadPreviewButton
+      .text($.i18n('snac-schema/reload-preview-button'))
+      .on('click', function() { self.preview(); });
    this.updateItemPreviewText("item", 0, 0);
+
    //previewElmts.invalidSchemaWarningPreview.text($.i18n('snac-schema/invalid-schema-warning-preview'));
 
    this._previewPanes = $('.schema-alignment-dialog-preview');
@@ -345,7 +497,7 @@ SNACSchemaAlignmentDialog.setUpTabs = function() {
 SNACSchemaAlignmentDialog.addResourceTable = function (schema) {
    snacDebug(`***** [ addResourceTable ] *****`);
 
-   snacDebug(`addResourceTable(): schema: [${JSON.stringify(schema)}]`);
+   //snacDebug(`addResourceTable(): schema: [${JSON.stringify(schema)}]`);
 
    var columns = theProject.columnModel.columns;
    var SNACcolumns = this.SNACResourceNames;
@@ -356,7 +508,7 @@ SNACSchemaAlignmentDialog.addResourceTable = function (schema) {
       columnMappings = schema.columnMappings;
    }
 
-   snacDebug(`addResourceTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
+   //snacDebug(`addResourceTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
 
    var myTableDiv = document.getElementById('myDynamicTableResource');
    if (myTableDiv == null){
@@ -441,7 +593,7 @@ SNACSchemaAlignmentDialog.addResourceTable = function (schema) {
 SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
    snacDebug(`***** [ addConstellationTable ] *****`);
 
-   snacDebug(`addConstellationTable(): schema: [${JSON.stringify(schema)}]`);
+   //snacDebug(`addConstellationTable(): schema: [${JSON.stringify(schema)}]`);
 
    var columns = theProject.columnModel.columns;
    var SNACcolumns = this.SNACConstellationNames;
@@ -452,7 +604,7 @@ SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
       columnMappings = schema.columnMappings;
    }
 
-   snacDebug(`addConstellationTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
+   //snacDebug(`addConstellationTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
 
    var myTableDiv = document.getElementById('myDynamicTableConstellation');
    if (myTableDiv == null){
@@ -537,7 +689,7 @@ SNACSchemaAlignmentDialog.addConstellationTable = function (schema) {
 SNACSchemaAlignmentDialog.addRelationTable = function (schema) {
    snacDebug(`***** [ addRelationTable ] *****`);
 
-   snacDebug(`addRelationTable(): schema: [${JSON.stringify(schema)}]`);
+   //snacDebug(`addRelationTable(): schema: [${JSON.stringify(schema)}]`);
 
    var columns = theProject.columnModel.columns;
    var SNACcolumns = this.SNACRelationNames;
@@ -548,7 +700,7 @@ SNACSchemaAlignmentDialog.addRelationTable = function (schema) {
       columnMappings = schema.columnMappings;
    }
 
-   snacDebug(`addRelationTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
+   //snacDebug(`addRelationTable(): columnMappings: [${JSON.stringify(columnMappings)}]`);
 
    var myTableDiv = document.getElementById('myDynamicTableRelation');
    if (myTableDiv == null){
@@ -739,7 +891,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
   var self = this;
 
-  snacDebug(`updateColumns(): schema: [${JSON.stringify(schema)}]`);
+  //snacDebug(`updateColumns(): schema: [${JSON.stringify(schema)}]`);
 
   var columns = theProject.columnModel.columns;
 
@@ -771,7 +923,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
   this.SNACResourceModel.forEach((resource) => {
     var cell = this._createDraggableColumn(resource.name, false);
     cell.addClass("dragResource");
-    cell.val(resource.name).change();
+    cell.val(resource.name).trigger('change');
     this._refcolumnAreaResource.append(cell);
   });
   $(".dragResource").addClass("tooltip");
@@ -812,7 +964,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
   this.SNACConstellationModel.forEach((field) => {
     var cell = this._createDraggableColumn(field.name, false);
     cell.addClass("dragConstellation");
-    cell.val(field.name).change();
+    cell.val(field.name).trigger('change');
     this._refcolumnAreaConestellation.append(cell);
   });
 
@@ -856,7 +1008,7 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
   this.SNACRelationModel.forEach((field) => {
     var cell = this._createDraggableColumn(field.name, false);
     cell.addClass("dragRelation");
-    cell.val(field.name).change();
+    cell.val(field.name).trigger('change');
     this._refcolumnAreaConestellation.append(cell);
   });
 
@@ -959,9 +1111,17 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
 SNACSchemaAlignmentDialog.switchTab = function(targetTab) {
    snacDebug(`***** [ switchTab ] *****`);
+
    $('.main-view-panel-tab').hide();
    $('.main-view-panel-tab-header').removeClass('active');
    $('.main-view-panel-tab-header[href="'+targetTab+'"]').addClass('active');
+
+/*
+   if (targetTab === "#snac-preview-panel") {
+     this.preview();
+   }
+*/
+
    $(targetTab).show();
    resizeAll();
    var panelHeight = this._viewPanel.height();
@@ -979,11 +1139,13 @@ SNACSchemaAlignmentDialog.switchTab = function(targetTab) {
 
 SNACSchemaAlignmentDialog.isSetUp = function() {
    snacDebug(`***** [ isSetUp ] *****`);
+
    return $('#snac-schema-panel').length !== 0;
 }
 
 SNACSchemaAlignmentDialog.launch = function(onDone) {
    snacDebug(`***** [ launch ] *****`);
+
    this._onDone = onDone;
    this._hasUnsavedChanges = false;
 
@@ -1003,10 +1165,11 @@ var beforeUnload = function(e) {
    }
 };
 
-$(window).bind('beforeunload', beforeUnload);
+$(window).on('beforeunload', beforeUnload);
 
 SNACSchemaAlignmentDialog._reset = function(schema) {
    snacDebug(`***** [ _reset ] *****`);
+
    this._ignoreChanges = true;
 
    this._originalSchema = schema || { schemaType: "", idColumn: "", columnMappings: {} };
@@ -1028,6 +1191,7 @@ SNACSchemaAlignmentDialog._reset = function(schema) {
 
 SNACSchemaAlignmentDialog._save = function(onDone) {
    snacDebug(`***** [ _save ] *****`);
+
    var self = this;
    var schema = this.getJSON();
 
@@ -1063,6 +1227,7 @@ SNACSchemaAlignmentDialog._save = function(onDone) {
 
 SNACSchemaAlignmentDialog._discardChanges = function() {
    snacDebug(`***** [ _discardChanges ] *****`);
+
    this._reset(theProject.overlayModels.snacSchema);
    this._changesCleared();
    this.evaluateCurrentSchema(false);
@@ -1070,6 +1235,7 @@ SNACSchemaAlignmentDialog._discardChanges = function() {
 
 SNACSchemaAlignmentDialog._changesCleared = function() {
    snacDebug(`***** [ _changesCleared ] *****`);
+
    this._hasUnsavedChanges = false;
    this._unsavedIndicator.hide();
    this._schemaElmts.saveButton
@@ -1083,6 +1249,7 @@ SNACSchemaAlignmentDialog._changesCleared = function() {
 //format cells for columns
 SNACSchemaAlignmentDialog._createDraggableColumn = function(name, reconciled, org) {
    snacDebug(`***** [ _createDraggableColumn ] *****`);
+
    var cell = $('<div></div>').addClass('wbs-draggable-column').text(name);
    if (reconciled) {
       cell.addClass('wbs-reconciled-column');
@@ -1098,7 +1265,8 @@ SNACSchemaAlignmentDialog._createDraggableColumn = function(name, reconciled, or
 }
 
 SNACSchemaAlignmentDialog.getJSON = function() {
-   snacDebug(`***** [ _getJSON ] *****`);
+   snacDebug(`***** [ getJSON ] *****`);
+
    var schemaType = "unknown";
    var idColumn = "";
    var dropDownColumn;
@@ -1150,14 +1318,14 @@ SNACSchemaAlignmentDialog.schemaIsValid = function() {
    } else if (schema.schemaType == "resource") {
       required = this.SNACResourceNamesRequired;
    } else {
-      required = this.SNACRelationNamesRequired; // TODO: Replace with a validateRelations() function
+      required = this.SNACRelationNamesRequired;
    }
 
    var warnings = [];
    var mappedColumns = Object.values(schema.columnMappings);
 
-   snacDebug(`mappedColumns:`);
-   snacDebug(mappedColumns);
+   //snacDebug(`mappedColumns:`);
+   //snacDebug(mappedColumns);
 
    // ensure each required column is present in the list
    for (var i = 0; i < required.length; i++) {
@@ -1179,6 +1347,9 @@ SNACSchemaAlignmentDialog.schemaIsValid = function() {
 SNACSchemaAlignmentDialog.evaluateCurrentSchema = function(enableButtons) {
    // disable save button if schema is not valid
 
+    snacDebug(`evaluateCurrentSchema() calling preview()`);
+    this.preview();
+
    if (!this.schemaIsValid()) {
 //      this.issueSpinner.hide();
 //      this.previewSpinner.hide();
@@ -1187,14 +1358,13 @@ SNACSchemaAlignmentDialog.evaluateCurrentSchema = function(enableButtons) {
          .prop('disabled', true)
          .addClass('disabled');
    } else {
-      snacDebug(`evaluateCurrentSchema() calling preview()`);
-      this.preview();
-
       if (enableButtons) {
          this._schemaElmts.saveButton
             .prop('disabled', false)
             .removeClass('disabled');
       }
+
+      this._updateWarnings([], 0);
    }
 
    if (enableButtons) {
@@ -1207,6 +1377,7 @@ SNACSchemaAlignmentDialog.evaluateCurrentSchema = function(enableButtons) {
 // Update everything when schema has changed
 SNACSchemaAlignmentDialog._hasChanged = function() {
    snacDebug(`***** [ _hasChanged ] *****`);
+
    if (this._ignoreChanges) {
       snacDebug(`_hasChanged(): ignoring changes`);
       return;
@@ -1224,10 +1395,12 @@ SNACSchemaAlignmentDialog.updateItemPreviewText = function(itemType, itemCount, 
          .replace('{preview_count}', previewCount)
          .replace('{item_type}', itemType)
          .replace('{item_count}', itemCount));
+   this._previewElmts.previewNote.html($.i18n('snac-schema/preview-note'));
 }
 
 SNACSchemaAlignmentDialog.preview = function() {
    snacDebug(`***** [ preview ] *****`);
+
    var self = this;
 
    $('.invalid-schema-warning').hide();
@@ -1247,7 +1420,7 @@ SNACSchemaAlignmentDialog.preview = function() {
       function(data) {
 //         self.issueSpinner.hide();
          self.previewSpinner.hide();
-         snacDebug(`preview(): SUCCESS  data = [${JSON.stringify(data)}]`);
+         //snacDebug(`preview(): SUCCESS  data = [${JSON.stringify(data)}]`);
 
          if ("items_preview" in data) {
             var previewContainer = self._previewPanes[0];
@@ -1262,7 +1435,9 @@ SNACSchemaAlignmentDialog.preview = function() {
             self.updateItemPreviewText(schema.schemaType, data["item_count"], data.items_preview.length);
          }
 
-         self._updateWarnings([], 0);
+         snacDebug(`preview(): added ${data["item_count"]} items`);
+
+         //self._updateWarnings([], 0);
 
          if ("code" in data && data.code === "error") {
             $('.invalid-schema-warning').show();
@@ -1274,6 +1449,7 @@ SNACSchemaAlignmentDialog.preview = function() {
 
 Refine.registerUpdateFunction(function(options) {
    snacDebug(`***** [ Refine.registerUpdateFunction ] *****`);
+
    // Inject tabs in any project where the schema has been defined
    if(theProject.overlayModels.snacSchema && !SNACSchemaAlignmentDialog.isSetUp()) {
       SNACSchemaAlignmentDialog.setUpTabs();

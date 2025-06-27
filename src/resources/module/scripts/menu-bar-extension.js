@@ -21,7 +21,7 @@ ExporterManager.MenuItems.push(
         {
             id:"performSNACEdits",
             label: $.i18n('snac-extension/upload-to-snac'),
-            click: function() { SNACManageUploadDialog.launch(null, function(success) {}); }
+            click: function() { SNACManageUploadDialog.launch(function(success) {}); }
         });
 ExporterManager.MenuItems.push(
         {
@@ -46,7 +46,7 @@ SNACExporterMenuBar.checkSchemaAndExport = function() {
   }
 }
 
-SNACExporterMenuBar.exportJSON = function(){
+SNACExporterMenuBar.exportJSON = function() {
    var schema = theProject.overlayModels.snacSchema;
 
    if (!schema) {
@@ -88,15 +88,20 @@ $(function(){
                     click: function() { SNACSchemaAlignmentDialog.launch(false); }
                 },
                 {
-                    id:"snac/api-key",
-                    label: $.i18n('snac-extension/manage-api-key'),
-                    click: function() { SNACManageKeysDialog.launch(null, function(success) {}); }
+                    id:"snac/manage-preferences",
+                    label: $.i18n('snac-extension/manage-preferences'),
+                    click: function() { SNACManagePreferencesDialog.launch(function(success) {}); }
                 },
                 {},
                 {
+                    id:"snac/perform-validation",
+                    label: $.i18n('snac-extension/validate-with-snac'),
+                    click: function() { SNACManageValidationDialog.launch(function(success) {}); }
+                },
+                {
                     id:"snac/perform-edits",
                     label: $.i18n('snac-extension/upload-to-snac'),
-                    click: function() { SNACManageUploadDialog.launch(null, function(success) {}); }
+                    click: function() { SNACManageUploadDialog.launch(function(success) {}); }
                 },
                 {
                     id:"snac/export-schema",

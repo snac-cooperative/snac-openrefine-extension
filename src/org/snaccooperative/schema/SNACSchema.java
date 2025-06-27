@@ -117,19 +117,12 @@ public class SNACSchema implements OverlayModel {
   }
 
   public List<SNACUploadItem> evaluateRecords(Project project, Engine engine) {
-    // currently, only upload tasks need to know what environment they should
-    // run in.  all other tasks (preview schema, export JSON) do not interact
-    // with SNAC, so we just use an invalid value for the environment.
-    return evaluateRecords(project, engine, "");
-  }
-
-  public List<SNACUploadItem> evaluateRecords(Project project, Engine engine, String snacEnv) {
     Mode prevMode = engine.getMode();
     engine.setMode(Mode.RecordBased);
 
     List<SNACUploadItem> items = new ArrayList<SNACUploadItem>();
     FilteredRecords filteredRecords = engine.getFilteredRecords();
-    filteredRecords.accept(project, new SNACRecordVisitor(items, this, snacEnv));
+    filteredRecords.accept(project, new SNACRecordVisitor(items, this));
 
     engine.setMode(prevMode);
 
@@ -142,17 +135,18 @@ public class SNACSchema implements OverlayModel {
     private SNACAPIClient _client;
     private SNACLookupCache _cache;
 
-    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema, String snacEnv) {
+    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema) {
       this._items = items;
       this._schema = schema;
 
-      this._client = new SNACAPIClient(snacEnv);
+      this._client = new SNACAPIClient();
       this._cache = new SNACLookupCache(this._client);
     }
 
     @Override
     public void start(Project project) {}
 
+    // FIXME: "visit(com.google.refine.model.Project ,com.google.refine.model.Record) in com.google.refine.browsing.RecordVisitor has been deprecated"
     @Override
     public boolean visit(Project project, Record record) {
       SNACUploadItem item;

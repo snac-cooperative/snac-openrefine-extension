@@ -1,38 +1,41 @@
 var SNACManageUploadDialog = {};
 
-SNACManageUploadDialog.launch = function(apikey, callback) {
+SNACManageUploadDialog.launch = function(callback) {
   var schema = theProject.overlayModels.snacSchema;
 
   if (!schema) {
       //console.log("cannot upload; no schema saved");
-      alert("Cannot upload until a SNAC schema is saved");
+      alert($.i18n('snac-upload/missing-schema'));
       callback(null);
       return;
    }
 
   $.get(
-    "command/snac/apikey",
+    "command/snac/preferences",
     function(data) {
-      SNACManageUploadDialog.display(apikey, data.apikey, callback);
+      if (data.api_key === '') {
+        alert($.i18n('snac-upload/missing-key'));
+        callback(null);
+      } else {
+        SNACManageUploadDialog.display(data, callback);
+      }
     });
 };
 
-SNACManageUploadDialog.display = function(apikey, saved_apikey, callback) {
+SNACManageUploadDialog.display = function(data, callback) {
   var self = this;
   var frame = $(DOM.loadHTML("snac", "scripts/dialogs/manage-upload-dialog.html"));
   var elmts = this._elmts = DOM.bind(frame);
 
   this._elmts.dialogHeader.text($.i18n('snac-upload/dialog-header'));
-  this._elmts.explainUpload.html($.i18n('snac-upload/explain-key'));
-  this._elmts.keyLabel.text($.i18n('snac-upload/key-label'));
+  this._elmts.uploadEnvironment.html($.i18n('snac-upload/upload-environment')
+    .replace('{environment}', `<a href="${data.web_url}" target="_blank">SNAC ${data.name}</a>`)
+    .replace('{apikey}', data.api_key.substr(0,8))
+  );
+  this._elmts.uploadExplanation.html($.i18n('snac-upload/upload-explanation'));
+  this._elmts.uploadDetails.html($.i18n('snac-upload/upload-details'));
   this._elmts.cancelButton.text($.i18n('snac-upload/close'));
   this._elmts.uploadButton.text($.i18n('snac-upload/upload'));
-
-  if (apikey != null) {
-    this._elmts.keyInput.text(apikey);
-  } else if (saved_apikey != null) {
-    this._elmts.keyInput.text(saved_apikey);
-  }
 
   this._level = DialogSystem.showDialog(frame);
 
@@ -40,33 +43,17 @@ SNACManageUploadDialog.display = function(apikey, saved_apikey, callback) {
     DialogSystem.dismissUntil(self._level - 1);
   };
 
-  frame.find('.cancel-btn').click(function() {
+  frame.find('.cancel-btn').on('click', function() {
      dismiss();
      callback(null);
   });
 
-  var rad = document.getElementsByName('uploadOption');
-  var prev = null;
-  var prod_or_dev = "dev";
-  for (var i = 0; i < rad.length; i++) {
-    rad[i].addEventListener('change', function() {
-      (prev) ? prev.value: null;
-      if (this !== prev) {
-        prev = this;
-      }
-      prod_or_dev = this.value;
-    });
-  }
-
-  elmts.uploadButton.click(function() {
-    //console.log(prod_or_dev);
-    //console.log(elmts.apiKeyForm.serialize());
-
+  elmts.uploadButton.on('click', function() {
     Refine.postProcess(
       "snac",
       "perform-uploads",
       {},
-      { snacenv: prod_or_dev },
+      {},
       { includeEngine: true, cellsChanged: true, columnStatsChanged: true },
       { onDone:
         function() {

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
 import org.snaccooperative.commands.SNACAPIResponse;
+import org.snaccooperative.exporters.SNACTermCache;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Term;
 
@@ -18,84 +19,106 @@ public class SNACLookupCache {
   static final Logger logger = LoggerFactory.getLogger("SNACLookupCache");
 
   protected SNACAPIClient _client;
+  protected SNACAPIClient _termClient;
   protected HashMap<String, Language> _languageCodes;
   protected HashMap<Integer, Boolean> _constellationExists;
   protected HashMap<Integer, Boolean> _resourceExists;
 
+  protected SNACTermCache _subjectTerms;
+  protected SNACTermCache _activityTerms;
+  protected SNACTermCache _occupationTerms;
+  protected SNACTermCache _entityTypeTerms;
+  protected SNACTermCache _dateTypeTerms;
+  protected SNACTermCache _placeRoleTerms;
+  protected SNACTermCache _documentRoleTerms;
+  protected SNACTermCache _relationTypeTerms;
+  protected SNACTermCache _languageCodeTerms;
+  protected SNACTermCache _scriptCodeTerms;
+  protected SNACTermCache _documentTypeTerms;
+  protected SNACTermCache _recordTypeTerms;
+  protected SNACTermCache _placeTypeTerms;
+
   public SNACLookupCache(SNACAPIClient client) {
     this._client = client;
+    this._termClient = null;
+
     this._languageCodes = new HashMap<String, Language>();
     this._constellationExists = new HashMap<Integer, Boolean>();
     this._resourceExists = new HashMap<Integer, Boolean>();
+
+    this._subjectTerms = new SNACTermCache("subject");
+    this._activityTerms = new SNACTermCache("activity");
+    this._occupationTerms = new SNACTermCache("occupation");
+    this._entityTypeTerms = new SNACTermCache("entity_type");
+    this._dateTypeTerms = new SNACTermCache("date_type");
+    this._placeRoleTerms = new SNACTermCache("place_role");
+    this._documentRoleTerms = new SNACTermCache("document_role");
+    this._relationTypeTerms = new SNACTermCache("relation_type");
+    this._languageCodeTerms = new SNACTermCache("language_code");
+    this._scriptCodeTerms = new SNACTermCache("script_code");
+    this._documentTypeTerms = new SNACTermCache("document_type");
+    this._recordTypeTerms = new SNACTermCache("record_type");
+    this._placeTypeTerms = new SNACTermCache("place_type");
   }
 
-  /**
-   * Helps determine whether a given ISO language code exists on the SNAC database
-   *
-   * @param lang (ISO language code)
-   * @return Language or null (ISO language code found in API Request)
-   */
-  private Language lookupLanguage(String lang) {
-    try {
-      // Insert API request calls for lang (if exists: insert into language dict, if not: return
-      // None)
-
-      String apiQuery =
-          "{ \"command\": \"vocabulary\", \"query_string\": \""
-              + lang
-              + "\", \"type\": \"language_code\", \"entity_type\": null }";
-
-      SNACAPIResponse lookupResponse = _client.post(apiQuery);
-
-      JSONParser jp = new JSONParser();
-      JSONArray results =
-          (JSONArray) ((JSONObject) jp.parse(lookupResponse.getAPIResponse())).get("results");
-
-      if (results.size() <= 0) {
-        return null;
-      }
-
-      Language fetchedLanguage = new Language();
-      Term langTerm = new Term();
-
-      JSONObject result = (JSONObject) results.get(0);
-      Integer term_id = Integer.parseInt((String) result.get("id"));
-      String description = (String) result.get("description");
-      String term_string = (String) result.get("term");
-      fetchedLanguage.setOperation("insert");
-
-      langTerm.setID(term_id);
-      langTerm.setTerm(term_string);
-      langTerm.setDescription(description);
-
-      fetchedLanguage.setLanguage(langTerm);
-      // fetchedLanguage.setScript(script_term);
-      return fetchedLanguage;
-    } catch (ParseException e) {
-      logger.warn("language lookup response parse failure: [" + e + "]");
-      return null;
-    }
+  public void disableTermCache() {
+    this._termClient = null;
   }
 
-  public Language getLanguage(String key) {
-    Language language = _languageCodes.get(key);
+  public void enableTermCache() {
+    this._termClient = this._client;
+  }
 
-    if (language != null) {
-      logger.info("language [" + key + "] mapping: cached: [" + language.toString() + "]");
-      return language;
-    }
+  public Term getSubjectTerm(String key) {
+    return _subjectTerms.getTerm(_termClient, key);
+  }
 
-    language = lookupLanguage(key);
+  public Term getActivityTerm(String key) {
+    return _activityTerms.getTerm(_termClient, key);
+  }
 
-    if (language != null) {
-      logger.info("language [" + key + "] mapping: lookup: [" + language.toString() + "]");
-      _languageCodes.put(key, language);
-      return language;
-    }
+  public Term getOccupationTerm(String key) {
+    return _occupationTerms.getTerm(_termClient, key);
+  }
 
-    logger.warn("language [" + key + "] mapping: no cache or lookup results");
+  public Term getEntityTypeTerm(String key) {
+    return _entityTypeTerms.getTerm(_termClient, key);
+  }
 
-    return null;
+  public Term getDateTypeTerm(String key) {
+    return _dateTypeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getPlaceRoleTerm(String key) {
+    return _placeRoleTerms.getTerm(_termClient, key);
+  }
+
+  public Term getDocumentRoleTerm(String key) {
+    return _documentRoleTerms.getTerm(_termClient, key);
+  }
+
+  public Term getRelationTypeTerm(String key) {
+    return _relationTypeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getLanguageCodeTerm(String key) {
+    return _languageCodeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getScriptCodeTerm(String key) {
+    return _scriptCodeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getDocumentTypeTerm(String key) {
+    return _documentTypeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getRecordTypeTerm(String key) {
+    return _recordTypeTerms.getTerm(_termClient, key);
+  }
+
+  public Term getPlaceTypeTerm(String key) {
+    return _placeTypeTerms.getTerm(_termClient, key);
   }
 
   private Boolean lookupConstellation(Integer id) {
@@ -213,4 +236,5 @@ public class SNACLookupCache {
 
     return false;
   }
+
 }
