@@ -1,6 +1,6 @@
-<div id="schema-alignment-tab">
+<div id="snac-schema-alignment-tab">
     <div bind="schemaHeader">
-        <div class="schema-alignment-save">
+        <div class="snac-schema-alignment-save">
             <button class="button button-primary" bind="saveButton"></button>
             <button class="button button-primary" bind="discardButton"></button>
         </div>
@@ -10,7 +10,7 @@
         <div style="clear: right"></div>
 
         <div id="snac-radio-buttons-container" style = "display: flex;">
-            <!-- Adding radio buttons to switch back and forth between resource and constellation  -->
+            <!-- radio buttons to switch among resource, constellation, and relation -->
             <div id="uploadingRadio" style="padding-left: 20px;">
                 <p>Uploading: </p>
                 <input type="radio" name="uploadingGroup" value="resource" id="uploadingResourceButton" checked="checked"> Resources<br>
@@ -18,38 +18,35 @@
                 <input type="radio" name="uploadingGroup" value="relation" id="uploadingRelationButton"> SNAC Join Model<br>
             </div>
         </div>
-
-
     </div>
 
-
-    <div class="schema-alignment-dialog-canvas" bind="canvas">
-        <div class="schema-alignment-dialog-statements-area" bind="statementsArea">
-                <div id="schema-alignment-statements-container">
-                    <div class="snac-columns-container">
-                        <div id="myDynamicTableResource"></div>
-                        <div id="myDynamicTableConstellation"></div>
-                        <div id="myDynamicTableRelation"></div>
+    <div class="snac-schema-alignment-dialog-canvas" bind="canvas">
+        <div class="snac-schema-alignment-dialog-selection-area" bind="selectionArea">
+                <div id="snac-schema-alignment-selection-container">
+                    <div class="snac-dynamic-data-container">
+                        <div id="snacDynamicTableResource"></div>
+                        <div id="snacDynamicTableConstellation"></div>
+                        <div id="snacDynamicTableRelation"></div>
 
                         <!-- RESOURCES PAGE -->
-                        <div class="schema-alignment-dialog-columns-area-resource" style="margin-left: 18px;">
+                        <div class="snac-schema-alignment-dialog-openrefine-names-area-resource">
                         </div>
 
-                        <div class="schema-alignment-dialog-columns-area-resource--ref">
+                        <div class="snac-schema-alignment-dialog-schema-fields-area-resource">
                         </div>
 
                         <!-- CONSTELLATION PAGE -->
-                        <div class="schema-alignment-dialog-columns-area-constellation" style="margin-left: 18px;">
+                        <div class="snac-schema-alignment-dialog-openrefine-names-area-constellation">
                         </div>
 
-                        <div class="schema-alignment-dialog-columns-area-constellation--ref">
+                        <div class="snac-schema-alignment-dialog-schema-fields-area-constellation">
                         </div>
 
                         <!-- RELATION PAGE -->
-                        <div class="schema-alignment-dialog-columns-area-relation" style="margin-left: 18px;">
+                        <div class="snac-schema-alignment-dialog-openrefine-names-area-relation">
                         </div>
 
-                        <div class="schema-alignment-dialog-columns-area-relation--ref">
+                        <div class="snac-schema-alignment-dialog-schema-fields-area-relation">
                         </div>
                     </div>
                 </div>

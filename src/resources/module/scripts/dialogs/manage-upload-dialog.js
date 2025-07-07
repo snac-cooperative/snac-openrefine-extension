@@ -23,7 +23,7 @@ SNACManageUploadDialog.launch = function(callback) {
 };
 
 SNACManageUploadDialog.display = function(data, callback) {
-  var self = this;
+  var _this = this;
   var frame = $(DOM.loadHTML("snac", "scripts/dialogs/manage-upload-dialog.html"));
   var elmts = this._elmts = DOM.bind(frame);
 
@@ -40,7 +40,7 @@ SNACManageUploadDialog.display = function(data, callback) {
   this._level = DialogSystem.showDialog(frame);
 
   var dismiss = function() {
-    DialogSystem.dismissUntil(self._level - 1);
+    DialogSystem.dismissUntil(_this._level - 1);
   };
 
   frame.find('.cancel-btn').on('click', function() {
