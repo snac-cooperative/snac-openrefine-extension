@@ -48,19 +48,16 @@ function init() {
       module,
       [
         "scripts/menu-bar-extension.js",
-        "scripts/dialogs/manage-key-dialog.js",
         "scripts/dialogs/manage-preferences-dialog.js",
         "scripts/dialogs/manage-upload-dialog.js",
         "scripts/dialogs/manage-validation-dialog.js",
         "scripts/dialogs/schema-alignment-dialog.js",
-        "scripts/dialogs/import-schema-dialog.js",
       ]);
 
     ClientSideResourceManager.addPaths(
       "project/styles",
       module,
       [
-        "styles/dialogs/manage-key-dialog.less",
         "styles/dialogs/manage-preferences-dialog.less",
         "styles/dialogs/manage-upload-dialog.less",
         "styles/dialogs/manage-validation-dialog.less",

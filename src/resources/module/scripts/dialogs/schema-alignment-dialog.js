@@ -497,7 +497,7 @@ SNACSchemaAlignmentDialog._addTable = function (schema, type, names) {
    //snacDebug(`_addTable(${lowerType}): columnMappings: [${JSON.stringify(columnMappings)}]`);
 
    var myTableDiv = document.getElementById(`snacDynamicTable${upperType}`);
-   if (myTableDiv == null){
+   if (myTableDiv == null) {
       var myClassDiv = document.getElementsByClassName('snac-dynamic-data-container');
       var myTableDiv = document.createElement("div");
       myTableDiv.setAttribute('id', `snacDynamicTable${upperType}`);
@@ -509,42 +509,29 @@ SNACSchemaAlignmentDialog._addTable = function (schema, type, names) {
    table.appendChild(tableBody);
    myTableDiv.appendChild(table);
 
-   makeDropdown = () => {
-      let dropdownOptionsArray = [document.getElementsByClassName(`dropdown-default-${lowerType}`)[0]];
-      for (var i = 0; i < 10; i++) {
-         let dropdownOptions = document.getElementsByClassName(`dropdown-option-${lowerType}`)[i];
-         dropdownOptionsArray.push(dropdownOptions)
-      }
-      return dropdownOptionsArray;
-   }
-
    // Create column
    for (var i = 0; i < columns.length; i++) {
       var tr = document.createElement("tr");
       tableBody.appendChild(tr);
       var column = columns[i];
 
-      for (var j = 0; j < 2; j+=2) {
-         var td = document.createElement("td");
-         //td.width = '100';
-         var reconConfig = column.reconConfig;
-         var cell = this._createDraggableItem(column.name,
-            reconConfig && reconConfig.identifierSpace === this.snacPrefix && column.reconStats);
-         var dragDivElement = cell[0];
-         var dragNode = document.createElement("div");
-         dragNode.className += 'snac-draggable-field snac-unreconciled-field-undraggable snac-cell-openrefine-name';
-         //dragNode.style = 'width: 150px';
-         dragNode.id = i;
-         dragNode.append(dragDivElement.innerHTML);
-         td.appendChild(dragNode);
-         tr.appendChild(td);
-      }
+      var td1 = document.createElement("td");
 
-      var selectList = $('<select></select>')
-         .addClass('snac-select-field')
-         .addClass(`snac-select-field-${lowerType}`)
-         .addClass(`${column.name}${upperType}DropDown`);
-         //.attr('style', 'width: 180px');
+      var cell = $('<div></div>');
+      cell.addClass('snac-cell');
+      cell.addClass('snac-cell-openrefine-name');
+      cell.text(column.name);
+      cell.prop('id', i);
+
+      td1.appendChild(cell[0]);
+      tr.appendChild(td1);
+
+      var selectList = $('<select></select>');
+      selectList.addClass('snac-cell')
+      selectList.addClass('snac-cell-select-dropdown')
+      //selectList.addClass('snac-select-field')
+      selectList.addClass(`snac-select-values-${lowerType}`)
+      selectList.addClass(`${column.name}${upperType}DropDown`);
 
       // Create and append the options
       var defaultoption = document.createElement("option");
@@ -561,15 +548,13 @@ SNACSchemaAlignmentDialog._addTable = function (schema, type, names) {
          selectList.append(option);
       }
 
-      if(columnMappings[column.name] != "" && columnMappings[column.name]!= undefined){
+      if (columnMappings[column.name] != "" && columnMappings[column.name]!= undefined) {
          selectList[0].value = columnMappings[column.name];
       }
 
-      for (var j = 1; j < 2; j+=2) {
-         var td = document.createElement("td");
-         td.appendChild(selectList[0]);
-         tr.appendChild(td);
-      }
+      var td2 = document.createElement("td");
+      td2.appendChild(selectList[0]);
+      tr.appendChild(td2);
    }
 
    return myTableDiv;
@@ -581,23 +566,23 @@ SNACSchemaAlignmentDialog.hideAndDisable = function(type) {
 
    snacDebug(`***** [ hideAndDisable(${lowerType}) ] *****`);
 
-   var dragItems = $.makeArray($(`.drag-${lowerType}`));
+   var dragItems = $.makeArray($(`.snac-drag-${lowerType}`));
 
    const selectedValue = []; // Array to hold selected values
-   $(`.snac-select-field-${lowerType}`).find(':selected').filter(function(i, el) { // Filter selected values and push to array
+   $(`.snac-select-values-${lowerType}`).find(':selected').filter(function(i, el) { // Filter selected values and push to array
       return $(el).val();
    }).each(function(i, el) {
       selectedValue.push($(el).val());
    });
 
-   $(`.snac-select-field-${lowerType}`).find(`.dropdown-option-${lowerType}`).each(function(i, option) { // Loop through all of the options
+   $(`.snac-select-values-${lowerType}`).find(`.dropdown-option-${lowerType}`).each(function(i, option) { // Loop through all of the options
       if (selectedValue.indexOf($(option).val()) > -1) { // Re-enable option if array does not contain current value
          if ($(option).is(':checked')) {  // Disable if current value is selected, else skip
             return;
          } else {
             $(this).attr('disabled', true);
             dragItems.forEach(r => {
-               if(r.value==this.innerHTML){
+               if (r.value==this.innerHTML) {
                   r.style.visibility = 'hidden';   // Hide value
                };
             });
@@ -605,7 +590,7 @@ SNACSchemaAlignmentDialog.hideAndDisable = function(type) {
       } else {
          $(this).attr('disabled', false);
          dragItems.forEach(c => {
-            if(c.value==this.innerHTML){
+            if (c.value==this.innerHTML) {
                c.style.visibility = 'visible';  // Show value
             };
          });
@@ -641,19 +626,19 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header, names, t
 
    // openrefine column names and dropdowns are appended here
    var columnArea = $(`.snac-schema-alignment-dialog-openrefine-names-area-${lowerType}`);
-   columnArea.addClass("snac-area-openrefine-name");
+   columnArea.addClass('snac-area-openrefine-name');
    columnArea.empty();
    columnArea.html("<h2>Columns</h2>");
    columnArea.append(this._addTable(schema, lowerType, names));
 
    // this is hidden?
    var dropdownArea= $(`.snac-schema-alignment-dialog-dropdown-area-${lowerType}`);
-   dropdownArea.addClass("snac-area-dropdown");
+   dropdownArea.addClass('snac-area-dropdown');
    dropdownArea.empty();
 
    // snac schema field names are appended here
    var refcolumnArea = $(`.snac-schema-alignment-dialog-schema-fields-area-${lowerType}`);
-   refcolumnArea.addClass("snac-area-schema-field");
+   refcolumnArea.addClass('snac-area-schema-field');
    refcolumnArea.empty();
    refcolumnArea.html(`<h2>${header}</h2>`);
 
@@ -666,35 +651,35 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header, names, t
       var tr = document.createElement("tr");
       var td = document.createElement("td");
 
-      var cell = this._createDraggableItem(field.name, false);
+      var cell = $('<div></div>');
+      cell.addClass('snac-cell');
       cell.addClass('snac-cell-schema-field');
-      cell.addClass(`drag-${lowerType}`);
-      cell.addClass("snac-tooltip");
+      cell.addClass(`snac-drag-${lowerType}`);
+      cell.addClass('snac-tooltip');
       if (field.required) {
-         cell.addClass("snac-required-field");
+         cell.addClass('snac-required-field');
       }
+      cell.text(field.name);
       cell.val(field.name).trigger('change');
-      //refcolumnArea.append(cell);
 
       td.appendChild(cell[0]);
       tr.appendChild(td);
       refTableBody.appendChild(tr);
    });
-   $(`.drag-${lowerType}`).addClass("snac-tooltip");
 
    // add tooltips to elements of this type's drag class by index
    for (var i = 0; i < tooltips.length; i++) {
       var toolTipSpan = document.createElement("span");
       var toolTiptext = document.createTextNode(tooltips[i]);
-      toolTipSpan.classList.add("snac-tooltip-text");
+      toolTipSpan.classList.add('snac-tooltip-text');
       toolTipSpan.appendChild(toolTiptext);
-      $(`.drag-${lowerType}`)[i].appendChild(toolTipSpan);
+      $(`.snac-drag-${lowerType}`)[i].appendChild(toolTipSpan);
    }
 
    // setup for redraw on change
-   $(`.snac-select-field-${lowerType}`).on("change", function () {
+   $(`.snac-select-values-${lowerType}`).on("change", function () {
       _this.hideAndDisable(lowerType);
-      snacDebug(`snac-select-field-${lowerType} calling _hasChanged()`);
+      snacDebug(`snac-select-values-${lowerType} calling _hasChanged()`);
       _this._hasChanged();
    });
 }
@@ -736,47 +721,53 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
    );
 
    // Allow names column (first column) to be droppable
-   $(".snac-unreconciled-field-undraggable").droppable({
-      hoverClass: "active",
+   $(".snac-cell-openrefine-name").droppable({
+      hoverClass: "snac-droppable-hover",
       drop: function (event, ui) {
+         // use the id of the element dropped onto, as an index into the dropdown list
          var id = $(this).attr("id");
-         $(".snac-select-field")[id].value = $(ui.draggable).val();
+         $(".snac-cell-select-dropdown")[id].value = $(ui.draggable).val();
          _this.hideAndDisableAll();
-         snacDebug(`snac-select-field[${id}] (names) calling _hasChanged()`);
+         snacDebug(`droppable('snac-cell-openrefine-name') calling _hasChanged()`);
          _this._hasChanged();
       },
    });
 
    // Allow dropdown column to be droppable
-   $(".snac-select-field").droppable({
-      hoverClass: "active",
+   $(".snac-cell-select-dropdown").droppable({
+      hoverClass: "snac-droppable-hover",
       drop: function (event, ui) {
          this.value = $(ui.draggable).val();
          _this.hideAndDisableAll();
-         snacDebug(`snac-select-field (dropdowns) calling _hasChanged()`);
+         snacDebug(`droppable('snac-cell-select-dropdown') calling _hasChanged()`);
          _this._hasChanged();
       },
    });
 
+/*
    $(".snac-reconciled-field").draggable({
       helper: "clone",
       cursor: "crosshair",
-      snap: ".snac-item-input input, .snac-target-input input",
+      snap: false,
       zIndex: 100,
    });
+*/
 
-   $(".snac-unreconciled-field").draggable({
+   // allow schema fields column to be draggable
+   $(".snac-cell-schema-field").draggable({
       helper: "clone",
       helper: function (e) {
          var original = $(e.target).hasClass("ui-draggable")
             ? $(e.target)
             : $(e.target).closest(".ui-draggable");
-         return original.clone().css({
+         var clone = original.clone();
+         clone.find('.snac-tooltip-text').remove();
+         return clone.css({
             width: original.width(), // or outerWidth*
          });
       },
       cursor: "crosshair",
-      snap: ".snac-target-input input",
+      snap: false,
       zIndex: 100,
    });
 
@@ -919,32 +910,6 @@ SNACSchemaAlignmentDialog._changesCleared = function() {
       .addClass('disabled');
 }
 
-// format cells for columns
-SNACSchemaAlignmentDialog._createDraggableItem = function(name, reconciled) {
-   snacDebug(`***** [ _createDraggableItem ] *****`);
-
-   var cell = $('<div></div>');
-
-   cell.addClass('snac-draggable-field');
-
-   if (reconciled) {
-      cell.addClass('snac-reconciled-field');
-   } else {
-      cell.addClass('snac-unreconciled-field');
-   }
-
-   cell.text(name);
-
-/*
-   // what was this for?
-   if (name == 'SNAC Resource ID' || name == 'SNAC CPF ID') {
-      cell.addClass('idcolumn')
-   }
-*/
-
-   return cell;
-}
-
 SNACSchemaAlignmentDialog.getJSON = function() {
    snacDebug(`***** [ getJSON ] *****`);
 
@@ -956,14 +921,14 @@ SNACSchemaAlignmentDialog.getJSON = function() {
 
    if ($('#uploadingResourceButton').is(':checked')) {
       schemaType = "resource";
-      dropDownColumn = $('.snac-select-field-resource');
+      dropDownColumn = $('.snac-select-values-resource');
 
    } else if ($('#uploadingRelationButton').is(':checked')) {
       schemaType = 'relation';
-      dropDownColumn = $('.snac-select-field-relation');
+      dropDownColumn = $('.snac-select-values-relation');
    } else {
       schemaType = 'constellation';
-      dropDownColumn = $('.snac-select-field-constellation');
+      dropDownColumn = $('.snac-select-values-constellation');
    }
 
    var dropDownValues = $.map(dropDownColumn, function(option) {
@@ -1132,7 +1097,7 @@ Refine.registerUpdateFunction(function(options) {
    snacDebug(`***** [ Refine.registerUpdateFunction ] *****`);
 
    // Inject tabs in any project where the schema has been defined
-   if(theProject.overlayModels.snacSchema && !SNACSchemaAlignmentDialog.isSetUp()) {
+   if (theProject.overlayModels.snacSchema && !SNACSchemaAlignmentDialog.isSetUp()) {
       SNACSchemaAlignmentDialog.setUpTabs();
    }
    if (SNACSchemaAlignmentDialog.isSetUp() && (options.everythingChanged || options.modelsChanged ||

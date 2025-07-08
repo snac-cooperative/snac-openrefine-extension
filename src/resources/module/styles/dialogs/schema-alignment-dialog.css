@@ -63,7 +63,9 @@
   margin-left: 30px;
 }
 
-.snac-draggable-field {
+/* individual fields in each table column */
+
+.snac-cell {
   border: 1px solid #aaa;
   padding: 3px;
   margin: 3px;
@@ -73,14 +75,6 @@
   max-width: 95%;
   border-radius: 4px;
 }
-
-.ui-droppable .snac-draggable-field {
-  margin: 0px;
-  padding: 0px;
-  padding-left: 2px;
-}
-
-/* individual fields in each table column */
 
 .snac-cell-openrefine-name {
   width: 150px;
@@ -201,6 +195,11 @@ div.snac-schema-alignment-dialog-preview {
 
 .snac-required-field {
   border-width: 2px;
+  border-style: solid;
   border-color: royalblue;
   margin: 2px;
+}
+
+.snac-droppable-hover {
+  background-color: #bcf;
 }
