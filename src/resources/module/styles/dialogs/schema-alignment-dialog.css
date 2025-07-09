@@ -49,14 +49,17 @@
   display: flex;
 }
 
-.snac-dynamic-data-container table {
+.snac-dynamic-table {
+  display: flex;
+  align-items: center;
+}
+
+.snac-dynamic-table table {
   margin-top: 10px;
 }
 
-.snac-area-dropdown {
-  display: flex;
-  flex-direction: column;
-  width: 200px;
+.snac-dynamic-table td {
+  height: 30px;
 }
 
 .snac-area-schema-field {
@@ -68,25 +71,35 @@
 .snac-cell {
   border: 1px solid #aaa;
   padding: 3px;
-  margin: 3px;
+  margin: 0 6px 6px 0;
   background-color: #eee;
   display: inline-block;
-  padding-bottom: 3px;
-  max-width: 95%;
+  /* max-width: 95%; */
   border-radius: 4px;
+  font-size: 100%;
 }
 
 .snac-cell-openrefine-name {
-  width: 150px;
+  width: 180px;
 }
 
 .snac-cell-select-dropdown {
-  width: 180px;
-  margin-top: 5px;
+  width: 200px;
 }
 
 .snac-cell-schema-field {
   width: 170px;
+  background-color: #bdf;
+  border-color: #222;
+}
+
+.snac-cell-schema-field-required {
+  background-color: #fb0;
+}
+
+.snac-cell-droppable-hover {
+  background-color: #8d0;
+  border-color: #222;
 }
 
 /*** Warnings rendering ****/
@@ -145,7 +158,7 @@ div.snac-schema-alignment-dialog-preview {
 .snac-tooltip .snac-tooltip-text {
   visibility: hidden;
   width: 320px;
-  background-color: royalblue;
+  background-color: #222;
   color: #fff;
   text-align: center;
   border-radius: 6px;
@@ -164,7 +177,7 @@ div.snac-schema-alignment-dialog-preview {
   margin-top: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: transparent royalblue transparent transparent;
+  border-color: transparent #222 transparent transparent;
 }
 
 .snac-tooltip:hover .snac-tooltip-text {
@@ -172,7 +185,7 @@ div.snac-schema-alignment-dialog-preview {
 }
 
 .snac-schema-preview-row:hover {
-  background-color: #dbe9fa;
+  background-color: #cdf;
 }
 
 .snac-schema-preview-column-field {
@@ -191,15 +204,4 @@ div.snac-schema-alignment-dialog-preview {
 
 .snac-reload-preview {
   margin-left: 10px;
-}
-
-.snac-required-field {
-  border-width: 2px;
-  border-style: solid;
-  border-color: royalblue;
-  margin: 2px;
-}
-
-.snac-droppable-hover {
-  background-color: #bcf;
 }
