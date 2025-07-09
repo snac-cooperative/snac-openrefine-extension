@@ -1,0 +1,75 @@
+<div class="container">
+  <div class="dialog-frame snac">
+    <div class="dialog-header snac" bind="dialogHeader">
+    </div>
+    <div class="dialog-body" bind="dialogBody">
+      <img src="extension/snac/images/snac-logo.png" class="snac-logo" alt="SNAC logo" />
+      <div class="snac-right-logo">
+          <p class="body-text" bind="prefsExplanation"></p>
+          <p class="body-text" bind="prefsNote" style="font-weight: bold;"></p>
+          <div class="snac-preferences-management-area">
+              <form bind="snacPreferencesForm" class="snac-preferences-form" method="post">
+                <div id="snacpreferences">
+                  <table id="snacenvpreferences">
+                    <tr>
+                      <td></td>
+                      <td><label bind="snacEnvHeader" style="font-weight: bold;"></label></td>
+                      <td><label bind="snacKeyHeader" style="font-weight: bold;"></label></td>
+                    </tr>
+                    <tr class="snac-preference-row" id="snacrowdev">
+                      <td>
+                        <input type="radio" id="snacenvdev" name="snacenv" value="dev" checked/>
+                      </td>
+                      <td align="left">
+                        <label for="snacenvdev" bind="snacLabelEnvDev"></label>
+                      </td>
+                      <td align="left">
+                        <input type="text" size="60" id="snackeydev" name="snackeydev" bind="snacKeyDev"/>
+                      </td>
+                    </tr>
+                    <tr class="snac-preference-row" id="snacrowprod">
+                      <td>
+                        <input type="radio" id="snacenvprod" name="snacenv" value="prod"/>
+                      </td>
+                      <td align="left">
+                        <label for="snacenvprod" bind="snacLabelEnvProd"></label>
+                      </td>
+                      <td align="left">
+                        <input type="text" size="60" id="snackeyprod" name="snackeyprod" bind="snacKeyProd"/>
+                      </td>
+                    </tr>
+                  </table>
+                  <table id="snacmiscpreferences">
+                    <tr>
+                      <td align="left">
+                        <label for="snacmaxpreviewitems" bind="snacLabelMaxPreviewItems"></label>
+                      </td>
+                      <td align="left">
+                        <input type="number" size="2" min="1" id="snacmaxpreviewitems" name="snacmaxpreviewitems" bind="snacMaxPreviewItems"/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="left">
+                        <label for="snacincludeapiresponse" bind="snacLabelIncludeAPIResponse"></label>
+                      </td>
+                      <td align="left">
+                        <input type="checkbox" value="true" id="snacincludeapiresponse" name="snacincludeapiresponse" bind="snacIncludeAPIResponse"/>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </form>
+              <div class="snac-preferences-button-container">
+                <div class="snac-preferences-version">
+                  <p bind="snacExtensionVersion"></p>
+                </div>
+                <div>
+                  <button class="button-snac cancel-btn" bind="cancelButton"></button>
+                  <button class="button-snac submit-btn" bind="saveButton"></button>
+                </div>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

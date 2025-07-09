@@ -1,0 +1,19 @@
+<div class="dialog-frame snac snac-validation">
+  <div class="dialog-header snac" bind="dialogHeader"></div>
+  <div class="dialog-body" bind="dialogBody">
+    <img src="extension/snac/images/validate.png" class="snac-logo" alt="SNAC logo" />
+    <div class="snac-right-logo">
+        <p class="body-text" bind="validationEnvironment"></p>
+        <p class="body-text" bind="validationExplanation"></p>
+        <p class="body-text" bind="validationDetails"></p>
+        <div class="snac-validation-management-area">
+            <form bind="snacValidationForm" class="snac-validation-form" method="post">
+            </form>
+            <div class="snac-validation-buttons">
+                <button class="button-snac cancel-btn" bind="cancelButton"></button>
+                <button class="button-snac submit-btn" bind="validationButton"></button>
+            </div>
+        </div>
+     </div>
+  </div>
+</div>
