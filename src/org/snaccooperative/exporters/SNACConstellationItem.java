@@ -403,11 +403,6 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "bioghist":
-            if (biogHists.size() > 0) {
-              _validationErrors.add("Only one BiogHist entry is supported");
-              continue;
-            }
-
             BiogHist biogHist = new BiogHist();
             biogHist.setText(cellValue);
             biogHist.setOperation("insert");
