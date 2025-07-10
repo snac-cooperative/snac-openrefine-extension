@@ -73,9 +73,7 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
         SNACUploadItem item = items.get(i);
         int row = item.rowIndex();
 
-logger.info("validating item " + (i + 1) + "...");
         SNACAPIResponse validationResponse = item.performValidation();
-logger.info("validated  item " + (i + 1) + ".");
 
         logger.info(
             "["
