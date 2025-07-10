@@ -514,7 +514,9 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       cell.addClass('snac-cell');
       cell.addClass('snac-cell-openrefine-name');
       cell.text(column.name);
-      cell.prop('id', i);
+      // this is used when dropping a snac schema field onto an
+      // openrefine column name to update the correct dropdown list
+      cell.prop('id', `${lowerType}:${i}`);
 
       td1.appendChild(cell[0]);
       tr.appendChild(td1);
@@ -723,9 +725,9 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
       hoverClass: "snac-cell-droppable-hover",
       tolerance: "pointer",
       drop: function (event, ui) {
-         // use the id of the element dropped onto, as an index into the dropdown list
-         var id = $(this).attr("id");
-         $(".snac-cell-select-dropdown")[id].value = $(ui.draggable).val();
+         // use the type:id of the element dropped onto, as an index into the correct dropdown list
+         var typeId = $(this).attr('id').split(':');
+         $(`.snac-select-values-${typeId[0]}`)[typeId[1]].value = $(ui.draggable).val();
          _this.hideAndDisableAll();
          snacDebug(`droppable('snac-cell-openrefine-name') calling hasChanged()`);
          _this.hasChanged();
