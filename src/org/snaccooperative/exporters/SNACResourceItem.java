@@ -105,9 +105,9 @@ public class SNACResourceItem extends SNACUploadItem {
             res.setTitle(cellValue);
             continue;
 
-            // case "display entry":
-            //   res.setDisplayEntry(cellValue);
-            //   continue;
+          // case "display entry":
+          //   res.setDisplayEntry(cellValue);
+          //   continue;
 
           case "resource url":
             res.setLink(cellValue);
@@ -126,8 +126,8 @@ public class SNACResourceItem extends SNACUploadItem {
             continue;
 
           case "language code": // queried alongside script code
-            // NOTE: SNAC language type can contain any combination of language code and/or script code.
-            // Here, we check for the cases that contain a language code.
+            // NOTE: SNAC language type can contain any combination of language code and/or
+            // script code.  Here, we check for the cases that contain a language code.
 
             Term languageCodeTerm = _cache.getLanguageCodeTerm(cellValue);
 
@@ -155,14 +155,19 @@ public class SNACResourceItem extends SNACUploadItem {
                   lang.setScript(scriptCodeTerm);
                 } else {
                   logger.warn("omitting invalid script code [" + scriptCode + "]");
-                  _validationErrors.add("Invalid Script Code: [" + scriptCode + "] for Language Code: [" + cellValue + "]");
+                  _validationErrors.add(
+                      "Invalid Script Code: ["
+                          + scriptCode
+                          + "] for Language Code: ["
+                          + cellValue
+                          + "]");
                   continue;
                 }
               } else {
-                //logger.info("no associated script code value found; skipping");
+                // logger.info("no associated script code value found; skipping");
               }
             } else {
-              //logger.info("no associated script code column found; skipping");
+              // logger.info("no associated script code column found; skipping");
             }
 
             languages.add(lang);
@@ -170,24 +175,25 @@ public class SNACResourceItem extends SNACUploadItem {
             continue;
 
           case "script code": // queried alongside language code
-            // NOTE: SNAC language type can contain any combination of language code and/or script code.
-            // Here, we check for the case when there is just a script code.
+            // NOTE: SNAC language type can contain any combination of language code and/or
+            // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
 
             if (languageCodeColumn != null) {
-              String languageCode = getCellValueForRowByColumnName(_project, row, languageCodeColumn);
+              String languageCode =
+                  getCellValueForRowByColumnName(_project, row, languageCodeColumn);
 
               if (!languageCode.equals("")) {
-                // found associated language code; this scenario is handled in the "language code" section
-                //logger.info("skipping script code with associated language code");
+                // this scenario is handled in the "language code" section
+                // logger.info("skipping script code with associated language code");
                 continue;
               } else {
-                //logger.info("no associated language code value found; proceeding");
+                // logger.info("no associated language code value found; proceeding");
               }
             } else {
-              //logger.info("no associated language code column found; proceeding");
+              // logger.info("no associated language code column found; proceeding");
             }
 
             Term scriptCodeTerm = _cache.getScriptCodeTerm(cellValue);
@@ -342,15 +348,21 @@ public class SNACResourceItem extends SNACUploadItem {
           if (_resource.getRepository() != null) {
             int repo_id = _resource.getRepository().getID();
             if (repo_id != 0) {
-              outFields.put(snacText, htmlLink(_client.urlForConstellationID(repo_id), Integer.toString(repo_id)));
+              outFields.put(
+                  snacText,
+                  htmlLink(_client.urlForConstellationID(repo_id), Integer.toString(repo_id)));
             }
           }
       }
     }
 
     if (_resource.getOperation() == "update") {
-      outFields.put("*** Operation ***", "Edit Resource with ID: " + 
-        htmlLink(_client.urlForResourceID(_resource.getID()), Integer.toString(_resource.getID())));
+      outFields.put(
+          "*** Operation ***",
+          "Edit Resource with ID: "
+              + htmlLink(
+                  _client.urlForResourceID(_resource.getID()),
+                  Integer.toString(_resource.getID())));
     } else {
       outFields.put("*** Operation ***", "Insert new Resource");
     }
@@ -363,7 +375,7 @@ public class SNACResourceItem extends SNACUploadItem {
         continue;
       }
       preview += htmlTableRow(htmlTableColumnField(key) + htmlTableColumnValue(out));
-      //logger.info(key + " => " + out);
+      // logger.info(key + " => " + out);
     }
     preview = htmlTable(preview);
 
@@ -442,5 +454,4 @@ public class SNACResourceItem extends SNACUploadItem {
 
     return insertResponse;
   }
-
 }

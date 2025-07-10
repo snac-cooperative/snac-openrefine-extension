@@ -28,7 +28,11 @@ public class SNACTermCache {
   private Term lookupTerm(SNACAPIClient client, String key) {
     try {
       String apiQuery =
-          "{ \"command\": \"vocabulary\", \"query_string\": \"" + key + "\", \"type\": \"" + _type + "\" }";
+          "{ \"command\": \"vocabulary\", \"query_string\": \""
+              + key
+              + "\", \"type\": \""
+              + _type
+              + "\" }";
 
       SNACAPIResponse lookupResponse = client.post(apiQuery);
 
@@ -37,7 +41,8 @@ public class SNACTermCache {
           (JSONArray) ((JSONObject) jp.parse(lookupResponse.getAPIResponse())).get("results");
 
       if (results.size() <= 0) {
-        logger.error("vocabulary [" + _type + "] query returned no results for term: [" + key + "]");
+        logger.error(
+            "vocabulary [" + _type + "] query returned no results for term: [" + key + "]");
         return null;
       }
 
@@ -47,13 +52,10 @@ public class SNACTermCache {
         String gotTerm = (String) result.get("term");
 
         if (!gotTerm.toLowerCase().equals(key.toLowerCase())) {
-          //logger.info("vocabulary [" + _type + "] result term [" + gotTerm + "] does not match term: [" + key + "]");
           continue;
         }
 
-        //logger.info("vocabulary [" + _type + "] result term [" + gotTerm + "] matches term: [" + key + "]");
-
-        //Integer gotID = Integer.parseInt((String) result.get("id"));
+        // Integer gotID = Integer.parseInt((String) result.get("id"));
         String gotType = (String) result.get("type");
         String gotDesc = (String) result.get("description");
 
@@ -111,14 +113,16 @@ public class SNACTermCache {
     Term term = _terms.get(key.toLowerCase());
 
     if (term != null) {
-      //logger.info("type [" + _type + "] key [" + key + "] mapping: cached: { " + getDescription(term) + " }");
+      // logger.info("type [" + _type + "] key [" + key + "] mapping: cached: { " +
+      // getDescription(term) + " }");
       return term;
     }
 
     term = lookupTerm(client, key);
 
     if (term != null) {
-      //logger.info("type [" + _type + "] key [" + key + "] mapping: lookup: { " + getDescription(term) + " }");
+      // logger.info("type [" + _type + "] key [" + key + "] mapping: lookup: { " +
+      // getDescription(term) + " }");
       return term;
     }
 

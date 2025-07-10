@@ -88,9 +88,10 @@ public class SNACAPIResponse {
           this._result = "error";
           this._message = errorFull;
         } else {
+          // in the absence of other evidence, the presence of some fields can indicate success:
+          // "results": returned by vocabulary lookups or elasticsearch queries
+          // "related_constellations": returned by a "read_resource" for a non-existent resource
           if ((results instanceof JSONObject) || (relatedConstellations instanceof JSONArray)) {
-            // "results": things like vocabulary lookups or elasticsearch queries may just have this section
-            // "related_constellations": a "read_resource" for a non-existent resource may just have this section
             this._result = "success";
           } else {
             this._result = "unknown";
@@ -128,9 +129,10 @@ public class SNACAPIResponse {
   }
 
   public SNACAPIResponse(SNACAPIResponse other, String apiResponse) {
-    // returns copy of existing API response, with its apiResponse field overridden with an alternate value.
-    // this is useful for scenarios such as constellation inserts (insert/publish), in which the second
-    // action (publish) has a less informative API response than the first (insert) when displayed in the client.
+    // returns copy of existing API response, with its apiResponse field overridden
+    // with an alternate value.  this is useful for scenarios such as constellation
+    // inserts (insert/publish), in which the second action (publish) has a less
+    // informative API response than the first (insert) when displayed in the client.
 
     this._apiResponse = apiResponse;
 

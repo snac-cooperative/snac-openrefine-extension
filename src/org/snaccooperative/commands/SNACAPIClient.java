@@ -9,8 +9,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.util.SNACPreferencesManager;
 import org.snaccooperative.util.SNACEnvironment;
+import org.snaccooperative.util.SNACPreferencesManager;
 
 public class SNACAPIClient {
 

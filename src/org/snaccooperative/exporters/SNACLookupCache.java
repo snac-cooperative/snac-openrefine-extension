@@ -2,7 +2,6 @@ package org.snaccooperative.exporters;
 
 import java.util.HashMap;
 import org.apache.http.*;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
 import org.snaccooperative.commands.SNACAPIResponse;
-import org.snaccooperative.exporters.SNACTermCache;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Term;
 
@@ -198,7 +196,7 @@ public class SNACLookupCache {
       }
 
       // existence check: it's probably sufficient that a resource was returned, but
-      // we go the extra mile and verify that its id equals the one we requested
+      // we go the extra inch and verify that its id equals the one we requested
 
       JSONParser jp = new JSONParser();
       JSONObject resource =
@@ -236,5 +234,4 @@ public class SNACLookupCache {
 
     return false;
   }
-
 }

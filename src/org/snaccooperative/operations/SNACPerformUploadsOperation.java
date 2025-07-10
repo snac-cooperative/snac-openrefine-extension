@@ -27,8 +27,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
   static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsOperation");
 
   @JsonCreator
-  public SNACPerformUploadsOperation(
-      @JsonProperty("engineConfig") EngineConfig engineConfig) {
+  public SNACPerformUploadsOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
     super(engineConfig);
   }
 

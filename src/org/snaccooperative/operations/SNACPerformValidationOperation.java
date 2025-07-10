@@ -26,8 +26,7 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
   static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationOperation");
 
   @JsonCreator
-  public SNACPerformValidationOperation(
-      @JsonProperty("engineConfig") EngineConfig engineConfig) {
+  public SNACPerformValidationOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
     super(engineConfig);
   }
 

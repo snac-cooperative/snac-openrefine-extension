@@ -19,9 +19,9 @@ import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.BiogHist;
 import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.ConstellationRelation;
+import org.snaccooperative.data.Language;
 import org.snaccooperative.data.NameEntry;
 import org.snaccooperative.data.Occupation;
-import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Place;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.ResourceRelation;
@@ -148,28 +148,39 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             if (dateTypeColumn == null) {
               logger.warn("no exist date type column found");
-              _validationErrors.add("Missing required Exist Date Type column for Exist Date: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Missing required Exist Date Type column for Exist Date: [" + cellValue + "]");
               continue;
             }
 
-            String dateType =
-                getCellValueForRowByColumnName(_project, row, dateTypeColumn);
+            String dateType = getCellValueForRowByColumnName(_project, row, dateTypeColumn);
 
             if (dateType == "") {
               logger.warn("no matching exist date type for date: [" + cellValue + "]");
-              _validationErrors.add("Invalid Exist Date Type: [" + dateType + "] for Exist Date: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid Exist Date Type: ["
+                      + dateType
+                      + "] for Exist Date: ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
             Term dateTypeTerm = _cache.getDateTypeTerm(dateType);
 
             if (dateTypeTerm == null) {
-              _validationErrors.add("Invalid Exist Date Type: [" + dateType + "] for Exist Date: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid Exist Date Type: ["
+                      + dateType
+                      + "] for Exist Date: ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
             // find and add optional exist date descriptive note in this row
-            String dateNoteColumn = _schema.getReverseColumnMappings().get("exist date descriptive note");
+            String dateNoteColumn =
+                _schema.getReverseColumnMappings().get("exist date descriptive note");
 
             String dateNote = "";
             if (dateNoteColumn != null) {
@@ -226,7 +237,8 @@ public class SNACConstellationItem extends SNACUploadItem {
             if (placeTypeTerm != null) {
               place.setType(placeTypeTerm);
             } else {
-              _validationErrors.add("Invalid Place Type: [" + placeType + "] for Place: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid Place Type: [" + placeType + "] for Place: [" + cellValue + "]");
               continue;
             }
 
@@ -241,7 +253,8 @@ public class SNACConstellationItem extends SNACUploadItem {
               if (placeRoleTerm != null) {
                 place.setRole(placeRoleTerm);
               } else {
-                _validationErrors.add("Invalid Place Role: [" + placeRole + "] for Place: [" + cellValue + "]");
+                _validationErrors.add(
+                    "Invalid Place Role: [" + placeRole + "] for Place: [" + cellValue + "]");
                 continue;
               }
             }
@@ -321,8 +334,8 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "language code": // queried alongside script code
-            // NOTE: SNAC language type can contain any combination of language code and/or script code.
-            // Here, we check for the cases that contain a language code.
+            // NOTE: SNAC language type can contain any combination of language code and/or
+            // script code.  Here, we check for the cases that contain a language code.
 
             Term languageCodeTerm = _cache.getLanguageCodeTerm(cellValue);
 
@@ -350,14 +363,19 @@ public class SNACConstellationItem extends SNACUploadItem {
                   lang.setScript(scriptCodeTerm);
                 } else {
                   logger.warn("omitting invalid script code [" + scriptCode + "]");
-                  _validationErrors.add("Invalid Script Code: [" + scriptCode + "] for Language Code: [" + cellValue + "]");
+                  _validationErrors.add(
+                      "Invalid Script Code: ["
+                          + scriptCode
+                          + "] for Language Code: ["
+                          + cellValue
+                          + "]");
                   continue;
                 }
               } else {
-                //logger.info("no associated script code value found; skipping");
+                // logger.info("no associated script code value found; skipping");
               }
             } else {
-              //logger.info("no associated script code column found; skipping");
+              // logger.info("no associated script code column found; skipping");
             }
 
             languages.add(lang);
@@ -365,24 +383,25 @@ public class SNACConstellationItem extends SNACUploadItem {
             continue;
 
           case "script code": // queried alongside language code
-            // NOTE: SNAC language type can contain any combination of language code and/or script code.
-            // Here, we check for the case when there is just a script code.
+            // NOTE: SNAC language type can contain any combination of language code and/or
+            // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
 
             if (languageCodeColumn != null) {
-              String languageCode = getCellValueForRowByColumnName(_project, row, languageCodeColumn);
+              String languageCode =
+                  getCellValueForRowByColumnName(_project, row, languageCodeColumn);
 
               if (!languageCode.equals("")) {
-                // found associated language code; this scenario is handled in the "language code" section
-                //logger.info("skipping script code with associated language code");
+                // this scenario is handled in the "language code" section
+                // logger.info("skipping script code with associated language code");
                 continue;
               } else {
-                //logger.info("no associated language code value found; proceeding");
+                // logger.info("no associated language code value found; proceeding");
               }
             } else {
-              //logger.info("no associated language code column found; proceeding");
+              // logger.info("no associated language code column found; proceeding");
             }
 
             Term scriptCodeTerm = _cache.getScriptCodeTerm(cellValue);
@@ -417,7 +436,12 @@ public class SNACConstellationItem extends SNACUploadItem {
             Term sameAsTerm = _cache.getRecordTypeTerm(defaultExternalRelatedCPFUrlType);
 
             if (sameAsTerm == null) {
-              _validationErrors.add("Invalid Record Type: [" + defaultExternalRelatedCPFUrlType + "] for External Related CPF URL: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid Record Type: ["
+                      + defaultExternalRelatedCPFUrlType
+                      + "] for External Related CPF URL: ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -453,7 +477,12 @@ public class SNACConstellationItem extends SNACUploadItem {
                 if (resourceRoleTerm != null) {
                   resourceRelation.setRole(resourceRoleTerm);
                 } else {
-                  _validationErrors.add("Invalid CPF to Resource Relation Type: [" + resourceRole + "] for SNAC Resource ID: [" + cellValue + "]");
+                  _validationErrors.add(
+                      "Invalid CPF to Resource Relation Type: ["
+                          + resourceRole
+                          + "] for SNAC Resource ID: ["
+                          + cellValue
+                          + "]");
                   continue;
                 }
               }
@@ -491,7 +520,12 @@ public class SNACConstellationItem extends SNACUploadItem {
                   cpfRelation.setType(cpfRelationTypeTerm);
                   cpfRelation.setOperation("insert");
                 } else {
-                  _validationErrors.add("Invalid CPF to CPF Relation Type: [" + cpfRelationType + "] for Related SNAC CPF ID: [" + cellValue + "]");
+                  _validationErrors.add(
+                      "Invalid CPF to CPF Relation Type: ["
+                          + cpfRelationType
+                          + "] for Related SNAC CPF ID: ["
+                          + cellValue
+                          + "]");
                   continue;
                 }
               }
@@ -595,7 +629,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             } else {
               nameAndPreferenceScore += " (variant)";
             }
-            namesAndPreferenceScores.add(nameAndPreferenceScore.replaceFirst("^Name Entry: ",""));
+            namesAndPreferenceScores.add(nameAndPreferenceScore.replaceFirst("^Name Entry: ", ""));
           }
           outFields.put(snacText, htmlOrderedList(namesAndPreferenceScores));
           break;
@@ -603,7 +637,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         case "exist date":
           List<String> dates = new ArrayList<String>();
           for (int i = 0; i < _constellation.getDateList().size(); i++) {
-            dates.add(_constellation.getDateList().get(i).toString().replaceFirst("^Date: ",""));
+            dates.add(_constellation.getDateList().get(i).toString().replaceFirst("^Date: ", ""));
           }
           outFields.put(snacText, htmlOrderedList(dates));
           break;
@@ -628,7 +662,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             if (place.getType() != null) {
               placeAndRoleAndType += " (" + place.getType().getTerm() + ")";
             }
-            placesAndRoles.add(placeAndRoleAndType.replaceFirst("^Place: ",""));
+            placesAndRoles.add(placeAndRoleAndType.replaceFirst("^Place: ", ""));
           }
           outFields.put(snacText, htmlOrderedList(placesAndRoles));
           break;
@@ -740,7 +774,8 @@ public class SNACConstellationItem extends SNACUploadItem {
           for (int i = 0; i < _constellation.getRelations().size(); i++) {
             ConstellationRelation relation = _constellation.getRelations().get(i);
             int relationID = relation.getTargetConstellation();
-            String relationAndType = htmlLink(_client.urlForConstellationID(relationID), Integer.toString(relationID));
+            String relationAndType =
+                htmlLink(_client.urlForConstellationID(relationID), Integer.toString(relationID));
             if (relation.getType() != null) {
               relationAndType += " (" + relation.getType().getTerm() + ")";
             }
@@ -754,7 +789,10 @@ public class SNACConstellationItem extends SNACUploadItem {
           for (int i = 0; i < _constellation.getResourceRelations().size(); i++) {
             ResourceRelation resourceRelation = _constellation.getResourceRelations().get(i);
             int resourceRelationID = resourceRelation.getResource().getID();
-            String resourceRelationAndRole = htmlLink(_client.urlForResourceID(resourceRelationID), Integer.toString(resourceRelationID));
+            String resourceRelationAndRole =
+                htmlLink(
+                    _client.urlForResourceID(resourceRelationID),
+                    Integer.toString(resourceRelationID));
             if (resourceRelation.getRole() != null) {
               resourceRelationAndRole += " (" + resourceRelation.getRole().getTerm() + ")";
             }
@@ -766,8 +804,12 @@ public class SNACConstellationItem extends SNACUploadItem {
     }
 
     if (_constellation.getOperation() == "update") {
-      outFields.put("*** Operation ***", "Edit Constellation with ID: " + 
-        htmlLink(_client.urlForConstellationID(_constellation.getID()), Integer.toString(_constellation.getID())));
+      outFields.put(
+          "*** Operation ***",
+          "Edit Constellation with ID: "
+              + htmlLink(
+                  _client.urlForConstellationID(_constellation.getID()),
+                  Integer.toString(_constellation.getID())));
     } else {
       outFields.put("*** Operation ***", "Insert new Constellation");
     }
@@ -780,7 +822,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         continue;
       }
       preview += htmlTableRow(htmlTableColumnField(key) + htmlTableColumnValue(out));
-      //logger.info(key + " => " + out);
+      // logger.info(key + " => " + out);
     }
     preview = htmlTable(preview);
 
@@ -915,5 +957,4 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     return updateResponse;
   }
-
 }

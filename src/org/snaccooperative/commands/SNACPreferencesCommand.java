@@ -24,12 +24,11 @@ public class SNACPreferencesCommand extends Command {
     // save preferences if provided
     if (request.getParameter("snacenv") != null) {
       prefsManager.savePreferences(
-        request.getParameter("snacenv"),
-        request.getParameter("snackeydev"),
-        request.getParameter("snackeyprod"),
-        request.getParameter("snacmaxpreviewitems"),
-        request.getParameter("snacincludeapiresponse")
-      );
+          request.getParameter("snacenv"),
+          request.getParameter("snackeydev"),
+          request.getParameter("snackeyprod"),
+          request.getParameter("snacmaxpreviewitems"),
+          request.getParameter("snacincludeapiresponse"));
     }
 
     // return current preference in all cases

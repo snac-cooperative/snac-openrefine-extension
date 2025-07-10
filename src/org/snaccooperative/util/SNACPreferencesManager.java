@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.refine.ProjectManager;
 import com.google.refine.preference.PreferenceStore;
-import com.google.refine.util.ParsingUtilities;
 import java.util.HashMap;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.util.SNACEnvironment;
 
 public class SNACPreferencesManager {
 
@@ -22,7 +19,8 @@ public class SNACPreferencesManager {
   private static final String PREFERENCE_STORE_KEY_ENVIRONMENT = "snac.environment";
   private static final String PREFERENCE_STORE_KEY_APIKEY_PREFIX = "snac.apikey.";
   private static final String PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS = "snac.preview.max_items";
-  private static final String PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE = "snac.upload.api_response";
+  private static final String PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE =
+      "snac.upload.api_response";
 
   private static final Integer SNAC_DEFAULT_MAX_PREVIEW_ITEMS = 10;
   private static final Boolean SNAC_DEFAULT_INCLUDE_API_RESPONSE = false;
@@ -57,19 +55,13 @@ public class SNACPreferencesManager {
   private SNACPreferencesManager() {
     prefStore = ProjectManager.singleton.getPreferenceStore();
 
-    _dev = new SNACEnvironment(
-      SNAC_ENV_DEV_ID,
-      SNAC_ENV_DEV_NAME,
-      SNAC_ENV_DEV_WEB_URL,
-      SNAC_ENV_DEV_API_URL
-    );
+    _dev =
+        new SNACEnvironment(
+            SNAC_ENV_DEV_ID, SNAC_ENV_DEV_NAME, SNAC_ENV_DEV_WEB_URL, SNAC_ENV_DEV_API_URL);
 
-    _prod = new SNACEnvironment(
-      SNAC_ENV_PROD_ID,
-      SNAC_ENV_PROD_NAME,
-      SNAC_ENV_PROD_WEB_URL,
-      SNAC_ENV_PROD_API_URL
-    );
+    _prod =
+        new SNACEnvironment(
+            SNAC_ENV_PROD_ID, SNAC_ENV_PROD_NAME, SNAC_ENV_PROD_WEB_URL, SNAC_ENV_PROD_API_URL);
 
     _env = new HashMap<String, SNACEnvironment>();
     _env.put(SNAC_ENV_DEV_ID, _dev);
@@ -82,7 +74,12 @@ public class SNACPreferencesManager {
     // read from openrefine preferences store
     logger.info("stored id: [" + (String) prefStore.get(PREFERENCE_STORE_KEY_ENVIRONMENT) + "]");
     for (String key : _env.keySet()) {
-      logger.info("stored env [" + key + "] api key = [" + (String) prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key) + "]");
+      logger.info(
+          "stored env ["
+              + key
+              + "] api key = ["
+              + (String) prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key)
+              + "]");
     }
 
     logger.info("local id: [" + _id + "]");
@@ -110,7 +107,7 @@ public class SNACPreferencesManager {
 
   private void loadPreferences() {
     // read from openrefine preferences store
-    //logger.info("loading preferences...");
+    // logger.info("loading preferences...");
 
     // get legacy api key preference to use as fallback when new preferences haven't been set
     String legacyKey = getLegacyKey();
@@ -119,17 +116,35 @@ public class SNACPreferencesManager {
     for (String key : _env.keySet()) {
       // pre-populate old api key as long as new preferences haven't been saved.
       // old api key was not environment-specific so populate it everywhere and let the user fix
-      _env.get(key).setAPIKey((String) valueWithFallback(prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key), legacyKey));
+      _env.get(key)
+          .setAPIKey(
+              (String)
+                  valueWithFallback(
+                      prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key), legacyKey));
     }
 
-    _maxPreviewItems = (Integer) valueWithFallback(prefStore.get(PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS), SNAC_DEFAULT_MAX_PREVIEW_ITEMS);
-    _includeAPIResponse = (Boolean) valueWithFallback(prefStore.get(PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE), SNAC_DEFAULT_INCLUDE_API_RESPONSE);
+    _maxPreviewItems =
+        (Integer)
+            valueWithFallback(
+                prefStore.get(PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS),
+                SNAC_DEFAULT_MAX_PREVIEW_ITEMS);
 
-    //logPreferences();
+    _includeAPIResponse =
+        (Boolean)
+            valueWithFallback(
+                prefStore.get(PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE),
+                SNAC_DEFAULT_INCLUDE_API_RESPONSE);
+
+    // logPreferences();
   }
 
-  public void savePreferences(String id, String devKey, String prodKey, String maxPreviewItemsStr, String includeAPIResponseStr) {
-    //logger.info("saving preferences...");
+  public void savePreferences(
+      String id,
+      String devKey,
+      String prodKey,
+      String maxPreviewItemsStr,
+      String includeAPIResponseStr) {
+    // logger.info("saving preferences...");
 
     // only check the ones that must be non-null
     if (id == null || devKey == null || prodKey == null || maxPreviewItemsStr == null) {
@@ -141,7 +156,10 @@ public class SNACPreferencesManager {
     try {
       maxPreviewItems = Integer.valueOf(maxPreviewItemsStr);
     } catch (NumberFormatException e) {
-      logger.warn("cannot save preferences: invalid value for maxPreviewItems: [" + maxPreviewItemsStr + "]");
+      logger.warn(
+          "cannot save preferences: invalid value for maxPreviewItems: ["
+              + maxPreviewItemsStr
+              + "]");
       return;
     }
 
@@ -149,7 +167,10 @@ public class SNACPreferencesManager {
     try {
       includeAPIResponse = Boolean.valueOf(includeAPIResponseStr);
     } catch (NumberFormatException e) {
-      logger.warn("cannot save preferences: invalid value for includeAPIResponse: [" + includeAPIResponseStr + "]");
+      logger.warn(
+          "cannot save preferences: invalid value for includeAPIResponse: ["
+              + includeAPIResponseStr
+              + "]");
       return;
     }
 
@@ -171,7 +192,7 @@ public class SNACPreferencesManager {
     // remove old legacy api key preference now that user has saved new preferences
     prefStore.put(LEGACY_PREFERENCE_STORE_KEY, null);
 
-    //logPreferences();
+    // logPreferences();
   }
 
   public String[] getIDs() {
@@ -297,5 +318,4 @@ public class SNACPreferencesManager {
   public Boolean includeAPIResponse() {
     return _includeAPIResponse;
   }
-
 }

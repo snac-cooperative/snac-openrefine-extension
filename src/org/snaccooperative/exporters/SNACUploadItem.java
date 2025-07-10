@@ -57,5 +57,4 @@ public abstract class SNACUploadItem {
   public String htmlLink(String url, String title) {
     return "<a href=\"" + url + "\" target=\"_blank\">" + title + "</a>";
   }
-
 }

@@ -25,7 +25,6 @@
 package org.snaccooperative.commands;
 
 import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
-import org.snaccooperative.util.SNACPreferencesManager;
 
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
@@ -39,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.exporters.SNACUploadItem;
 import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.util.SNACPreferencesManager;
 
 public class SNACPreviewSchemaCommand extends Command {
 
