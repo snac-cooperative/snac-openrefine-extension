@@ -1,9 +1,8 @@
 package org.snaccooperative.commands;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.data.Constellation;
@@ -43,16 +42,7 @@ public class SNACAPIResponse {
     // a badly-formed response or (most likely) an exception
 
     try {
-      JSONParser jsonParser = new JSONParser();
-      Object parseResult = jsonParser.parse(apiResponse);
-
-      if (!(parseResult instanceof JSONObject)) {
-        this._result = "failure";
-        this._message = apiResponse;
-        return;
-      }
-
-      JSONObject jsonResponse = (JSONObject) parseResult;
+      JSONObject jsonResponse = new JSONObject(apiResponse);
 
       Object result = jsonResponse.get("result");
       Object message = jsonResponse.get("message");
@@ -121,7 +111,7 @@ public class SNACAPIResponse {
           this._uri = client.urlForConstellationID(con.getID());
         }
       }
-    } catch (ParseException e) {
+    } catch (JSONException e) {
       // assume apiResponse is an exception string, not a badly-formed API response
       this._result = "exception";
       this._message = apiResponse;

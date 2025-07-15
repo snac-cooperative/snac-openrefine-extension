@@ -62,8 +62,6 @@ public class SNACSchema implements OverlayModel {
   @JsonProperty("columnMappings")
   protected HashMap<String, String> _columnMappings;
 
-  @JsonIgnore protected HashMap<String, String> _reverseColumnMappings;
-
   /*
    * Constructor.
    */
@@ -77,23 +75,9 @@ public class SNACSchema implements OverlayModel {
       @JsonProperty("schemaType") String schemaType,
       @JsonProperty("idColumn") String idColumn,
       @JsonProperty("columnMappings") HashMap<String, String> columnMappings) {
-    HashMap<String, String> forwardMap = new HashMap<String, String>();
-    HashMap<String, String> reverseMap = new HashMap<String, String>();
-
-    for (Map.Entry<String, String> entry : columnMappings.entrySet()) {
-      String csvColumn = entry.getKey();
-      String snacText = entry.getValue();
-      String snacField = snacText.toLowerCase();
-
-      forwardMap.put(csvColumn, snacText);
-      reverseMap.put(snacText, csvColumn);
-      reverseMap.put(snacField, csvColumn);
-    }
-
     this._schemaType = schemaType;
     this._idColumn = idColumn;
-    this._columnMappings = forwardMap;
-    this._reverseColumnMappings = reverseMap;
+    this._columnMappings = columnMappings;
   }
 
   @JsonProperty("schemaType")
@@ -109,11 +93,6 @@ public class SNACSchema implements OverlayModel {
   @JsonProperty("columnMappings")
   public HashMap<String, String> getColumnMappings() {
     return _columnMappings;
-  }
-
-  @JsonIgnore
-  public HashMap<String, String> getReverseColumnMappings() {
-    return _reverseColumnMappings;
   }
 
   public List<SNACUploadItem> evaluateRecords(Project project, Engine engine) {

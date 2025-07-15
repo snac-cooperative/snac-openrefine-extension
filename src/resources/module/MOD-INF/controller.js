@@ -39,6 +39,7 @@ function init() {
     RefineServlet.registerCommand(module, "perform-validation", new SNACPerformValidationCommand());
     RefineServlet.registerCommand(module, "export-json", new SNACExportJSONCommand());
     RefineServlet.registerCommand(module, "preferences", new SNACPreferencesCommand());
+    RefineServlet.registerCommand(module, "get-model", new SNACGetModelCommand());
 
     /*
      * Resources

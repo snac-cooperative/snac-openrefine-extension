@@ -34,10 +34,9 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.exporters.SNACUploadItem;
@@ -84,19 +83,16 @@ public class SNACExportJSONCommand extends Command {
 
       JSONObject jsonResp = new JSONObject();
       JSONArray jsonItems = new JSONArray();
-      JSONParser jsonParser = new JSONParser();
 
       for (int i = 0; i < items.size(); i++) {
         try {
-          // FIXME: "unchecked call to add(E) as a member of the raw type java.util.ArrayList"
-          jsonItems.add((JSONObject) jsonParser.parse(items.get(i).toJSON()));
-        } catch (ParseException e) {
+          jsonItems.put(new JSONObject(items.get(i).toJSON()));
+        } catch (JSONException e) {
           logger.warn("SNAC JSON export: skipping item " + (i + 1) + ": [" + e + "]");
           continue;
         }
       }
 
-      // FIXME: "unchecked call to put(K,V) as a member of the raw type java.util.HashMap"
       jsonResp.put(schema.getSchemaType() + "s", jsonItems);
 
       logger.info("SNAC JSON export succeeded");

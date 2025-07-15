@@ -11,19 +11,49 @@
 	<description>Schema alignment and data upload for the SNAC Cooperative</description>
 	<url>https://snaccooperative.org/</url>
 
+	<properties>
+		<java.minversion>11</java.minversion>
+		<java.maxversion>21</java.maxversion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- dependency versions -->
+		<build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
+		<maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+		<maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+		<maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+		<maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+		<openrefine-core.version>3.9.3</openrefine-core.version>
+		<!--<servlet-api.version>2.5</servlet-api.version>-->
+		<snac-datamodel.version>1.2.2</snac-datamodel.version>
+		<slf4j-api.version>2.0.17</slf4j-api.version>
+		<httpclient.version>4.5.14</httpclient.version>
+		<!--<jackson-databind.version>2.19.1</jackson-databind.version>-->
+		<json.version>20250517</json.version>
+		<!--<gson.version>2.13.1</gson.version>-->
+		<!--<json-simple.version>1.1.1</json-simple.version>-->
+		<testng.version>7.11.0</testng.version>
+	</properties>
+
 	<build>
 		<finalName>openrefine-snac</finalName>
+
+		<defaultGoal>package</defaultGoal>
+
 		<resources>
 			<resource>
 				<directory>src</directory>
 			</resource>
 		</resources>
+
 		<outputDirectory>module/MOD-INF/classes</outputDirectory>
+
 		<plugins>
 			<plugin>
+				<!-- https://mvnrepository.com/artifact/org.codehaus.mojo/build-helper-maven-plugin -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.8</version>
+				<version>${build-helper-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
@@ -38,31 +68,36 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<release>${java.minversion}</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-Xlint:deprecation,unchecked</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.6</version>
+				<version>${maven-resources-plugin.version}</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>${maven-dependency-plugin.version}</version>
 				<executions>
 					<execution>
 						<phase>compile</phase>
@@ -76,10 +111,12 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-clean-plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>${maven-clean-plugin.version}</version>
 				<configuration>
 					<filesets>
 						<fileset>
@@ -88,9 +125,12 @@
 					</filesets>
 				</configuration>
 			</plugin>
+
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>${maven-assembly-plugin.version}</version>
 				<configuration>
 					<descriptors>
 						<descriptor>src/assemble/module.xml</descriptor>
@@ -113,65 +153,91 @@
 	</build>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.openrefine/core -->
 		<dependency>
 			<groupId>org.openrefine</groupId>
 			<artifactId>core</artifactId>
-			<version>3.9.3</version>
+			<version>${openrefine-core.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.servlet/servlet-api -->
+<!--
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
+-->
 
 		<!-- add here the dependencies of your extension -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.18</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.5</version>
-		</dependency>
+
+		<!-- https://github.com/snac-cooperative/data-model-java -->
 		<dependency>
 			<groupId>org.snaccooperative</groupId>
 			<artifactId>datamodel</artifactId>
-			<version>1.2.2</version>
+			<version>${snac-datamodel.version}</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
+			<version>${httpclient.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20210307</version>
-		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+<!--
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.18.2</version>
+			<version>${jackson-databind.version}</version>
 		</dependency>
+-->
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+<!--
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+		</dependency>
+-->
+
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+<!--
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
-			<version>1.1</version>
+			<version>${json-simple.version}</version>
 		</dependency>
+-->
 
-
+		<!-- https://mvnrepository.com/artifact/org.testng/testng -->
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>6.9.10</version>
+			<version>${testng.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>maven-repository</id>

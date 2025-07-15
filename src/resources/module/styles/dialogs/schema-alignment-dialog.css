@@ -191,6 +191,7 @@ div.snac-schema-alignment-dialog-preview {
 .snac-schema-preview-column-field {
   padding: 3px;
   font-weight: bold;
+  width: 150px;
 }
 
 .snac-schema-preview-column-value {

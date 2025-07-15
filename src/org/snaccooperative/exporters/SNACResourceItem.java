@@ -20,6 +20,8 @@ import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.Term;
 import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.model.SNACResourceModel;
+import org.snaccooperative.model.SNACResourceModel.ResourceModelField;
 
 public class SNACResourceItem extends SNACUploadItem {
 
@@ -36,6 +38,8 @@ public class SNACResourceItem extends SNACUploadItem {
   protected List<Integer> _relatedConstellations;
   protected List<String> _validationErrors;
 
+  protected SNACResourceModel _resourceModel;
+
   public SNACResourceItem(
       Project project,
       SNACSchema schema,
@@ -49,6 +53,8 @@ public class SNACResourceItem extends SNACUploadItem {
     this._record = record;
 
     this._rowIndex = record.fromRowIndex;
+
+    this._resourceModel = new SNACResourceModel();
   }
 
   private void buildResource() {
@@ -65,7 +71,8 @@ public class SNACResourceItem extends SNACUploadItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
-      String snacField = entry.getValue().toLowerCase();
+
+      ResourceModelField resourceField = _resourceModel.getFieldType(entry.getValue());
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -76,8 +83,8 @@ public class SNACResourceItem extends SNACUploadItem {
           continue;
         }
 
-        switch (snacField) {
-          case "snac resource id":
+        switch (resourceField) {
+          case RESOURCE_ID:
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
@@ -88,7 +95,7 @@ public class SNACResourceItem extends SNACUploadItem {
             }
             continue;
 
-          case "resource type":
+          case RESOURCE_TYPE:
             Term typeTerm = _cache.getDocumentTypeTerm(cellValue);
 
             if (typeTerm == null) {
@@ -101,31 +108,27 @@ public class SNACResourceItem extends SNACUploadItem {
 
             continue;
 
-          case "title":
+          case TITLE:
             res.setTitle(cellValue);
             continue;
 
-          // case "display entry":
-          //   res.setDisplayEntry(cellValue);
-          //   continue;
-
-          case "resource url":
+          case RESOURCE_URL:
             res.setLink(cellValue);
             continue;
 
-          case "abstract":
+          case ABSTRACT:
             res.setAbstract(cellValue);
             continue;
 
-          case "extent":
+          case EXTENT:
             res.setExtent(cellValue);
             continue;
 
-          case "date":
+          case DATE:
             res.setDate(cellValue);
             continue;
 
-          case "language code": // queried alongside script code
+          case LANGUAGE_CODE: // queried alongside SCRIPT_CODE
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
@@ -143,7 +146,7 @@ public class SNACResourceItem extends SNACUploadItem {
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional associated script code in this row
-            String scriptCodeColumn = _schema.getReverseColumnMappings().get("script code");
+            String scriptCodeColumn = _resourceModel.getEntryForFieldType(ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
               String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
@@ -174,12 +177,12 @@ public class SNACResourceItem extends SNACUploadItem {
 
             continue;
 
-          case "script code": // queried alongside language code
+          case SCRIPT_CODE: // queried alongside LANGUAGE_CODE
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
-            String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
+            String languageCodeColumn = _resourceModel.getEntryForFieldType(ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
 
             if (languageCodeColumn != null) {
               String languageCode =
@@ -213,7 +216,7 @@ public class SNACResourceItem extends SNACUploadItem {
 
             continue;
 
-          case "holding repository snac id":
+          case HOLDING_REPOSITORY_ID:
             try {
               int id = Integer.parseInt(cellValue);
 
@@ -260,37 +263,38 @@ public class SNACResourceItem extends SNACUploadItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacText = entry.getValue();
-      String snacField = snacText.toLowerCase();
 
-      switch (snacField) {
-        case "resource type":
+      ResourceModelField resourceField = _resourceModel.getFieldType(entry.getValue());
+
+      switch (resourceField) {
+        case RESOURCE_TYPE:
           Term previewTerm = _resource.getDocumentType();
           if (previewTerm != null) {
             outFields.put(snacText, previewTerm.getTerm());
           }
           break;
 
-        case "title":
+        case TITLE:
           outFields.put(snacText, _resource.getTitle());
           break;
 
-        case "resource url":
+        case RESOURCE_URL:
           outFields.put(snacText, htmlLink(_resource.getLink(), _resource.getLink()));
           break;
 
-        case "abstract":
+        case ABSTRACT:
           outFields.put(snacText, _resource.getAbstract());
           break;
 
-        case "extent":
+        case EXTENT:
           outFields.put(snacText, _resource.getExtent());
           break;
 
-        case "date":
+        case DATE:
           outFields.put(snacText, _resource.getDate());
           break;
 
-        case "language code":
+        case LANGUAGE_CODE:
           List<String> langList = new ArrayList<>();
 
           for (int i = 0; i < _resource.getLanguages().size(); i++) {
@@ -343,7 +347,7 @@ public class SNACResourceItem extends SNACUploadItem {
 
           break;
 
-        case "holding repository snac id":
+        case HOLDING_REPOSITORY_ID:
           snacText = "Repository ID";
           if (_resource.getRepository() != null) {
             int repo_id = _resource.getRepository().getID();

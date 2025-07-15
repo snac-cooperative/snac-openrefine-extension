@@ -31,6 +31,10 @@ import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Subject;
 import org.snaccooperative.data.Term;
 import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.model.SNACConstellationModel;
+import org.snaccooperative.model.SNACConstellationModel.ConstellationModelField;
+import org.snaccooperative.model.SNACRelationModel;
+import org.snaccooperative.model.SNACRelationModel.RelationModelField;
 
 public class SNACConstellationItem extends SNACUploadItem {
 
@@ -48,6 +52,9 @@ public class SNACConstellationItem extends SNACUploadItem {
   protected List<Integer> _relatedResources;
   protected List<String> _validationErrors;
 
+  protected SNACConstellationModel _constellationModel;
+  protected SNACRelationModel _relationModel;
+
   public SNACConstellationItem(
       Project project,
       SNACSchema schema,
@@ -61,6 +68,9 @@ public class SNACConstellationItem extends SNACUploadItem {
     this._record = record;
 
     this._rowIndex = record.fromRowIndex;
+
+    this._constellationModel = new SNACConstellationModel();
+    this._relationModel = new SNACRelationModel();
   }
 
   private void buildConstellation() {
@@ -89,7 +99,9 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
-      String snacField = entry.getValue().toLowerCase();
+
+      ConstellationModelField constellationField = _constellationModel.getFieldType(entry.getValue());
+      RelationModelField relationField = _relationModel.getFieldType(entry.getValue());
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -100,8 +112,11 @@ public class SNACConstellationItem extends SNACUploadItem {
           continue;
         }
 
-        switch (snacField) {
-          case "snac cpf id":
+        // NOTE: there are two switch statements because this could be a constellation or relation field
+
+        // handle constellation model fields
+        switch (constellationField) {
+          case CPF_ID:
             try {
               int id = Integer.parseInt(cellValue);
               con.setID(id);
@@ -110,7 +125,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             }
             continue;
 
-          case "cpf type":
+          case CPF_TYPE:
             Term entityTypeTerm = _cache.getEntityTypeTerm(cellValue);
 
             if (entityTypeTerm == null) {
@@ -122,7 +137,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "name entry":
+          case NAME_ENTRY:
             NameEntry preferredName = new NameEntry();
             preferredName.setOriginal(cellValue);
             preferredName.setPreferenceScore(99);
@@ -132,7 +147,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "variant name entry":
+          case VARIANT_NAME_ENTRY:
             NameEntry variantName = new NameEntry();
             variantName.setOriginal(cellValue);
             variantName.setPreferenceScore(0);
@@ -142,9 +157,9 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "exist date":
+          case EXIST_DATE:
             // find and add required associated exist date type in this row
-            String dateTypeColumn = _schema.getReverseColumnMappings().get("exist date type");
+            String dateTypeColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.EXIST_DATE_TYPE, _schema.getColumnMappings());
 
             if (dateTypeColumn == null) {
               logger.warn("no exist date type column found");
@@ -179,8 +194,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             }
 
             // find and add optional exist date descriptive note in this row
-            String dateNoteColumn =
-                _schema.getReverseColumnMappings().get("exist date descriptive note");
+            String dateNoteColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE, _schema.getColumnMappings());
 
             String dateNote = "";
             if (dateNoteColumn != null) {
@@ -196,13 +210,13 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "exist date descriptive note": // queried alongside "exist date"
+          case EXIST_DATE_TYPE: // queried alongside EXIST_DATE
             continue;
 
-          case "exist date type": // queried alongside "exist date"
+          case EXIST_DATE_DESCRIPTIVE_NOTE: // queried alongside EXIST_DATE
             continue;
 
-          case "subject":
+          case SUBJECT:
             Term subjectTerm = _cache.getSubjectTerm(cellValue);
 
             if (subjectTerm == null) {
@@ -218,7 +232,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "place":
+          case PLACE:
             Place place = new Place();
             place.setOriginal(cellValue);
             place.setOperation("insert");
@@ -227,7 +241,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             String placeType = "AssociatedPlace";
 
             // find and add optional associated place type in this row
-            String placeTypeColumn = _schema.getReverseColumnMappings().get("place type");
+            String placeTypeColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.PLACE_TYPE, _schema.getColumnMappings());
             if (placeTypeColumn != null) {
               placeType = getCellValueForRowByColumnName(_project, row, placeTypeColumn);
             }
@@ -243,7 +257,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             }
 
             // find and add optional associated place role in this row
-            String placeRoleColumn = _schema.getReverseColumnMappings().get("place role");
+            String placeRoleColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.PLACE_ROLE, _schema.getColumnMappings());
 
             if (placeRoleColumn != null) {
               String placeRole = getCellValueForRowByColumnName(_project, row, placeRoleColumn);
@@ -263,28 +277,27 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "place role": // queried alongside "place"
+          case PLACE_ROLE: // queried alongside PLACE
             continue;
 
-          case "place type": // queried alongside "place"
+          case PLACE_TYPE: // queried alongside PLACE
             continue;
 
-          case "source citation":
+          case SOURCE_CITATION:
             Source source = new Source();
 
             // set citation
             source.setCitation(cellValue);
 
             // set url
-            String urlColumn = _schema.getReverseColumnMappings().get("source citation url");
+            String urlColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.SOURCE_CITATION_URL, _schema.getColumnMappings());
             if (urlColumn != null) {
               String url = getCellValueForRowByColumnName(_project, row, urlColumn);
               source.setURI(url);
             }
 
             // set found data
-            String foundColumn =
-                _schema.getReverseColumnMappings().get("source citation found data");
+            String foundColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.SOURCE_CITATION_FOUND_DATA, _schema.getColumnMappings());
             if (foundColumn != null) {
               String foundData = getCellValueForRowByColumnName(_project, row, foundColumn);
               source.setText(foundData);
@@ -295,13 +308,13 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "source citation url": // queried alongside "source citation"
+          case SOURCE_CITATION_URL: // queried alongside SOURCE_CITATION
             continue;
 
-          case "source citation found data": // queried alongside "source citation"
+          case SOURCE_CITATION_FOUND_DATA: // queried alongside SOURCE_CITATION
             continue;
 
-          case "occupation":
+          case OCCUPATION:
             Term occupationTerm = _cache.getOccupationTerm(cellValue);
 
             if (occupationTerm == null) {
@@ -317,7 +330,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "activity":
+          case ACTIVITY:
             Term activityTerm = _cache.getActivityTerm(cellValue);
 
             if (activityTerm == null) {
@@ -333,7 +346,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "language code": // queried alongside script code
+          case LANGUAGE_CODE: // queried alongside SCRIPT_CODE
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
@@ -351,7 +364,7 @@ public class SNACConstellationItem extends SNACUploadItem {
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional associated script code in this row
-            String scriptCodeColumn = _schema.getReverseColumnMappings().get("script code");
+            String scriptCodeColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
               String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
@@ -382,12 +395,12 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "script code": // queried alongside language code
+          case SCRIPT_CODE: // queried alongside LANGUAGE_CODE
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
-            String languageCodeColumn = _schema.getReverseColumnMappings().get("language code");
+            String languageCodeColumn = _constellationModel.getEntryForFieldType(ConstellationModelField.LANGUAGE_CODE, _schema.getColumnMappings());
 
             if (languageCodeColumn != null) {
               String languageCode =
@@ -421,7 +434,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "bioghist":
+          case BIOG_HIST:
             BiogHist biogHist = new BiogHist();
             biogHist.setText(cellValue);
             biogHist.setOperation("insert");
@@ -430,7 +443,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "external related cpf url":
+          case EXTERNAL_RELATED_CPF_URL:
             // external related CPF URLs are always sameAs relations
             String defaultExternalRelatedCPFUrlType = "sameAs";
             Term sameAsTerm = _cache.getRecordTypeTerm(defaultExternalRelatedCPFUrlType);
@@ -453,8 +466,11 @@ public class SNACConstellationItem extends SNACUploadItem {
             sameAsRelations.add(sameAs);
 
             continue;
+        }
 
-          case "snac resource id":
+        // handle relation model fields that are not in common with constellation model
+        switch (relationField) {
+          case RELATED_RESOURCE_ID:
             try {
               int targetResource = Integer.parseInt(cellValue);
               Resource resource = new Resource();
@@ -465,8 +481,7 @@ public class SNACConstellationItem extends SNACUploadItem {
               resourceRelation.setResource(resource);
 
               // find and add optional associated 'cpf to resource relation type' in this row
-              String resourceRoleColumn =
-                  _schema.getReverseColumnMappings().get("cpf to resource relation type");
+              String resourceRoleColumn = _relationModel.getEntryForFieldType(RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE, _schema.getColumnMappings());
 
               if (resourceRoleColumn != null) {
                 String resourceRole =
@@ -496,10 +511,10 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "cpf to resource relation type": // queried alongside "resource id"
+          case CPF_TO_RESOURCE_RELATION_TYPE: // queried alongside RESOURCE_ID
             continue;
 
-          case "related snac cpf id":
+          case RELATED_CPF_ID:
             try {
               int targetConstellation = Integer.parseInt(cellValue);
               ConstellationRelation cpfRelation = new ConstellationRelation();
@@ -507,8 +522,7 @@ public class SNACConstellationItem extends SNACUploadItem {
               cpfRelation.setTargetConstellation(targetConstellation);
 
               // Get Relation Type.
-              String cpfRelationTypeColumn =
-                  _schema.getReverseColumnMappings().get("cpf to cpf relation type");
+              String cpfRelationTypeColumn = _relationModel.getEntryForFieldType(RelationModelField.CPF_TO_CPF_RELATION_TYPE, _schema.getColumnMappings());
 
               if (cpfRelationTypeColumn != null) {
                 String cpfRelationType =
@@ -539,11 +553,8 @@ public class SNACConstellationItem extends SNACUploadItem {
 
             continue;
 
-          case "cpf to cpf relation type": // Queried alongside related snac cpf id
+          case CPF_TO_CPF_RELATION_TYPE: // Queried alongside RELATED_CPF_ID
             break;
-
-          default:
-            continue;
         }
       }
     }
@@ -562,11 +573,13 @@ public class SNACConstellationItem extends SNACUploadItem {
 
         SNACDate range = new SNACDate();
         range.setRange(true);
+        // TODO: next two lines seem sus, need to verify this is correct
         range.setFromDate(from.getFromDate(), from.getFromDate(), from.getFromType());
         range.setToDate(to.getFromDate(), from.getFromDate(), from.getFromType());
         range.setOperation("insert");
 
         dateList.add(range);
+        break;
 
       default:
         // add as individual dates
@@ -609,17 +622,19 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacText = entry.getValue();
-      String snacField = snacText.toLowerCase();
 
-      switch (snacField) {
-        case "cpf type":
+      ConstellationModelField constellationField = _constellationModel.getFieldType(entry.getValue());
+      RelationModelField relationField = _relationModel.getFieldType(entry.getValue());
+
+      switch (constellationField) {
+        case CPF_TYPE:
           Term previewTerm = _constellation.getEntityType();
           if (previewTerm != null) {
             outFields.put(snacText, previewTerm.getTerm());
           }
           break;
 
-        case "name entry":
+        case NAME_ENTRY:
           List<String> namesAndPreferenceScores = new ArrayList<String>();
           for (int i = 0; i < _constellation.getNameEntries().size(); i++) {
             NameEntry name = _constellation.getNameEntries().get(i);
@@ -634,7 +649,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(namesAndPreferenceScores));
           break;
 
-        case "exist date":
+        case EXIST_DATE:
           List<String> dates = new ArrayList<String>();
           for (int i = 0; i < _constellation.getDateList().size(); i++) {
             dates.add(_constellation.getDateList().get(i).toString().replaceFirst("^Date: ", ""));
@@ -642,7 +657,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(dates));
           break;
 
-        case "subject":
+        case SUBJECT:
           List<String> subjects = new ArrayList<String>();
           for (int i = 0; i < _constellation.getSubjects().size(); i++) {
             subjects.add(_constellation.getSubjects().get(i).getTerm().getTerm());
@@ -650,7 +665,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(subjects));
           break;
 
-        case "place":
+        case PLACE:
           List<String> placesAndRoles = new ArrayList<String>();
           for (int i = 0; i < _constellation.getPlaces().size(); i++) {
             Place place = _constellation.getPlaces().get(i);
@@ -667,7 +682,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(placesAndRoles));
           break;
 
-        case "occupation":
+        case OCCUPATION:
           List<String> occupations = new ArrayList<String>();
           for (int i = 0; i < _constellation.getOccupations().size(); i++) {
             occupations.add(_constellation.getOccupations().get(i).getTerm().getTerm());
@@ -675,7 +690,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(occupations));
           break;
 
-        case "activity":
+        case ACTIVITY:
           List<String> activities = new ArrayList<String>();
           for (int i = 0; i < _constellation.getActivities().size(); i++) {
             activities.add(_constellation.getActivities().get(i).getTerm().getTerm());
@@ -683,7 +698,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(activities));
           break;
 
-        case "language code":
+        case LANGUAGE_CODE:
           List<String> langList = new ArrayList<>();
 
           for (int i = 0; i < _constellation.getLanguagesUsed().size(); i++) {
@@ -736,7 +751,7 @@ public class SNACConstellationItem extends SNACUploadItem {
 
           break;
 
-        case "bioghist":
+        case BIOG_HIST:
           List<String> bioghists = new ArrayList<String>();
           for (int i = 0; i < _constellation.getBiogHists().size(); i++) {
             bioghists.add(_constellation.getBiogHists().get(i).getText());
@@ -744,7 +759,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(bioghists));
           break;
 
-        case "source citation":
+        case SOURCE_CITATION:
           List<String> sources = new ArrayList<String>();
           for (int i = 0; i < _constellation.getSources().size(); i++) {
             Source source = _constellation.getSources().get(i);
@@ -760,7 +775,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(sources));
           break;
 
-        case "external related cpf url":
+        case EXTERNAL_RELATED_CPF_URL:
           List<String> sameAsURIs = new ArrayList<String>();
           for (int i = 0; i < _constellation.getSameAsRelations().size(); i++) {
             SameAs sameAs = _constellation.getSameAsRelations().get(i);
@@ -768,8 +783,10 @@ public class SNACConstellationItem extends SNACUploadItem {
           }
           outFields.put(snacText, htmlOrderedList(sameAsURIs));
           break;
+      }
 
-        case "related snac cpf id":
+      switch (relationField) {
+        case RELATED_CPF_ID:
           List<String> relations = new ArrayList<String>();
           for (int i = 0; i < _constellation.getRelations().size(); i++) {
             ConstellationRelation relation = _constellation.getRelations().get(i);
@@ -784,7 +801,7 @@ public class SNACConstellationItem extends SNACUploadItem {
           outFields.put(snacText, htmlOrderedList(relations));
           break;
 
-        case "snac resource id":
+        case RELATED_RESOURCE_ID:
           List<String> resourceRelations = new ArrayList<String>();
           for (int i = 0; i < _constellation.getResourceRelations().size(); i++) {
             ResourceRelation resourceRelation = _constellation.getResourceRelations().get(i);

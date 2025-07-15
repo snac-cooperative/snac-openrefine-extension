@@ -50,237 +50,54 @@ var snacDebug = function(s) {
    }
 };
 
-SNACSchemaAlignmentDialog.getSNACModel = function() {
-   snacDebug(`***** [ getSNACModel ] *****`);
+SNACSchemaAlignmentDialog.setup = function(onDone) {
+   this.setupModel(onDone);
+}
 
-   this.SNACResourceModel = [
-      {
-         name:     "Resource Type",
-         required: true,
-         tooltip:  "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource"
-      },
-      {
-         name:     "SNAC Resource ID",
-         required: false,
-         tooltip:  "SNAC identifier for Resource Description.  Leave blank if Resource Description is NOT in SNAC."
-      },
-      {
-         name:     "Title",
-         required: true,
-         tooltip:  "Title of a resource (that may or may not include dates) (e.g. Jacob Miller Papers, 1809-1882)"
-      },
-      {
-         name:     "Resource URL",
-         required: true,
-         tooltip:  "URL of the local Resource Description"
-      },
-      {
-         name:     "Holding Repository SNAC ID",
-         required: true,
-         tooltip:  "SNAC identifier for the holding repository description.  The holding repository must be created in SNAC before adding Resource Descriptions."
-      },
-      {
-         name:     "Abstract",
-         required: false,
-         tooltip:  "Brief prose abstract of scope and contents of the resource"
-      },
-      {
-         name:     "Extent",
-         required: false,
-         tooltip:  "Extent of the resource"
-      },
-      {
-         name:     "Date",
-         required: false,
-         tooltip:  "Date or dates of the resource (YYYY or YYYY-YYYY)"
-      },
-      {
-         name:     "Language Code",
-         required: false,
-         tooltip:  "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Repeatable in relation to resource.  Combinable with a Script Code in the same row."
-      },
-      {
-         name:     "Script Code",
-         required: false,
-         tooltip:  "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Repeatable in relation to resource.  Combinable with a Language Code in the same row."
-      }
-   ];
+SNACSchemaAlignmentDialog.setupModel = function(onDone) {
+   snacDebug(`***** [ setupModel ] *****`);
 
-   this.SNACConstellationModel = [
-      {
-         name:     "CPF Type",
-         required: true,
-         tooltip:  "Type of CPF entity.  Possible values are: corporateBody, person, family"
-      },
-      {
-         name:     "SNAC CPF ID",
-         required: false,
-         tooltip:  "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC."
-      },
-      {
-         name:     "Name Entry",
-         required: false,
-         tooltip:  "Preferred Name Entry of the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Variant Name Entry",
-         required: false,
-         tooltip:  "Variant Name Entry of the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Exist Date",
-         required: false,
-         tooltip:  "Exist Date or Dates of the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Exist Date Type",
-         required: false,
-         tooltip:  "Type of Exist Date.  Repeatable in relation to entity.  The following values may be used: Active, Birth, Death, Establishment, Disestablishment.  Only used if Exist Date field is defined in the same row, in which case it is required."
-      },
-      {
-         name:     "Exist Date Descriptive Note",
-         required: false,
-         tooltip:  "Descriptive Note of Exist Date.  Repeatable in relation to entity.  Only used if Exist Date field is defined in the same row."
-      },
-      {
-         name:     "Subject",
-         required: false,
-         tooltip:  "Subject term associated with the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Place",
-         required: false,
-         tooltip:  "Place name associated with the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Place Role",
-         required: false,
-         tooltip:  "Role of the place in relation to the CPF entity.  The following values may be used: Birth, Death, Residence, Citizenship, Work.  Only used if Place field is defined in the same row."
-      },
-      {
-         name:     "Place Type",
-         required: false,
-         tooltip:  "Type of the place in relation to the CPF entity.  The following values may be used: AssociatedPlace, Address.  Defaults to AssociatedPlace if not supplied.  Only used if Place field is defined in the same row."
-      },
-      {
-         name:     "Occupation",
-         required: false,
-         tooltip:  "Occupation term associated with the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Activity",
-         required: false,
-         tooltip:  "Activity term associated with the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Language Code",
-         required: false,
-         tooltip:  "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Repeatable in relation to resource.  Combinable with a Script Code in the same row."
-      },
-      {
-         name:     "Script Code",
-         required: false,
-         tooltip:  "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Repeatable in relation to resource.  Combinable with a Language Code in the same row."
-      },
-      {
-         name:     "BiogHist",
-         required: false,
-         tooltip:  "Biography or History note associated with the CPF entity.  By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF.  Repeatable in relation to entity."
-      },
-      {
-         name:     "External Related CPF URL",
-         required: false,
-         tooltip:  "URL to a description of the CPF entity in an external authority.  Such links are limited to those found in the approved list linked above.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Source Citation",
-         required: false,
-         tooltip:  "Text citation for a source used in describing the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "Source Citation URL",
-         required: false,
-         tooltip:  "URL, if available, for the Source Citation.  Repeatable in relation to entity.  Only used if Source Citation field is defined in the same row."
-      },
-      {
-         name:     "Source Citation Found Data",
-         required: false,
-         tooltip:  "Information found in the Source that is evidence used in the description of the CPF entity.  Repeatable in relation to entity.  Only used if Source Citation field is defined in the same row."
-      }
-   ];
-
-   this.SNACRelationModel = [
-      {
-         name:     "CPF Type",
-         required: true,
-         tooltip:  "Type of CPF entity.  Possible values are: corporateBody, person, family"
-      },
-      {
-         name:     "SNAC CPF ID",
-         required: false,
-         tooltip:  "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC."
-      },
-      {
-         name:     "CPF to CPF Relation Type",
-         required: false,
-         tooltip:  "Nature of the relation of the CPF entity with the related CPF entity.  Repeatable in relation to entity.  The following values may be used: associatedWith, correspondedWith.  Only used if Related SNAC CPF ID field is defined in the same row."
-      },
-      {
-         name:     "Related SNAC CPF ID",
-         required: false,
-         tooltip:  "SNAC ID of a CPF entity in SNAC related to the CPF entity.  Repeatable in relation to entity."
-      },
-      {
-         name:     "CPF to Resource Relation Type",
-         required: false,
-         tooltip:  "Role of the CPF entity in relation to the Resource.  Repeatable in relation to entity.  The following values may be used: contributorOf, creatorOf, editorOf, referencedIn.  Only used if SNAC Resource ID field is defined in the same row."
-      },
-      {
-         name:     "SNAC Resource ID",  // TODO: SNAC RESOURCE ID rename (?) -- NOTE: will require supporting saved schemas with old name
-         required: false,
-         tooltip:  "SNAC ID for a related Resource in SNAC.  Repeatable in relation to entity."
-      }
-   ];
-
-   this.SNACResourceNames = this.SNACResourceModel.map(x => x.name);
-   this.SNACResourceNamesRequired = this.SNACResourceModel.filter(x => x.required === true).map(x => x.name);
-   this.SNACResourceTooltips = this.SNACResourceModel.map(x => x.tooltip);
-
-   this.SNACConstellationNames = this.SNACConstellationModel.map(x => x.name);
-   this.SNACConstellationNamesRequired = this.SNACConstellationModel.filter(x => x.required === true).map(x => x.name);
-   this.SNACConstellationTooltips = this.SNACConstellationModel.map(x => x.tooltip);
-
-   this.SNACRelationNames = this.SNACRelationModel.map(x => x.name);
-   this.SNACRelationNamesRequired = this.SNACRelationModel.filter(x => x.required === true).map(x => x.name);
-   this.SNACRelationTooltips = this.SNACRelationModel.map(x => x.tooltip);
-
-   // TODO: probably should get the above info from the backend instead at some point, a la:
-/*
    var _this = this;
 
-   Refine.postCSRF(
-      "command/snac/get-model?" + $.param({ project: theProject.id }),
-      { schema: JSON.stringify(schema), engine: JSON.stringify(ui.browsingEngine.getJSON()) },
+   $.get(
+      "command/snac/get-model",
       function(data) {
-         snacDebug(`getSNACModel(): SUCCESS  data = [${JSON.stringify(data)}]`);
-      },
-      "json"
-   );
-*/
+         snacDebug(`setupModel(): SUCCESS  data = [${JSON.stringify(data)}]`);
+         _this._model = data;
+
+         _this.SNACConstellationModel = _this._model.constellation;
+         _this.SNACResourceModel = _this._model.resource;
+         _this.SNACRelationModel = _this._model.relation;
+
+         // TODO: phase these out and use model fields directly?
+         _this.SNACResourceNames = _this.SNACResourceModel.map(x => x.name);
+         _this.SNACResourceNamesRequired = _this.SNACResourceModel.filter(x => x.required === true).map(x => x.name);
+         _this.SNACResourceTooltips = _this.SNACResourceModel.map(x => x.tooltip);
+
+         _this.SNACConstellationNames = _this.SNACConstellationModel.map(x => x.name);
+         _this.SNACConstellationNamesRequired = _this.SNACConstellationModel.filter(x => x.required === true).map(x => x.name);
+         _this.SNACConstellationTooltips = _this.SNACConstellationModel.map(x => x.tooltip);
+
+         _this.SNACRelationNames = _this.SNACRelationModel.map(x => x.name);
+         _this.SNACRelationNamesRequired = _this.SNACRelationModel.filter(x => x.required === true).map(x => x.name);
+         _this.SNACRelationTooltips = _this.SNACRelationModel.map(x => x.tooltip);
+
+         _this.setupTabs();
+
+         if (onDone) onDone();
+      });
 };
 
 /**
  * Installs the tabs in the UI the first time the snac
  * extension is called.
  */
-SNACSchemaAlignmentDialog.setUpTabs = function() {
-   snacDebug(`***** [ setUpTabs ] *****`);
+SNACSchemaAlignmentDialog.setupTabs = function() {
+   snacDebug(`***** [ setupTabs ] *****`);
 
    var _this = this;
 
    this._ignoreChanges = true;
-
-   this.getSNACModel();
 
    this._rightPanel = $('#right-panel');
    this._viewPanel = $('#view-panel').addClass('main-view-panel-tab');
@@ -796,6 +613,11 @@ SNACSchemaAlignmentDialog.isSetUp = function() {
    return $('#snac-schema-panel').length !== 0;
 }
 
+SNACSchemaAlignmentDialog.switchToSchemaPanel = function() {
+   $('.main-view-panel-tab-header').show();
+   SNACSchemaAlignmentDialog.switchTab('#snac-schema-panel');
+}
+
 SNACSchemaAlignmentDialog.launch = function(onDone) {
    snacDebug(`***** [ launch ] *****`);
 
@@ -803,12 +625,10 @@ SNACSchemaAlignmentDialog.launch = function(onDone) {
    this._hasUnsavedChanges = false;
 
    if (!this.isSetUp()) {
-      this.setUpTabs();
+      this.setup(this.switchToSchemaPanel);
+   } else {
+      this.switchToSchemaPanel()
    }
-
-   $('.main-view-panel-tab-header').show();
-
-   this.switchTab('#snac-schema-panel');
 }
 
 var beforeUnload = function(e) {
@@ -1086,7 +906,7 @@ Refine.registerUpdateFunction(function(options) {
 
    // Inject tabs in any project where the schema has been defined
    if (theProject.overlayModels.snacSchema && !SNACSchemaAlignmentDialog.isSetUp()) {
-      SNACSchemaAlignmentDialog.setUpTabs();
+      SNACSchemaAlignmentDialog.setup();
    }
    if (SNACSchemaAlignmentDialog.isSetUp() && (options.everythingChanged || options.modelsChanged ||
       options.rowsChanged || options.rowMetadataChanged || options.cellsChanged || options.engineChanged)) {
@@ -1129,6 +949,10 @@ SNACSchemaAlignmentDialog.updateWarnings = function(warnings, totalCount) {
    if (totalCount) {
       countsElem.text(totalCount);
       countsElem.show();
+   } else {
+      table.before($('<p></p>')
+         .addClass('snac-panel-explanation')
+          .text($.i18n('snac-schema/no-issues-detected')));
    }
 
    return totalCount;

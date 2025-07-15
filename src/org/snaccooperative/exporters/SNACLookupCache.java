@@ -2,9 +2,8 @@ package org.snaccooperative.exporters;
 
 import java.util.HashMap;
 import org.apache.http.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -144,14 +143,12 @@ public class SNACLookupCache {
 
       // existence check: verify that the total number of hits for this id is 1
 
-      JSONParser jp = new JSONParser();
-      JSONObject results =
-          (JSONObject) ((JSONObject) jp.parse(lookupResponse.getAPIResponse())).get("results");
+      JSONObject results = (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("results");
       JSONObject hits = (JSONObject) results.get("hits");
       JSONObject total = (JSONObject) hits.get("total");
       Integer value = (Integer) (((Number) total.get("value")).intValue());
       return (value == 1);
-    } catch (ParseException e) {
+    } catch (JSONException e) {
       logger.warn("constellation lookup response parse failure: [" + e + "]");
       return null;
     }
@@ -198,9 +195,7 @@ public class SNACLookupCache {
       // existence check: it's probably sufficient that a resource was returned, but
       // we go the extra inch and verify that its id equals the one we requested
 
-      JSONParser jp = new JSONParser();
-      JSONObject resource =
-          (JSONObject) ((JSONObject) jp.parse(lookupResponse.getAPIResponse())).get("resource");
+      JSONObject resource = (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("resource");
 
       if (resource == null) {
         return false;
@@ -208,7 +203,7 @@ public class SNACLookupCache {
 
       Integer resid = Integer.parseInt((String) resource.get("id"));
       return resid.equals(id);
-    } catch (ParseException e) {
+    } catch (JSONException e) {
       logger.warn("resource lookup response parse failure: [" + e + "]");
       return null;
     }

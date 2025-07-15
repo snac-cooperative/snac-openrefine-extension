@@ -2,10 +2,9 @@ package org.snaccooperative.exporters;
 
 import java.util.HashMap;
 import org.apache.http.*;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -36,17 +35,15 @@ public class SNACTermCache {
 
       SNACAPIResponse lookupResponse = client.post(apiQuery);
 
-      JSONParser jp = new JSONParser();
-      JSONArray results =
-          (JSONArray) ((JSONObject) jp.parse(lookupResponse.getAPIResponse())).get("results");
+      JSONArray results = (JSONArray) new JSONObject(lookupResponse.getAPIResponse()).get("results");
 
-      if (results.size() <= 0) {
+      if (results.length() <= 0) {
         logger.error(
             "vocabulary [" + _type + "] query returned no results for term: [" + key + "]");
         return null;
       }
 
-      for (int i = 0; i < results.size(); i++) {
+      for (int i = 0; i < results.length(); i++) {
         JSONObject result = (JSONObject) results.get(i);
 
         String gotTerm = (String) result.get("term");
@@ -73,7 +70,7 @@ public class SNACTermCache {
 
         return term;
       }
-    } catch (ParseException e) {
+    } catch (JSONException e) {
       logger.error("vocabulary [" + _type + "] query response parse failure: [" + e + "]");
     }
 
