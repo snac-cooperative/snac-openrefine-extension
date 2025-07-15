@@ -19,9 +19,9 @@ import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.Term;
-import org.snaccooperative.schema.SNACSchema;
 import org.snaccooperative.model.SNACResourceModel;
 import org.snaccooperative.model.SNACResourceModel.ResourceModelField;
+import org.snaccooperative.schema.SNACSchema;
 
 public class SNACResourceItem extends SNACUploadItem {
 
@@ -146,7 +146,9 @@ public class SNACResourceItem extends SNACUploadItem {
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional associated script code in this row
-            String scriptCodeColumn = _resourceModel.getEntryForFieldType(ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
+            String scriptCodeColumn =
+                _resourceModel.getEntryForFieldType(
+                    ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
               String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
@@ -182,7 +184,9 @@ public class SNACResourceItem extends SNACUploadItem {
             // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
-            String languageCodeColumn = _resourceModel.getEntryForFieldType(ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
+            String languageCodeColumn =
+                _resourceModel.getEntryForFieldType(
+                    ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
 
             if (languageCodeColumn != null) {
               String languageCode =

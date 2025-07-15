@@ -2,20 +2,31 @@ package org.snaccooperative.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@JsonPropertyOrder({ "name", "required", "repeatable", "controlled", "tooltip" })
+@JsonPropertyOrder({"name", "required", "repeatable", "controlled", "tooltip"})
 public class SNACModelField {
 
   static final Logger logger = LoggerFactory.getLogger("SNACModelField");
 
-  public enum FieldRequirement { REQUIRED, OPTIONAL };
-  public enum FieldOccurence { SINGLE, MULTIPLE };
-  public enum FieldVocabulary { CONTROLLED, FREETEXT, IDENTIFIER };
+  public enum FieldRequirement {
+    REQUIRED,
+    OPTIONAL
+  };
+
+  public enum FieldOccurence {
+    SINGLE,
+    MULTIPLE
+  };
+
+  public enum FieldVocabulary {
+    CONTROLLED,
+    FREETEXT,
+    IDENTIFIER
+  };
+
   // TODO:  add row relations (dependencies) text description field?  or just leave it in tooltips
 
   private String _name;
@@ -26,11 +37,22 @@ public class SNACModelField {
   private FieldVocabulary _vocabulary;
   private String _tooltip;
 
-  public SNACModelField(String name, FieldRequirement requirement, FieldOccurence occurence, FieldVocabulary vocabulary, String tooltip) {
+  public SNACModelField(
+      String name,
+      FieldRequirement requirement,
+      FieldOccurence occurence,
+      FieldVocabulary vocabulary,
+      String tooltip) {
     this(name, null, requirement, occurence, vocabulary, tooltip);
   }
 
-  public SNACModelField(String name, ArrayList<String> previousNames, FieldRequirement requirement, FieldOccurence occurence, FieldVocabulary vocabulary, String tooltip) {
+  public SNACModelField(
+      String name,
+      ArrayList<String> previousNames,
+      FieldRequirement requirement,
+      FieldOccurence occurence,
+      FieldVocabulary vocabulary,
+      String tooltip) {
     _name = name;
     _previousNames = previousNames;
     _requirement = requirement;

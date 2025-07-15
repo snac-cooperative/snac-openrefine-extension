@@ -1,22 +1,10 @@
 package org.snaccooperative.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRootName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.snaccooperative.model.SNACModelField;
-import org.snaccooperative.model.SNACModelField.FieldRequirement;
-import org.snaccooperative.model.SNACModelField.FieldOccurence;
-import org.snaccooperative.model.SNACModelField.FieldVocabulary;
 
 public class SNACAbstractModel<E extends Enum<E>> {
 

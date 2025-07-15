@@ -2,8 +2,8 @@ package org.snaccooperative.exporters;
 
 import java.util.HashMap;
 import org.apache.http.*;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -143,7 +143,8 @@ public class SNACLookupCache {
 
       // existence check: verify that the total number of hits for this id is 1
 
-      JSONObject results = (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("results");
+      JSONObject results =
+          (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("results");
       JSONObject hits = (JSONObject) results.get("hits");
       JSONObject total = (JSONObject) hits.get("total");
       Integer value = (Integer) (((Number) total.get("value")).intValue());
@@ -195,7 +196,8 @@ public class SNACLookupCache {
       // existence check: it's probably sufficient that a resource was returned, but
       // we go the extra inch and verify that its id equals the one we requested
 
-      JSONObject resource = (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("resource");
+      JSONObject resource =
+          (JSONObject) new JSONObject(lookupResponse.getAPIResponse()).get("resource");
 
       if (resource == null) {
         return false;

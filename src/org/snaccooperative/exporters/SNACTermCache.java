@@ -3,8 +3,8 @@ package org.snaccooperative.exporters;
 import java.util.HashMap;
 import org.apache.http.*;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -35,7 +35,8 @@ public class SNACTermCache {
 
       SNACAPIResponse lookupResponse = client.post(apiQuery);
 
-      JSONArray results = (JSONArray) new JSONObject(lookupResponse.getAPIResponse()).get("results");
+      JSONArray results =
+          (JSONArray) new JSONObject(lookupResponse.getAPIResponse()).get("results");
 
       if (results.length() <= 0) {
         logger.error(
