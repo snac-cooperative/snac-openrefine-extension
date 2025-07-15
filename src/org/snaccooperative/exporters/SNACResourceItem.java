@@ -55,6 +55,8 @@ public class SNACResourceItem extends SNACUploadItem {
     this._rowIndex = record.fromRowIndex;
 
     this._resourceModel = new SNACResourceModel();
+
+    buildResourceVerbatim();
   }
 
   private void buildResource() {
@@ -261,8 +263,6 @@ public class SNACResourceItem extends SNACUploadItem {
   }
 
   public String getPreviewText() {
-    buildResourceVerbatim();
-
     Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {

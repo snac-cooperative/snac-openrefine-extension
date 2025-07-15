@@ -71,6 +71,8 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     this._constellationModel = new SNACConstellationModel();
     this._relationModel = new SNACRelationModel();
+
+    buildConstellationVerbatim();
   }
 
   private void buildConstellation() {
@@ -641,8 +643,6 @@ public class SNACConstellationItem extends SNACUploadItem {
   }
 
   public String getPreviewText() {
-    buildConstellationVerbatim();
-
     Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {

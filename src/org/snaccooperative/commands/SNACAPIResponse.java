@@ -44,26 +44,26 @@ public class SNACAPIResponse {
     try {
       JSONObject jsonResponse = new JSONObject(apiResponse);
 
-      Object result = jsonResponse.get("result");
-      Object message = jsonResponse.get("message");
-      Object error = jsonResponse.get("error");
-      Object resource = jsonResponse.get("resource");
-      Object constellation = jsonResponse.get("constellation");
-      Object results = jsonResponse.get("results");
-      Object relatedConstellations = jsonResponse.get("related_constellations");
+      Object result = jsonResponse.opt("result");
+      Object message = jsonResponse.opt("message");
+      Object error = jsonResponse.opt("error");
+      Object resource = jsonResponse.opt("resource");
+      Object constellation = jsonResponse.opt("constellation");
+      Object results = jsonResponse.opt("results");
+      Object relatedConstellations = jsonResponse.opt("related_constellations");
 
       // populate result/message
       if (result instanceof String) {
         // result = "success", "success-notice", etc. -- could contain optional message
         this._result = result.toString();
         if (message instanceof JSONObject) {
-          this._message = ((JSONObject) message).get("text").toString();
+          this._message = ((JSONObject) message).optString("text", "");
         }
       } else {
         if (error instanceof JSONObject) {
           // result = "error", plus any error type/message
-          String errorType = ((JSONObject) error).get("type").toString();
-          String errorMessage = ((JSONObject) error).get("message").toString();
+          String errorType = ((JSONObject) error).optString("type", "");
+          String errorMessage = ((JSONObject) error).optString("message", "");
           String errorFull = "";
 
           if (errorType != "") {

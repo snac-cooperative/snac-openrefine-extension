@@ -35,27 +35,46 @@ public class SNACTermCache {
 
       SNACAPIResponse lookupResponse = client.post(apiQuery);
 
-      JSONArray results =
-          (JSONArray) new JSONObject(lookupResponse.getAPIResponse()).get("results");
+      JSONArray results = new JSONObject(lookupResponse.getAPIResponse()).optJSONArray("results");
 
-      if (results.length() <= 0) {
+      if (results == null || results.length() <= 0) {
         logger.error(
             "vocabulary [" + _type + "] query returned no results for term: [" + key + "]");
         return null;
       }
 
       for (int i = 0; i < results.length(); i++) {
-        JSONObject result = (JSONObject) results.get(i);
+        JSONObject result = results.optJSONObject(i);
+        if (result == null) {
+          logger.warn(
+              "vocabulary [" + _type + "] query response contained missing/invalid array object");
+          continue;
+        }
 
-        String gotTerm = (String) result.get("term");
+        String gotTerm = result.optString("term", null);
+        if (gotTerm == null) {
+          logger.warn(
+              "vocabulary ["
+                  + _type
+                  + "] query response contained missing/invalid term in array object");
+          continue;
+        }
 
         if (!gotTerm.toLowerCase().equals(key.toLowerCase())) {
           continue;
         }
 
-        // Integer gotID = Integer.parseInt((String) result.get("id"));
-        String gotType = (String) result.get("type");
-        String gotDesc = (String) result.get("description");
+        // Integer gotID = Integer.parseInt(result.optString("id", "0"));
+        String gotType = result.optString("type", null);
+        if (gotType == null) {
+          logger.warn(
+              "vocabulary ["
+                  + _type
+                  + "] query response contained missing/invalid type in array object");
+          continue;
+        }
+
+        String gotDesc = result.optString("description", null);
 
         Term term = new Term();
         term.setType(gotType);
@@ -111,16 +130,12 @@ public class SNACTermCache {
     Term term = _terms.get(key.toLowerCase());
 
     if (term != null) {
-      // logger.info("type [" + _type + "] key [" + key + "] mapping: cached: { " +
-      // getDescription(term) + " }");
       return term;
     }
 
     term = lookupTerm(client, key);
 
     if (term != null) {
-      // logger.info("type [" + _type + "] key [" + key + "] mapping: lookup: { " +
-      // getDescription(term) + " }");
       return term;
     }
 

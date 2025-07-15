@@ -26,17 +26,17 @@ package org.snaccooperative.commands;
 
 import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
 import com.google.refine.model.Project;
+import com.google.refine.util.ParsingUtilities;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.exporters.SNACUploadItem;
@@ -81,23 +81,26 @@ public class SNACExportJSONCommand extends Command {
 
       List<SNACUploadItem> items = schema.evaluateRecords(project, engine);
 
-      JSONObject jsonResp = new JSONObject();
-      JSONArray jsonItems = new JSONArray();
+      Writer w = response.getWriter();
+      JsonGenerator writer = ParsingUtilities.mapper.getFactory().createGenerator(w);
 
+      writer.writeStartObject();
+
+      writer.writeFieldName(schema.getSchemaType() + "s");
+      writer.writeStartArray();
       for (int i = 0; i < items.size(); i++) {
-        try {
-          jsonItems.put(new JSONObject(items.get(i).toJSON()));
-        } catch (JSONException e) {
-          logger.warn("SNAC JSON export: skipping item " + (i + 1) + ": [" + e + "]");
-          continue;
-        }
+        writer.writeRaw(items.get(i).toJSON());
       }
+      writer.writeEndArray();
 
-      jsonResp.put(schema.getSchemaType() + "s", jsonItems);
+      writer.writeEndObject();
 
       logger.info("SNAC JSON export succeeded");
 
-      respondJSON(response, jsonResp);
+      writer.flush();
+      writer.close();
+      w.flush();
+      w.close();
     } catch (Exception e) {
       logger.error("SNAC JSON export: exception: [" + e + "]");
       respondException(response, e);
