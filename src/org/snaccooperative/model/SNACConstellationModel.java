@@ -51,8 +51,9 @@ public class SNACConstellationModel
     addField(
         ConstellationModelField.CPF_ID,
         new SNACModelField(
-            "SNAC CPF ID", // TODO: when testing, make this just "CPF ID", and possibly keep the
-                           // change
+            // "CPF ID",
+            // new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
+            "SNAC CPF ID",
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
@@ -92,9 +93,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "Type of Exist Date. The following values may be used: Active, Birth, Death,"
-                + " Establishment, Disestablishment.  Only used if Exist Date field is defined in"
-                + " the same row, in which case it is required."));
+            "Type of Exist Date. The following values may be used: Active, Birth, Death, Establishment, Disestablishment.  Only used if Exist Date field is defined in the same row, in which case it is required."));
 
     addField(
         ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE,
@@ -103,8 +102,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.FREETEXT,
-            "Descriptive Note of Exist Date.  Only used if Exist Date field is defined in the same"
-                + " row."));
+            "Descriptive Note of Exist Date.  Only used if Exist Date field is defined in the same row."));
 
     addField(
         ConstellationModelField.SUBJECT,
@@ -131,9 +129,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "Role of the place in relation to the CPF entity.  The following values may be used:"
-                + " Birth, Death, Residence, Citizenship, Work.  Only used if Place field is"
-                + " defined in the same row."));
+            "Role of the place in relation to the CPF entity.  The following values may be used: Birth, Death, Residence, Citizenship, Work.  Only used if Place field is defined in the same row."));
 
     addField(
         ConstellationModelField.PLACE_TYPE,
@@ -142,9 +138,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "Type of the place in relation to the CPF entity.  The following values may be used:"
-                + " AssociatedPlace, Address.  Defaults to AssociatedPlace if not supplied.  Only"
-                + " used if Place field is defined in the same row."));
+            "Type of the place in relation to the CPF entity.  The following values may be used: AssociatedPlace, Address.  Defaults to AssociatedPlace if not supplied.  Only used if Place field is defined in the same row."));
 
     addField(
         ConstellationModelField.OCCUPATION,
@@ -171,8 +165,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Combinable with a Script Code in the"
-                + " same row."));
+            "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Combinable with a Script Code in the same row."));
 
     addField(
         ConstellationModelField.SCRIPT_CODE,
@@ -181,8 +174,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Combinable with a Script Code in"
-                + " the same row."));
+            "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Combinable with a Script Code in the same row."));
 
     addField(
         ConstellationModelField.BIOG_HIST,
@@ -191,9 +183,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.FREETEXT,
-            "Biography or History note associated with the CPF entity.  By exception, the note is"
-                + " encoded in XML based on a simplified version of the <biogHist> element in"
-                + " EAC-CPF."));
+            "Biography or History note associated with the CPF entity.  By exception, the note is encoded in XML based on a simplified version of the <biogHist> element in EAC-CPF."));
 
     addField(
         ConstellationModelField.EXTERNAL_RELATED_CPF_URL,
@@ -202,8 +192,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.FREETEXT,
-            "URL to a description of the CPF entity in an external authority.  Such links are"
-                + " limited to those found in the approved list linked above."));
+            "URL to a description of the CPF entity in an external authority.  Such links are limited to those found in the approved list linked above."));
 
     addField(
         ConstellationModelField.SOURCE_CITATION,
@@ -221,8 +210,7 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.FREETEXT,
-            "URL, if available, for the Source Citation.  Only used if Source Citation field is"
-                + " defined in the same row."));
+            "URL, if available, for the Source Citation.  Only used if Source Citation field is defined in the same row."));
 
     addField(
         ConstellationModelField.SOURCE_CITATION_FOUND_DATA,
@@ -231,7 +219,6 @@ public class SNACConstellationModel
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.FREETEXT,
-            "Information found in the Source that is evidence used in the description of the CPF"
-                + " entity.  Only used if Source Citation field is defined in the same row."));
+            "Information found in the Source that is evidence used in the description of the CPF entity.  Only used if Source Citation field is defined in the same row."));
   }
 }

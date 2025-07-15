@@ -35,18 +35,18 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.CONTROLLED,
-            "Resource Type may have the following values: ArchivalResource, BibliographicResource,"
-                + " DigitalArchivalResource, OralHistoryResource"));
+            "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource"));
 
     addField(
         ResourceModelField.RESOURCE_ID,
         new SNACModelField(
-            "SNAC Resource ID", // TODO: rename?
+            // "Resource ID",
+            // new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
+            "SNAC Resource ID",
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
-            "SNAC identifier for Resource Description.  Leave blank if Resource Description is NOT"
-                + " in SNAC."));
+            "SNAC identifier for Resource Description.  Leave blank if Resource Description is NOT in SNAC."));
 
     addField(
         ResourceModelField.TITLE,
@@ -55,8 +55,7 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
-            "Title of a resource that may or may not include dates (e.g. Jacob Miller Papers,"
-                + " 1809-1882)."));
+            "Title of a resource that may or may not include dates (e.g. Jacob Miller Papers, 1809-1882)."));
 
     addField(
         ResourceModelField.RESOURCE_URL,
@@ -70,12 +69,14 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
     addField(
         ResourceModelField.HOLDING_REPOSITORY_ID,
         new SNACModelField(
-            "Holding Repository SNAC ID", // TODO: rename?
+            // "Holding Repository ID",
+            // new ArrayList<String>(Arrays.asList("Holding Repository SNAC ID")), // previous
+            // name(s)
+            "Holding Repository SNAC ID",
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
-            "SNAC identifier for the holding repository description.  The holding repository must"
-                + " be created in SNAC before adding Resource Descriptions."));
+            "SNAC identifier for the holding repository description.  The holding repository must be created in SNAC before adding Resource Descriptions."));
 
     addField(
         ResourceModelField.ABSTRACT,
@@ -111,8 +112,7 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Combinable with a Script Code in the"
-                + " same row."));
+            "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Combinable with a Script Code in the same row."));
 
     addField(
         ResourceModelField.SCRIPT_CODE,
@@ -121,7 +121,6 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Combinable with a Language Code"
-                + " in the same row."));
+            "ISO 15924 Script Code, e.g. 'Latn', 'Cyrl', 'Grek'.  Combinable with a Language Code in the same row."));
   }
 }

@@ -54,9 +54,6 @@ public class SNACSchema implements OverlayModel {
   @JsonProperty("schemaType")
   protected String _schemaType;
 
-  @JsonProperty("idColumn")
-  protected String _idColumn;
-
   @JsonProperty("columnMappings")
   protected HashMap<String, String> _columnMappings;
 
@@ -71,21 +68,14 @@ public class SNACSchema implements OverlayModel {
   @JsonCreator
   public SNACSchema(
       @JsonProperty("schemaType") String schemaType,
-      @JsonProperty("idColumn") String idColumn,
       @JsonProperty("columnMappings") HashMap<String, String> columnMappings) {
     this._schemaType = schemaType;
-    this._idColumn = idColumn;
     this._columnMappings = columnMappings;
   }
 
   @JsonProperty("schemaType")
   public String getSchemaType() {
     return _schemaType;
-  }
-
-  @JsonProperty("idColumn")
-  public String getIdColumn() {
-    return _idColumn;
   }
 
   @JsonProperty("columnMappings")
@@ -179,7 +169,6 @@ public class SNACSchema implements OverlayModel {
     }
     SNACSchema otherSchema = (SNACSchema) other;
     return (_schemaType == otherSchema.getSchemaType())
-        && (_idColumn == otherSchema.getIdColumn())
         && _columnMappings.equals(otherSchema.getColumnMappings());
   }
 }

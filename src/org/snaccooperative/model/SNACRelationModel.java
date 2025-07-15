@@ -36,7 +36,9 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     addField(
         RelationModelField.CPF_ID,
         new SNACModelField(
-            "SNAC CPF ID", // TODO: rename?
+            // "CPF ID",
+            // new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
+            "SNAC CPF ID",
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
@@ -49,14 +51,14 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "Nature of the relation of the CPF entity with the related CPF entity.  The following"
-                + " values may be used: associatedWith, correspondedWith.  Only used if Related"
-                + " SNAC CPF ID field is defined in the same row."));
+            "Nature of the relation of the CPF entity with the related CPF entity.  The following values may be used: associatedWith, correspondedWith.  Only used if Related CPF ID field is defined in the same row."));
 
     addField(
         RelationModelField.RELATED_CPF_ID,
         new SNACModelField(
-            "Related SNAC CPF ID", // TODO: rename?
+            // "Related CPF ID",
+            // new ArrayList<String>(Arrays.asList("Related SNAC CPF ID")), // previous name(s)
+            "Related SNAC CPF ID",
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.IDENTIFIER,
@@ -69,14 +71,14 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
-            "Role of the CPF entity in relation to the Resource.  The following values may be used:"
-                + " contributorOf, creatorOf, editorOf, referencedIn.  Only used if SNAC Resource"
-                + " ID field is defined in the same row."));
+            "Role of the CPF entity in relation to the Resource.  The following values may be used: contributorOf, creatorOf, editorOf, referencedIn.  Only used if Resource ID field is defined in the same row."));
 
     addField(
         RelationModelField.RELATED_RESOURCE_ID,
         new SNACModelField(
-            "SNAC Resource ID", // TODO: rename?
+            // "Resource ID",
+            // new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
+            "SNAC Resource ID",
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.IDENTIFIER,

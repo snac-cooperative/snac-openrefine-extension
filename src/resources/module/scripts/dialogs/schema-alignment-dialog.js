@@ -644,7 +644,7 @@ SNACSchemaAlignmentDialog.reset = function(schema) {
 
    this._ignoreChanges = true;
 
-   this._originalSchema = schema || { schemaType: "", idColumn: "", columnMappings: {} };
+   this._originalSchema = schema || { schemaType: "", columnMappings: {} };
    this._schema = cloneDeep(this._originalSchema); // this is what can be munched on
 
    $('#snac-areas-container').empty();
@@ -722,7 +722,6 @@ SNACSchemaAlignmentDialog.getJSON = function() {
    snacDebug(`***** [ getJSON ] *****`);
 
    var schemaType = "unknown";
-   var idColumn = "";
    var dropDownColumn;
 
    // determine source of schema values
@@ -745,7 +744,7 @@ SNACSchemaAlignmentDialog.getJSON = function() {
 
    // build schema from selected values
 
-   var schema = { schemaType: schemaType, idColumn: idColumn, columnMappings: {} };
+   var schema = { schemaType: schemaType, columnMappings: {} };
 
    var columns = theProject.columnModel.columns;
    for (var i = 0; i < columns.length; i++) {
