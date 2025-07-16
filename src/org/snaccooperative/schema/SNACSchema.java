@@ -40,9 +40,9 @@ import java.util.HashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.commands.SNACAPIClient;
+import org.snaccooperative.api.SNACAPIClient;
 import org.snaccooperative.exporters.SNACConstellationItem;
-import org.snaccooperative.exporters.SNACLookupCache;
+import org.snaccooperative.cache.SNACLookupCache;
 import org.snaccooperative.exporters.SNACResourceItem;
 import org.snaccooperative.exporters.SNACUploadItem;
 

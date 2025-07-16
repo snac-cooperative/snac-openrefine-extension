@@ -1,7 +1,7 @@
 package org.snaccooperative.exporters;
 
 import java.util.List;
-import org.snaccooperative.commands.SNACAPIResponse;
+import org.snaccooperative.api.SNACAPIResponse;
 
 public abstract class SNACUploadItem {
 

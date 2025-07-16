@@ -1,4 +1,4 @@
-package org.snaccooperative.util;
+package org.snaccooperative.preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

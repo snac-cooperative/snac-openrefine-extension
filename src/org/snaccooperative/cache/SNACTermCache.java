@@ -1,4 +1,4 @@
-package org.snaccooperative.exporters;
+package org.snaccooperative.cache;
 
 import java.util.HashMap;
 import org.apache.http.*;
@@ -7,8 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.commands.SNACAPIClient;
-import org.snaccooperative.commands.SNACAPIResponse;
+import org.snaccooperative.api.SNACAPIClient;
+import org.snaccooperative.api.SNACAPIResponse;
 import org.snaccooperative.data.Term;
 
 public class SNACTermCache {

@@ -1,4 +1,4 @@
-package org.snaccooperative.commands;
+package org.snaccooperative.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;
