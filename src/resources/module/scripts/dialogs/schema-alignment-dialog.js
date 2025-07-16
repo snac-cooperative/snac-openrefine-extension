@@ -258,7 +258,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
    */
    var issuesTab = $(DOM.loadHTML("snac", "scripts/issues-tab.html")).appendTo(this._issuesPanel);
    var issuesElmts = this._issuesElmts = DOM.bind(issuesTab);
-   //issuesElmts.invalidSchemaWarningIssues.text($.i18n('snac-schema/invalid-schema-warning-issues'));
 
    /**
    * Init the preview tab
@@ -269,8 +268,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       .text($.i18n('snac-schema/reload-preview-button'))
       .on('click', function() { _this.preview(); });
    this.updateItemPreviewText("item", 0, 0);
-
-   //previewElmts.invalidSchemaWarningPreview.text($.i18n('snac-schema/invalid-schema-warning-preview'));
 
    this._previewPanes = $('.snac-schema-alignment-dialog-preview');
 
@@ -684,7 +681,6 @@ SNACSchemaAlignmentDialog.save = function(onDone) {
 
             _this.updateColumns(theProject.overlayModels.snacSchema);
 
-            $('.invalid-schema-warning').hide();
             _this.changesCleared();
 
             if (onDone) onDone();
@@ -856,14 +852,12 @@ SNACSchemaAlignmentDialog.preview = function() {
 
    var _this = this;
 
-   $('.invalid-schema-warning').hide();
    this._previewPanes.empty();
    this.updateItemPreviewText("item", 0, 0);
 //   this.issueSpinner.show();
    this.previewSpinner.show();
    var schema = this.getJSON();
    if (schema === null) {
-      $('.invalid-schema-warning').show();
       return;
    }
 
@@ -891,10 +885,6 @@ SNACSchemaAlignmentDialog.preview = function() {
          snacDebug(`preview(): added ${data["item_count"]} items`);
 
          //_this.updateWarnings([], 0);
-
-         if ("code" in data && data.code === "error") {
-            $('.invalid-schema-warning').show();
-         }
       },
       "json"
    );

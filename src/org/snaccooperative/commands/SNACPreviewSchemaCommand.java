@@ -24,8 +24,6 @@
 
 package org.snaccooperative.commands;
 
-import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
-
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
 import com.google.refine.model.Project;
@@ -37,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.exporters.SNACUploadItem;
-import org.snaccooperative.schema.SNACSchema;
 import org.snaccooperative.preferences.SNACPreferencesManager;
+import org.snaccooperative.schema.SNACSchema;
 
 public class SNACPreviewSchemaCommand extends Command {
 
@@ -65,7 +63,7 @@ public class SNACPreviewSchemaCommand extends Command {
           schema = SNACSchema.reconstruct(schemaJSON);
         } catch (IOException e) {
           logger.error("SNAC preview generation: could not reconstruct schema: [" + e + "]");
-          respondError(response, "SNAC schema could not be parsed.");
+          respondStatusError(response, "SNAC schema could not be parsed.");
           return;
         }
       } else {
@@ -73,7 +71,7 @@ public class SNACPreviewSchemaCommand extends Command {
       }
       if (schema == null) {
         logger.error("SNAC preview generation: missing schema");
-        respondError(response, "No SNAC schema provided.");
+        respondStatusError(response, "No SNAC schema provided.");
         return;
       }
 

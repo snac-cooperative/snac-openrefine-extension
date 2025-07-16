@@ -24,8 +24,6 @@
 
 package org.snaccooperative.commands;
 
-import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
@@ -67,7 +65,7 @@ public class SNACExportJSONCommand extends Command {
           schema = SNACSchema.reconstruct(schemaJSON);
         } catch (IOException e) {
           logger.error("SNAC JSON export: could not reconstruct schema: [" + e + "]");
-          respondError(response, "SNAC schema could not be parsed.");
+          respondStatusError(response, "SNAC schema could not be parsed.");
           return;
         }
       } else {
@@ -75,7 +73,7 @@ public class SNACExportJSONCommand extends Command {
       }
       if (schema == null) {
         logger.error("SNAC JSON export: missing schema");
-        respondError(response, "No SNAC schema provided.");
+        respondStatusError(response, "No SNAC schema provided.");
         return;
       }
 

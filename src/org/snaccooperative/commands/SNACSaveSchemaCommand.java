@@ -24,8 +24,6 @@
 
 package org.snaccooperative.commands;
 
-import static org.snaccooperative.commands.SNACCommandUtilities.respondError;
-
 import com.google.refine.commands.Command;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Project;
@@ -63,7 +61,7 @@ public class SNACSaveSchemaCommand extends Command {
       String schemaJSON = request.getParameter("schema");
       if (schemaJSON == null) {
         logger.error("SNAC schema save: missing schema");
-        respondError(response, "No SNAC schema provided.");
+        respondStatusError(response, "No SNAC schema provided.");
         return;
       }
 
@@ -83,7 +81,7 @@ public class SNACSaveSchemaCommand extends Command {
       // exception which happens every time a user tries to save an incomplete
       // schema - the exception should not be logged.
       logger.warn("SNAC schema save: incomplete schema?: [" + e + "]");
-      respondError(response, "SNAC schema could not be parsed.");
+      respondStatusError(response, "SNAC schema could not be parsed.");
     } catch (Exception e) {
       // This is an unexpected exception, so we log it.
       logger.error("SNAC schema save: exception: [" + e + "]");

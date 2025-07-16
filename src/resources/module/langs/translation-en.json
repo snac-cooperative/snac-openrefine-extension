@@ -23,8 +23,6 @@
   "snac-schema/discard-schema-changes-alt": "Discard the changes made to the schema.",
   "snac-schema/items-preview-tab-header": "SNAC Preview",
   "snac-schema/incomplete-schema-could-not-be-saved": "Your schema is incomplete so it cannot be saved yet.",
-  "snac-schema/invalid-schema-warning-issues": "Your schema is incomplete. Fix it to see the issues.",
-  "snac-schema/invalid-schema-warning-preview": "Your schema is incomplete. Fix it to see the preview.",
   "snac-schema/no-issues-detected": "No issues detected.",
   "snac-schema/preview-explanation": "This tab shows the first {preview_count} {item_type}s (out of {item_count}) that will be uploaded to SNAC. You can use facets to inspect particular items.",
   "snac-schema/preview-note": "<strong>NOTE:</strong> Any controlled vocabulary terms and related IDs below have not been verified with SNAC. They will be verified when you Validate with SNAC or Upload to SNAC.",
