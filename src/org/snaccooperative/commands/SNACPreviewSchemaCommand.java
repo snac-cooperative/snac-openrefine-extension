@@ -77,15 +77,14 @@ public class SNACPreviewSchemaCommand extends Command {
         return;
       }
 
-      List<SNACUploadItem> items = schema.evaluateRecords(project, engine);
-
       SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
-      int maxPreviewItems = Math.min(items.size(), prefsManager.getMaxPreviewItems());
+      List<SNACUploadItem> items =
+          schema.evaluateRecords(project, engine, prefsManager.getMaxPreviewItems());
 
-      SNACPreviewItems previewItems = new SNACPreviewItems(maxPreviewItems);
+      SNACPreviewItems previewItems = new SNACPreviewItems();
 
-      for (int i = 0; i < maxPreviewItems; i++) {
+      for (int i = 0; i < items.size(); i++) {
         SNACUploadItem item = items.get(i);
 
         previewItems.addPreviewItem(item.getPreviewText());

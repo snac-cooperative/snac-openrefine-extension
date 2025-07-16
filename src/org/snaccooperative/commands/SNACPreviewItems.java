@@ -12,17 +12,15 @@ public class SNACPreviewItems {
 
   static final Logger logger = LoggerFactory.getLogger("SNACPreviewItems");
 
-  protected int _itemCount;
   protected List<String> _itemsPreview;
 
-  protected SNACPreviewItems(int itemCount) {
-    this._itemCount = itemCount;
+  protected SNACPreviewItems() {
     this._itemsPreview = new ArrayList<String>();
   }
 
   @JsonProperty("item_count")
   public int getItemCount() {
-    return _itemCount;
+    return _itemsPreview.size();
   }
 
   @JsonProperty("items_preview")

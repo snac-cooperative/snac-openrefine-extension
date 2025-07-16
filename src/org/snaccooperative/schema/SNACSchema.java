@@ -84,12 +84,16 @@ public class SNACSchema implements OverlayModel {
   }
 
   public List<SNACUploadItem> evaluateRecords(Project project, Engine engine) {
+    return evaluateRecords(project, engine, 0);
+  }
+
+  public List<SNACUploadItem> evaluateRecords(Project project, Engine engine, int maxRecords) {
     Mode prevMode = engine.getMode();
     engine.setMode(Mode.RecordBased);
 
     List<SNACUploadItem> items = new ArrayList<SNACUploadItem>();
     FilteredRecords filteredRecords = engine.getFilteredRecords();
-    filteredRecords.accept(project, new SNACRecordVisitor(items, this));
+    filteredRecords.accept(project, new SNACRecordVisitor(items, this, maxRecords));
 
     engine.setMode(prevMode);
 
@@ -101,10 +105,18 @@ public class SNACSchema implements OverlayModel {
     private SNACSchema _schema;
     private SNACAPIClient _client;
     private SNACLookupCache _cache;
+    private int _maxRecords;
+
+    final Logger logger = LoggerFactory.getLogger("SNACRecordVisitor");
 
     public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema) {
+      this(items, schema, 0);
+    }
+
+    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema, int maxRecords) {
       this._items = items;
       this._schema = schema;
+      this._maxRecords = maxRecords;
 
       this._client = new SNACAPIClient();
       this._cache = new SNACLookupCache(this._client);
@@ -118,6 +130,10 @@ public class SNACSchema implements OverlayModel {
     //    com.google.refine.browsing.RecordVisitor has been deprecated"
     @Override
     public boolean visit(Project project, Record record) {
+      if (_maxRecords > 0 && _items.size() >= _maxRecords) {
+        return false;
+      }
+
       SNACUploadItem item;
 
       switch (_schema.getSchemaType()) {
