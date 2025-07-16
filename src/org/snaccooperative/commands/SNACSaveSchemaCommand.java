@@ -22,7 +22,7 @@
  * SOFTWARE.
  ******************************************************************************/
 
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.google.refine.commands.Command;
 import com.google.refine.model.AbstractOperation;
@@ -36,8 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.operations.SNACSaveSchemaOperation;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.operations.SNACSaveSchemaOperation;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACSaveSchemaCommand extends Command {
 

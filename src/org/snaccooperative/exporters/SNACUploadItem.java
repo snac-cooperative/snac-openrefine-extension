@@ -1,7 +1,7 @@
-package org.snaccooperative.exporters;
+package org.snaccooperative.openrefine.exporters;
 
 import java.util.List;
-import org.snaccooperative.api.SNACAPIResponse;
+import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
 public abstract class SNACUploadItem {
 

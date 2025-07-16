@@ -1,6 +1,6 @@
-package org.snaccooperative.exporters;
+package org.snaccooperative.openrefine.exporters;
 
-import static org.snaccooperative.schema.SNACSchemaUtilities.getCellValueForRowByColumnName;
+import static org.snaccooperative.openrefine.schema.SNACSchemaUtilities.getCellValueForRowByColumnName;
 
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
@@ -14,16 +14,16 @@ import org.apache.http.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.api.SNACAPIClient;
-import org.snaccooperative.api.SNACAPIResponse;
-import org.snaccooperative.cache.SNACLookupCache;
 import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Resource;
 import org.snaccooperative.data.Term;
-import org.snaccooperative.model.SNACResourceModel;
-import org.snaccooperative.model.SNACResourceModel.ResourceModelField;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.api.SNACAPIClient;
+import org.snaccooperative.openrefine.api.SNACAPIResponse;
+import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.model.SNACResourceModel;
+import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACResourceItem extends SNACUploadItem {
 

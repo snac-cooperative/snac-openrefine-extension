@@ -1,4 +1,4 @@
-package org.snaccooperative.preferences;
+package org.snaccooperative.openrefine.preferences;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

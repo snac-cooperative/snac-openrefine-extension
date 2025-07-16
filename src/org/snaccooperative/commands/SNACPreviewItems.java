@@ -1,4 +1,4 @@
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;

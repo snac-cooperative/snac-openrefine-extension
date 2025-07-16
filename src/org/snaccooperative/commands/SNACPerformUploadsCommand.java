@@ -1,4 +1,4 @@
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.google.refine.browsing.EngineConfig;
 import com.google.refine.commands.EngineDependentCommand;
@@ -7,7 +7,7 @@ import com.google.refine.model.Project;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.operations.SNACPerformUploadsOperation;
+import org.snaccooperative.openrefine.operations.SNACPerformUploadsOperation;
 
 public class SNACPerformUploadsCommand extends EngineDependentCommand {
 

@@ -1,4 +1,4 @@
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.refine.commands.Command;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.preferences.SNACPreferencesManager;
+import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 
 public class SNACPreferencesCommand extends Command {
 

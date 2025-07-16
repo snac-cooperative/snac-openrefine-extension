@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.snaccooperative.operations;
+package org.snaccooperative.openrefine.operations;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +37,7 @@ import java.io.Writer;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACSaveSchemaOperation extends AbstractOperation {
 

@@ -22,7 +22,7 @@
  * SOFTWARE.
  ******************************************************************************/
 
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.refine.browsing.Engine;
@@ -37,8 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.exporters.SNACUploadItem;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACExportJSONCommand extends Command {
 

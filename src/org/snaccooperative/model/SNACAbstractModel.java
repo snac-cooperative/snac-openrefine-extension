@@ -1,4 +1,4 @@
-package org.snaccooperative.model;
+package org.snaccooperative.openrefine.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;

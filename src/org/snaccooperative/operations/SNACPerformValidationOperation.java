@@ -1,4 +1,4 @@
-package org.snaccooperative.operations;
+package org.snaccooperative.openrefine.operations;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.api.SNACAPIResponse;
-import org.snaccooperative.exporters.SNACUploadItem;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.api.SNACAPIResponse;
+import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformValidationOperation extends EngineDependentOperation {
 

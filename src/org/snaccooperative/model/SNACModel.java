@@ -1,4 +1,4 @@
-package org.snaccooperative.model;
+package org.snaccooperative.openrefine.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;

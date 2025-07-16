@@ -1,6 +1,6 @@
-package org.snaccooperative.exporters;
+package org.snaccooperative.openrefine.exporters;
 
-import static org.snaccooperative.schema.SNACSchemaUtilities.getCellValueForRowByColumnName;
+import static org.snaccooperative.openrefine.schema.SNACSchemaUtilities.getCellValueForRowByColumnName;
 
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
@@ -14,9 +14,6 @@ import org.apache.http.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.api.SNACAPIClient;
-import org.snaccooperative.api.SNACAPIResponse;
-import org.snaccooperative.cache.SNACLookupCache;
 import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.BiogHist;
 import org.snaccooperative.data.Constellation;
@@ -32,11 +29,14 @@ import org.snaccooperative.data.SameAs;
 import org.snaccooperative.data.Source;
 import org.snaccooperative.data.Subject;
 import org.snaccooperative.data.Term;
-import org.snaccooperative.model.SNACConstellationModel;
-import org.snaccooperative.model.SNACConstellationModel.ConstellationModelField;
-import org.snaccooperative.model.SNACRelationModel;
-import org.snaccooperative.model.SNACRelationModel.RelationModelField;
-import org.snaccooperative.schema.SNACSchema;
+import org.snaccooperative.openrefine.api.SNACAPIClient;
+import org.snaccooperative.openrefine.api.SNACAPIResponse;
+import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.model.SNACConstellationModel;
+import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
+import org.snaccooperative.openrefine.model.SNACRelationModel;
+import org.snaccooperative.openrefine.model.SNACRelationModel.RelationModelField;
+import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACConstellationItem extends SNACUploadItem {
 

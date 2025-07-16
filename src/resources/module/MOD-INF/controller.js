@@ -1,5 +1,5 @@
 
-importPackage(org.snaccooperative.commands);
+importPackage(org.snaccooperative.openrefine.commands);
 
 /*
  * Function invoked to initialize the extension.
@@ -9,26 +9,26 @@ function init() {
 
     // these must be defined to allow history entries to be reloaded after openrefine restarts
     RefineServlet.registerClassMapping(
-            "org.snaccooperative.operations.SNACSaveSchemaOperation$SNACSchemaChange",
-            "org.snaccooperative.operations.SNACSaveSchemaOperation$SNACSchemaChange");
+            "org.snaccooperative.openrefine.operations.SNACSaveSchemaOperation$SNACSchemaChange",
+            "org.snaccooperative.openrefine.operations.SNACSaveSchemaOperation$SNACSchemaChange");
 
-    RefineServlet.cacheClass(Packages.org.snaccooperative.operations.SNACSaveSchemaOperation$SNACSchemaChange);
+    RefineServlet.cacheClass(Packages.org.snaccooperative.openrefine.operations.SNACSaveSchemaOperation$SNACSchemaChange);
 
     /*
      *  Attach a SNAC schema to each project.
      */
     var Project = Packages.com.google.refine.model.Project;
 
-    Project.registerOverlayModel("snacSchema", Packages.org.snaccooperative.schema.SNACSchema);
+    Project.registerOverlayModel("snacSchema", Packages.org.snaccooperative.openrefine.schema.SNACSchema);
 
     /*
      * Operations
      */
     var OperationRegistry = Packages.com.google.refine.operations.OperationRegistry;
 
-    OperationRegistry.registerOperation(module, "save-schema", Packages.org.snaccooperative.operations.SNACSaveSchemaOperation);
-    OperationRegistry.registerOperation(module, "perform-uploads", Packages.org.snaccooperative.operations.SNACPerformUploadsOperation);
-    OperationRegistry.registerOperation(module, "perform-validation", Packages.org.snaccooperative.operations.SNACPerformValidationOperation);
+    OperationRegistry.registerOperation(module, "save-schema", Packages.org.snaccooperative.openrefine.operations.SNACSaveSchemaOperation);
+    OperationRegistry.registerOperation(module, "perform-uploads", Packages.org.snaccooperative.openrefine.operations.SNACPerformUploadsOperation);
+    OperationRegistry.registerOperation(module, "perform-validation", Packages.org.snaccooperative.openrefine.operations.SNACPerformValidationOperation);
 
     /*
      * Commands

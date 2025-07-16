@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-package org.snaccooperative.schema;
+package org.snaccooperative.openrefine.schema;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -40,11 +40,11 @@ import java.util.HashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.api.SNACAPIClient;
-import org.snaccooperative.cache.SNACLookupCache;
-import org.snaccooperative.exporters.SNACConstellationItem;
-import org.snaccooperative.exporters.SNACResourceItem;
-import org.snaccooperative.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.api.SNACAPIClient;
+import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.exporters.SNACConstellationItem;
+import org.snaccooperative.openrefine.exporters.SNACResourceItem;
+import org.snaccooperative.openrefine.exporters.SNACUploadItem;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SNACSchema implements OverlayModel {

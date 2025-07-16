@@ -1,4 +1,4 @@
-package org.snaccooperative.api;
+package org.snaccooperative.openrefine.api;
 
 import org.json.JSONArray;
 import org.json.JSONException;

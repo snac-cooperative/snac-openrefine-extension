@@ -1,11 +1,11 @@
-package org.snaccooperative.model;
+package org.snaccooperative.openrefine.model;
 
 import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.model.SNACModelField.FieldOccurence;
-import org.snaccooperative.model.SNACModelField.FieldRequirement;
-import org.snaccooperative.model.SNACModelField.FieldVocabulary;
+import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
+import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
+import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
 
 public class SNACConstellationModel
     extends SNACAbstractModel<SNACConstellationModel.ConstellationModelField> {

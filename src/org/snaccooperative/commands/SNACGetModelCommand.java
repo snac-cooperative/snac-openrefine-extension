@@ -1,4 +1,4 @@
-package org.snaccooperative.commands;
+package org.snaccooperative.openrefine.commands;
 
 import com.google.refine.commands.Command;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.model.SNACModel;
+import org.snaccooperative.openrefine.model.SNACModel;
 
 public class SNACGetModelCommand extends Command {
 

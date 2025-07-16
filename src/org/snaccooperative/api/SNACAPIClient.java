@@ -1,4 +1,4 @@
-package org.snaccooperative.api;
+package org.snaccooperative.openrefine.api;
 
 import java.io.IOException;
 import org.apache.http.*;
@@ -10,8 +10,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.preferences.SNACEnvironment;
-import org.snaccooperative.preferences.SNACPreferencesManager;
+import org.snaccooperative.openrefine.preferences.SNACEnvironment;
+import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 
 public class SNACAPIClient {
 

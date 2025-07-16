@@ -1,4 +1,4 @@
-package org.snaccooperative.schema;
+package org.snaccooperative.openrefine.schema;
 
 import com.google.refine.model.Column;
 import com.google.refine.model.Project;

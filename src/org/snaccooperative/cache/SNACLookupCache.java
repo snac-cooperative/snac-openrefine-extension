@@ -1,4 +1,4 @@
-package org.snaccooperative.cache;
+package org.snaccooperative.openrefine.cache;
 
 import java.util.HashMap;
 import org.apache.http.*;
@@ -7,10 +7,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.api.SNACAPIClient;
-import org.snaccooperative.api.SNACAPIResponse;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Term;
+import org.snaccooperative.openrefine.api.SNACAPIClient;
+import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
 public class SNACLookupCache {
 
