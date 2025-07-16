@@ -125,13 +125,10 @@ public class SNACSchema implements OverlayModel {
     @Override
     public void start(Project project) {}
 
-    // FIXME:
-    // "visit(com.google.refine.model.Project ,com.google.refine.model.Record) in
-    //    com.google.refine.browsing.RecordVisitor has been deprecated"
     @Override
     public boolean visit(Project project, Record record) {
       if (_maxRecords > 0 && _items.size() >= _maxRecords) {
-        return false;
+        return true;
       }
 
       SNACUploadItem item;
