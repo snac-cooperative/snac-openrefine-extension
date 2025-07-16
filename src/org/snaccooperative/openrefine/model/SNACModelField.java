@@ -27,7 +27,17 @@ public class SNACModelField {
     IDENTIFIER
   };
 
-  // TODO:  add row relations (dependencies) text description field?  or just leave it in tooltips
+  // TODO: field dependencies:
+  //
+  // Some fields have a required or optional dependency on other fields being mapped. (*)
+  // Currently these are conveyed through the field tooltips, but this can be improved:
+  //   * we can have a separate "dependencies" text description field (defined here)
+  //   * and/or a FieldDependencies enum to specify whether a field is dependent on other(s)
+  // Then the front end can use this info for better tooltips/visual dependency indication/etc.
+  //
+  // (*) some examples:
+  //  + "Exist Date Type" and "Exist Date Descriptive Note" depend on "Exist Date" being mapped
+  //  + "Language Code" has an optional dependency on "Script Code", and vice versa
 
   private String _name;
   // names this field was formerly known as, for backwards compatibility

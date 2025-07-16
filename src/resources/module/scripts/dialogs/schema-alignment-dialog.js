@@ -50,6 +50,12 @@ var snacDebug = function(s) {
    }
 };
 
+SNACSchemaAlignmentDialog.getCases = function(str) {
+  var lower = str.toLowerCase();                              // e.g. 'resource'
+  var upper = lower.charAt(0).toUpperCase() + lower.slice(1); // e.g. 'Resource'
+  return { lower: lower, upper: upper };
+}
+
 SNACSchemaAlignmentDialog.setup = function(onDone) {
    this.setupModel(onDone);
 }
@@ -63,24 +69,8 @@ SNACSchemaAlignmentDialog.setupModel = function(onDone) {
       "command/snac/get-model",
       function(data) {
          snacDebug(`setupModel(): SUCCESS  data = [${JSON.stringify(data)}]`);
+
          _this._model = data;
-
-         _this.SNACConstellationModel = _this._model.constellation;
-         _this.SNACResourceModel = _this._model.resource;
-         _this.SNACRelationModel = _this._model.relation;
-
-         // TODO: phase these out and use model fields directly?
-         _this.SNACResourceNames = _this.SNACResourceModel.map(x => x.name);
-         _this.SNACResourceNamesRequired = _this.SNACResourceModel.filter(x => x.required === true).map(x => x.name);
-         _this.SNACResourceTooltips = _this.SNACResourceModel.map(x => x.tooltip);
-
-         _this.SNACConstellationNames = _this.SNACConstellationModel.map(x => x.name);
-         _this.SNACConstellationNamesRequired = _this.SNACConstellationModel.filter(x => x.required === true).map(x => x.name);
-         _this.SNACConstellationTooltips = _this.SNACConstellationModel.map(x => x.tooltip);
-
-         _this.SNACRelationNames = _this.SNACRelationModel.map(x => x.name);
-         _this.SNACRelationNamesRequired = _this.SNACRelationModel.filter(x => x.required === true).map(x => x.name);
-         _this.SNACRelationTooltips = _this.SNACRelationModel.map(x => x.tooltip);
 
          _this.setupTabs();
 
@@ -96,6 +86,10 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
    snacDebug(`***** [ setupTabs ] *****`);
 
    var _this = this;
+
+   // set up the initial schema
+   this._defaultSchema = { schemaType: 'resource', columnMappings: {} }
+   this._schema = theProject.overlayModels.snacSchema || this._defaultSchema;
 
    this._ignoreChanges = true;
 
@@ -245,7 +239,7 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
    });
 
    // Init the column area
-   this.updateColumns(theProject.overlayModels.snacSchema);
+   this.updateColumns(this._schema);
 
    $('.snac-schema-alignment-dialog-openrefine-names-area-constellation').hide();
    $('.snac-schema-alignment-dialog-schema-fields-area-constellation').hide();
@@ -286,10 +280,9 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
 
 // Create a table for the fields of the given type
 SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
-   var lowerType = type.toLowerCase(); // e.g. 'resource'
-   var upperType = lowerType.charAt(0).toUpperCase() + lowerType.slice(1); // e.g. 'Resource'
+   var types = this.getCases(type);
 
-   snacDebug(`***** [ addTable(${lowerType}) ] *****`);
+   snacDebug(`***** [ addTable(${types.lower}) ] *****`);
 
    //snacDebug(`addTable(): schema: [${JSON.stringify(schema)}]`);
 
@@ -297,17 +290,17 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
 
    var columnMappings = {}
 
-   if (schema && schema.schemaType == lowerType) {
+   if (schema && schema.schemaType == types.lower) {
       columnMappings = schema.columnMappings;
    }
 
-   //snacDebug(`addTable(${lowerType}): columnMappings: [${JSON.stringify(columnMappings)}]`);
+   //snacDebug(`addTable(${types.lower}): columnMappings: [${JSON.stringify(columnMappings)}]`);
 
-   var myTableDiv = document.getElementById(`snacDynamicTable${upperType}`);
+   var myTableDiv = document.getElementById(`snacDynamicTable${types.upper}`);
    if (myTableDiv == null) {
       var myClassDiv = document.getElementsByClassName('snac-dynamic-data-container');
       var myTableDiv = document.createElement("div");
-      myTableDiv.setAttribute('id', `snacDynamicTable${upperType}`);
+      myTableDiv.setAttribute('id', `snacDynamicTable${types.upper}`);
       myClassDiv[0].parentNode.insertBefore(myTableDiv, myClassDiv[0]);
    }
 
@@ -330,7 +323,7 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       cell.text(column.name);
       // this is used when dropping a snac schema field onto an
       // openrefine column name to update the correct dropdown list
-      cell.prop('id', `${lowerType}:${i}`);
+      cell.prop('id', `${types.lower}:${i}`);
 
       td1.appendChild(cell[0]);
       tr.appendChild(td1);
@@ -339,21 +332,21 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       selectList.addClass('snac-cell')
       selectList.addClass('snac-cell-select-dropdown')
       //selectList.addClass('snac-select-field')
-      selectList.addClass(`snac-select-values-${lowerType}`)
-      selectList.addClass(`${column.name}${upperType}DropDown`);
+      selectList.addClass(`snac-select-values-${types.lower}`)
+      selectList.addClass(`${column.name}${types.upper}DropDown`);
 
       // Create and append the options
       var defaultoption = document.createElement("option");
       defaultoption.setAttribute('value', 'default');
       defaultoption.text = 'Select an Option';
-      defaultoption.classList.add(`dropdown-default-${lowerType}`);
+      defaultoption.classList.add(`dropdown-default-${types.lower}`);
       selectList.append(defaultoption);
 
       for (var j = 0; j < names.length; j++) {
          var option = document.createElement("option");
          option.setAttribute('value', names[j]);
          option.text = names[j];
-         option.classList.add(`dropdown-option-${lowerType}`);
+         option.classList.add(`dropdown-option-${types.lower}`);
          selectList.append(option);
       }
 
@@ -370,21 +363,20 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
 }
 
 SNACSchemaAlignmentDialog.hideAndDisable = function(type) {
-   var lowerType = type.toLowerCase(); // e.g. 'resource'
-   var upperType = lowerType.charAt(0).toUpperCase() + lowerType.slice(1); // e.g. 'Resource'
+   var types = this.getCases(type);
 
-   snacDebug(`***** [ hideAndDisable(${lowerType}) ] *****`);
+   snacDebug(`***** [ hideAndDisable(${types.lower}) ] *****`);
 
-   var dragItems = $.makeArray($(`.snac-drag-${lowerType}`));
+   var dragItems = $.makeArray($(`.snac-drag-${types.lower}`));
 
    const selectedValue = []; // Array to hold selected values
-   $(`.snac-select-values-${lowerType}`).find(':selected').filter(function(i, el) { // Filter selected values and push to array
+   $(`.snac-select-values-${types.lower}`).find(':selected').filter(function(i, el) { // Filter selected values and push to array
       return $(el).val();
    }).each(function(i, el) {
       selectedValue.push($(el).val());
    });
 
-   $(`.snac-select-values-${lowerType}`).find(`.dropdown-option-${lowerType}`).each(function(i, option) { // Loop through all of the options
+   $(`.snac-select-values-${types.lower}`).find(`.dropdown-option-${types.lower}`).each(function(i, option) { // Loop through all of the options
       if (selectedValue.indexOf($(option).val()) > -1) { // Re-enable option if array does not contain current value
          if ($(option).is(':checked')) {  // Disable if current value is selected, else skip
             return;
@@ -425,28 +417,30 @@ SNACSchemaAlignmentDialog.hideAndDisableAll = function() {
    this.hideAndDisableRelation();
 }
 
-SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header, names, tooltips, model) {
-   var lowerType = type.toLowerCase(); // e.g. 'resource'
-   var upperType = lowerType.charAt(0).toUpperCase() + lowerType.slice(1); // e.g. 'Resource'
+SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
+   var types = this.getCases(type);
 
-   snacDebug(`***** [ updateColumn(${lowerType}) ] *****`);
+   snacDebug(`***** [ updateColumn(${types.lower}) ] *****`);
 
    var _this = this;
 
+   var names = this._model[type].map(x => x.name);
+   var tooltips = this._model[type].map(x => x.tooltips);
+
    // openrefine column names and dropdowns are appended here
-   var columnArea = $(`.snac-schema-alignment-dialog-openrefine-names-area-${lowerType}`);
+   var columnArea = $(`.snac-schema-alignment-dialog-openrefine-names-area-${types.lower}`);
    columnArea.addClass('snac-area-openrefine-name');
    columnArea.empty();
    columnArea.html("<h2>OpenRefine Columns</h2>");
 
    var columnDiv = $('<div></div>');
    columnDiv.addClass('snac-dynamic-table');
-   columnDiv.append(this.addTable(schema, lowerType, names));
+   columnDiv.append(this.addTable(schema, types.lower, names));
 
    columnArea.append(columnDiv);
 
    // snac schema field names are appended here
-   var refcolumnArea = $(`.snac-schema-alignment-dialog-schema-fields-area-${lowerType}`);
+   var refcolumnArea = $(`.snac-schema-alignment-dialog-schema-fields-area-${types.lower}`);
    refcolumnArea.addClass('snac-area-schema-field');
    refcolumnArea.empty();
    refcolumnArea.html(`<h2>${header}</h2>`);
@@ -458,14 +452,14 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header, names, t
    var refTableBody = document.createElement("tbody");
    refTable.appendChild(refTableBody);
 
-   model.forEach((field) => {
+   this._model[type].forEach((field) => {
       var tr = document.createElement("tr");
       var td = document.createElement("td");
 
       var cell = $('<div></div>');
       cell.addClass('snac-cell');
       cell.addClass('snac-cell-schema-field');
-      cell.addClass(`snac-drag-${lowerType}`);
+      cell.addClass(`snac-drag-${types.lower}`);
       cell.addClass('snac-tooltip');
       if (field.required) {
          cell.addClass('snac-cell-schema-field-required');
@@ -487,13 +481,13 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header, names, t
       var toolTiptext = document.createTextNode(tooltips[i]);
       toolTipSpan.classList.add('snac-tooltip-text');
       toolTipSpan.appendChild(toolTiptext);
-      $(`.snac-drag-${lowerType}`)[i].appendChild(toolTipSpan);
+      $(`.snac-drag-${types.lower}`)[i].appendChild(toolTipSpan);
    }
 
    // setup for redraw on change
-   $(`.snac-select-values-${lowerType}`).on("change", function () {
-      _this.hideAndDisable(lowerType);
-      snacDebug(`snac-select-values-${lowerType} calling hasChanged()`);
+   $(`.snac-select-values-${types.lower}`).on("change", function () {
+      _this.hideAndDisable(types.lower);
+      snacDebug(`snac-select-values-${types.lower} calling hasChanged()`);
       _this.hasChanged();
    });
 }
@@ -507,32 +501,9 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
    var columns = theProject.columnModel.columns;
 
-   this.updateColumn(
-      schema,
-      'resource',
-      "SNAC Resource Description Model",
-      this.SNACResourceNames,
-      this.SNACResourceTooltips,
-      this.SNACResourceModel
-   );
-
-   this.updateColumn(
-      schema,
-      'constellation',
-      "SNAC CPF Model",
-      this.SNACConstellationNames,
-      this.SNACConstellationTooltips,
-      this.SNACConstellationModel
-   );
-
-   this.updateColumn(
-      schema,
-      'relation',
-      "SNAC Join Model",
-      this.SNACRelationNames,
-      this.SNACRelationTooltips,
-      this.SNACRelationModel
-   );
+   this.updateColumn(schema, 'resource',      "SNAC Resource Description Model");
+   this.updateColumn(schema, 'constellation', "SNAC CPF Model");
+   this.updateColumn(schema, 'relation',      "SNAC Join Model");
 
    // Allow names column (first column) to be droppable
    $(".snac-cell-openrefine-name").droppable({
@@ -641,19 +612,14 @@ SNACSchemaAlignmentDialog.reset = function(schema) {
 
    this._ignoreChanges = true;
 
-   this._originalSchema = schema || { schemaType: "", columnMappings: {} };
+   this._originalSchema = schema || this._defaultSchema;
    this._schema = cloneDeep(this._originalSchema); // this is what can be munched on
 
-   $('#snac-areas-container').empty();
-   this.updateColumns(schema);
-   if (this._schema.schemaType == "constellation") {
-      $('#uploadingConstellationButton').trigger('click');
-   } else if (this._schema.schemaType == 'relation') {
-      $('#uploadingRelationButton').trigger('click');
-   } else {
-      $('#uploadingResourceButton').trigger('click');
+   var types = this.getCases(this._schema.schemaType);
 
-   }
+   $('#snac-areas-container').empty();
+   this.updateColumns(this._schema);
+   $(`#uploading${types.upper}Button`).trigger('click');
 
    this._ignoreChanges = false;
 };
@@ -717,22 +683,22 @@ SNACSchemaAlignmentDialog.changesCleared = function() {
 SNACSchemaAlignmentDialog.getJSON = function() {
    snacDebug(`***** [ getJSON ] *****`);
 
-   var schemaType = "unknown";
-   var dropDownColumn;
-
    // determine source of schema values
 
-   if ($('#uploadingResourceButton').is(':checked')) {
-      schemaType = "resource";
-      dropDownColumn = $('.snac-select-values-resource');
+   var schemaType;
 
+   if ($('#uploadingResourceButton').is(':checked')) {
+      schemaType = 'resource';
+   } else if ($('#uploadingConstellationButton').is(':checked')) {
+      schemaType = 'constellation';
    } else if ($('#uploadingRelationButton').is(':checked')) {
       schemaType = 'relation';
-      dropDownColumn = $('.snac-select-values-relation');
    } else {
-      schemaType = 'constellation';
-      dropDownColumn = $('.snac-select-values-constellation');
+      // should never get here... but just in case, force a default
+      schemaType = this._defaultSchema.schemaType;
    }
+
+   var dropDownColumn = $(`.snac-select-values-${schemaType}`);
 
    var dropDownValues = $.map(dropDownColumn, function(option) {
       return option.value;
@@ -760,15 +726,7 @@ SNACSchemaAlignmentDialog.schemaIsValid = function() {
 
    var schema = this.getJSON();
 
-   var required;
-
-   if (schema.schemaType == "constellation") {
-      required = this.SNACConstellationNamesRequired;
-   } else if (schema.schemaType == "resource") {
-      required = this.SNACResourceNamesRequired;
-   } else {
-      required = this.SNACRelationNamesRequired;
-   }
+   var required = this._model[schema.schemaType].filter(x => x.required === true).map(x => x.name);
 
    var warnings = [];
    var mappedColumns = Object.values(schema.columnMappings);
