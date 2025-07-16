@@ -21,12 +21,12 @@ public class SNACEnvironment {
     this._apiKey = "";
   }
 
-  public SNACEnvironment(SNACEnvironment _env) {
-    this._id = _env.getID();
-    this._name = _env.getName();
-    this._webURL = _env.getWebURL();
-    this._apiURL = _env.getAPIURL();
-    this._apiKey = _env.getAPIKey();
+  public SNACEnvironment(SNACEnvironment env) {
+    this._id = env.getID();
+    this._name = env.getName();
+    this._webURL = env.getWebURL();
+    this._apiURL = env.getAPIURL();
+    this._apiKey = env.getAPIKey();
   }
 
   public Boolean isProd() {

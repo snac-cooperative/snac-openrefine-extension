@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.http.*;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -627,9 +628,9 @@ public class SNACConstellationItem extends SNACUploadItem {
     con.setDateList(dateList);
     con.setSources(sources);
 
-    this._constellation = con;
+    _constellation = con;
 
-    logger.debug("built constellation: [" + this.toJSON() + "]");
+    logger.debug("built constellation: [" + toJSON() + "]");
   }
 
   private void buildConstellationVerbatim() {
@@ -877,7 +878,7 @@ public class SNACConstellationItem extends SNACUploadItem {
   }
 
   public String toJSON() {
-    return Constellation.toJSON(this._constellation);
+    return Constellation.toJSON(_constellation);
   }
 
   private SNACAPIResponse verifyRelatedIDs() {
@@ -916,10 +917,10 @@ public class SNACConstellationItem extends SNACUploadItem {
     if (relationErrors.size() > 0) {
       String errMsg = String.join("\n\n", relationErrors);
       logger.warn("constellation validation error: [" + errMsg + "]");
-      return new SNACAPIResponse(this._client, errMsg);
+      return new SNACAPIResponse(_client, errMsg);
     }
 
-    return new SNACAPIResponse(this._client, "success");
+    return new SNACAPIResponse(_client, "success");
   }
 
   public SNACAPIResponse performValidation() {
@@ -933,7 +934,7 @@ public class SNACConstellationItem extends SNACUploadItem {
         _validationErrors.set(i, "* " + _validationErrors.get(i));
       }
       String errMsg = String.join("\n", _validationErrors);
-      return new SNACAPIResponse(this._client, errMsg);
+      return new SNACAPIResponse(_client, errMsg);
     }
 
     // verify any related IDs
@@ -951,9 +952,6 @@ public class SNACConstellationItem extends SNACUploadItem {
 
     // so far so good, proceed with upload
 
-    String apiStr = "\"apikey\": \"" + this._client.apiKey() + "\"";
-    String apiQuery = "";
-
     int myID = _constellation.getID();
 
     if (myID > 0) {
@@ -963,9 +961,13 @@ public class SNACConstellationItem extends SNACUploadItem {
 
       logger.info("checking out existing constellation [" + myID + "]...");
 
-      apiQuery = "{ \"command\": \"edit\", " + apiStr + ", \"constellationid\": " + myID + " }";
+      JSONObject req = new JSONObject();
 
-      SNACAPIResponse checkoutResponse = this._client.post(apiQuery);
+      req.put("command", "edit");
+      req.put("constellationid", myID);
+      req.put("apikey", _client.apiKey());
+
+      SNACAPIResponse checkoutResponse = _client.post(req);
 
       Constellation checkoutCon = checkoutResponse.getConstellation();
 
@@ -976,25 +978,21 @@ public class SNACConstellationItem extends SNACUploadItem {
 
       // set update information
 
-      this._constellation.setOperation("update");
-      this._constellation.setID(checkoutCon.getID());
-      this._constellation.setVersion(checkoutCon.getVersion());
-      this._constellation.setArk(checkoutCon.getArk());
+      _constellation.setOperation("update");
+      _constellation.setID(checkoutCon.getID());
+      _constellation.setVersion(checkoutCon.getVersion());
+      _constellation.setArk(checkoutCon.getArk());
     }
 
     logger.info("uploading constellation...");
 
-    // Perform insert or update and publish
-    String constellationJSON = this.toJSON();
+    JSONObject req = new JSONObject();
 
-    apiQuery =
-        "{ \"command\": \"insert_and_publish_constellation\", "
-            + apiStr
-            + ", \"constellation\": "
-            + constellationJSON
-            + " }";
+    req.put("command", "insert_and_publish_constellation");
+    req.put("apikey", _client.apiKey());
+    req.put("constellation", new JSONObject(toJSON()));
 
-    SNACAPIResponse updateResponse = this._client.post(apiQuery);
+    SNACAPIResponse updateResponse = _client.post(req);
 
     logger.info("constellation upload complete");
 

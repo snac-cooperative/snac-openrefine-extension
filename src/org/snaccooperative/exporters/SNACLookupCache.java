@@ -2,6 +2,7 @@ package org.snaccooperative.exporters;
 
 import java.util.HashMap;
 import org.apache.http.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -59,11 +60,11 @@ public class SNACLookupCache {
   }
 
   public void disableTermCache() {
-    this._termClient = null;
+    _termClient = null;
   }
 
   public void enableTermCache() {
-    this._termClient = this._client;
+    _termClient = _client;
   }
 
   public Term getSubjectTerm(String key) {
@@ -122,12 +123,15 @@ public class SNACLookupCache {
     // query existence of constellation ID via elasticsearch for speed
 
     try {
-      String apiQuery =
-          "{ \"command\": \"elastic\", \"query\": { \"ids\": { \"values\": [ "
-              + id
-              + " ] } }, \"size\": 0 }";
+      JSONObject req = new JSONObject();
 
-      SNACAPIResponse lookupResponse = _client.post(apiQuery);
+      req.put("command", "elastic");
+      req.put(
+          "query",
+          new JSONObject().put("ids", new JSONObject().put("values", new JSONArray().put(id))));
+      req.put("size", 0);
+
+      SNACAPIResponse lookupResponse = _client.post(req);
 
       logger.debug(
           "lookupConstellation(): API response: [" + lookupResponse.getAPIResponse() + "]");
@@ -180,9 +184,12 @@ public class SNACLookupCache {
     // perform lookup of ID by simply reading the resource
 
     try {
-      String apiQuery = "{ \"command\": \"read_resource\", \"resourceid\": " + id + " }";
+      JSONObject req = new JSONObject();
 
-      SNACAPIResponse lookupResponse = _client.post(apiQuery);
+      req.put("command", "read_resource");
+      req.put("resourceid", id);
+
+      SNACAPIResponse lookupResponse = _client.post(req);
 
       logger.debug("lookupResource(): API response: [" + lookupResponse.getAPIResponse() + "]");
 

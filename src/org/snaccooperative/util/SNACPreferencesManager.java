@@ -13,14 +13,13 @@ public class SNACPreferencesManager {
   static final Logger logger = LoggerFactory.getLogger("SNACPreferencesManager");
 
   // deprecated; existing value will be migrated on load of new preference keys
-  private static final String LEGACY_PREFERENCE_STORE_KEY = "snac_apikey";
-  private static final String LEGACY_PREFERENCE_STORE_APIKEY_KEY = "apikey";
+  private static final String LEGACY_PREF_STORE_KEY = "snac_apikey";
+  private static final String LEGACY_PREF_STORE_APIKEY_KEY = "apikey";
 
-  private static final String PREFERENCE_STORE_KEY_ENVIRONMENT = "snac.environment";
-  private static final String PREFERENCE_STORE_KEY_APIKEY_PREFIX = "snac.apikey.";
-  private static final String PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS = "snac.preview.max_items";
-  private static final String PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE =
-      "snac.upload.api_response";
+  private static final String PREF_STORE_KEY_ENVIRONMENT = "snac.environment";
+  private static final String PREF_STORE_KEY_APIKEY_PREFIX = "snac.apikey.";
+  private static final String PREF_STORE_KEY_MAX_PREVIEW_ITEMS = "snac.preview.max_items";
+  private static final String PREF_STORE_KEY_INCLUDE_API_RESPONSE = "snac.upload.api_response";
 
   private static final Integer SNAC_DEFAULT_MAX_PREVIEW_ITEMS = 10;
   private static final Boolean SNAC_DEFAULT_INCLUDE_API_RESPONSE = false;
@@ -72,13 +71,13 @@ public class SNACPreferencesManager {
 
   private void logPreferences() {
     // read from openrefine preferences store
-    logger.info("stored id: [" + (String) prefStore.get(PREFERENCE_STORE_KEY_ENVIRONMENT) + "]");
+    logger.info("stored id: [" + (String) prefStore.get(PREF_STORE_KEY_ENVIRONMENT) + "]");
     for (String key : _env.keySet()) {
       logger.info(
           "stored env ["
               + key
               + "] api key = ["
-              + (String) prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key)
+              + (String) prefStore.get(PREF_STORE_KEY_APIKEY_PREFIX + key)
               + "]");
     }
 
@@ -96,10 +95,10 @@ public class SNACPreferencesManager {
   }
 
   private String getLegacyKey() {
-    ArrayNode array = (ArrayNode) prefStore.get(LEGACY_PREFERENCE_STORE_KEY);
+    ArrayNode array = (ArrayNode) prefStore.get(LEGACY_PREF_STORE_KEY);
 
     if (array != null && array.size() > 0 && array.get(0) instanceof ObjectNode) {
-      return array.get(0).get(LEGACY_PREFERENCE_STORE_APIKEY_KEY).asText().trim();
+      return array.get(0).get(LEGACY_PREF_STORE_APIKEY_KEY).asText().trim();
     }
 
     return "";
@@ -112,27 +111,25 @@ public class SNACPreferencesManager {
     // get legacy api key preference to use as fallback when new preferences haven't been set
     String legacyKey = getLegacyKey();
 
-    _id = (String) valueWithFallback(prefStore.get(PREFERENCE_STORE_KEY_ENVIRONMENT), _dev.getID());
+    _id = (String) valueWithFallback(prefStore.get(PREF_STORE_KEY_ENVIRONMENT), _dev.getID());
     for (String key : _env.keySet()) {
       // pre-populate old api key as long as new preferences haven't been saved.
       // old api key was not environment-specific so populate it everywhere and let the user fix
       _env.get(key)
           .setAPIKey(
               (String)
-                  valueWithFallback(
-                      prefStore.get(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key), legacyKey));
+                  valueWithFallback(prefStore.get(PREF_STORE_KEY_APIKEY_PREFIX + key), legacyKey));
     }
 
     _maxPreviewItems =
         (Integer)
             valueWithFallback(
-                prefStore.get(PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS),
-                SNAC_DEFAULT_MAX_PREVIEW_ITEMS);
+                prefStore.get(PREF_STORE_KEY_MAX_PREVIEW_ITEMS), SNAC_DEFAULT_MAX_PREVIEW_ITEMS);
 
     _includeAPIResponse =
         (Boolean)
             valueWithFallback(
-                prefStore.get(PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE),
+                prefStore.get(PREF_STORE_KEY_INCLUDE_API_RESPONSE),
                 SNAC_DEFAULT_INCLUDE_API_RESPONSE);
 
     // logPreferences();
@@ -182,15 +179,15 @@ public class SNACPreferencesManager {
     _includeAPIResponse = includeAPIResponse;
 
     // write to openrefine preferences store
-    prefStore.put(PREFERENCE_STORE_KEY_ENVIRONMENT, _id);
+    prefStore.put(PREF_STORE_KEY_ENVIRONMENT, _id);
     for (String key : _env.keySet()) {
-      prefStore.put(PREFERENCE_STORE_KEY_APIKEY_PREFIX + key, _env.get(key).getAPIKey());
+      prefStore.put(PREF_STORE_KEY_APIKEY_PREFIX + key, _env.get(key).getAPIKey());
     }
-    prefStore.put(PREFERENCE_STORE_KEY_MAX_PREVIEW_ITEMS, _maxPreviewItems);
-    prefStore.put(PREFERENCE_STORE_KEY_INCLUDE_API_RESPONSE, _includeAPIResponse);
+    prefStore.put(PREF_STORE_KEY_MAX_PREVIEW_ITEMS, _maxPreviewItems);
+    prefStore.put(PREF_STORE_KEY_INCLUDE_API_RESPONSE, _includeAPIResponse);
 
     // remove old legacy api key preference now that user has saved new preferences
-    prefStore.put(LEGACY_PREFERENCE_STORE_KEY, null);
+    prefStore.put(LEGACY_PREF_STORE_KEY, null);
 
     // logPreferences();
   }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.http.*;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.commands.SNACAPIClient;
@@ -247,9 +248,9 @@ public class SNACResourceItem extends SNACUploadItem {
     // add accumulated languages
     res.setLanguages(languages);
 
-    this._resource = res;
+    _resource = res;
 
-    logger.debug("built resource: [" + this.toJSON() + "]");
+    logger.debug("built resource: [" + toJSON() + "]");
   }
 
   private void buildResourceVerbatim() {
@@ -395,7 +396,7 @@ public class SNACResourceItem extends SNACUploadItem {
   }
 
   public String toJSON() {
-    return Resource.toJSON(this._resource);
+    return Resource.toJSON(_resource);
   }
 
   private SNACAPIResponse verifyRelatedIDs() {
@@ -417,10 +418,10 @@ public class SNACResourceItem extends SNACUploadItem {
     if (relationErrors.size() > 0) {
       String errMsg = String.join("\n\n", relationErrors);
       logger.warn("resource validation error: [" + errMsg + "]");
-      return new SNACAPIResponse(this._client, errMsg);
+      return new SNACAPIResponse(_client, errMsg);
     }
 
-    return new SNACAPIResponse(this._client, "success");
+    return new SNACAPIResponse(_client, "success");
   }
 
   public SNACAPIResponse performValidation() {
@@ -434,7 +435,7 @@ public class SNACResourceItem extends SNACUploadItem {
         _validationErrors.set(i, "* " + _validationErrors.get(i));
       }
       String errMsg = String.join("\n", _validationErrors);
-      return new SNACAPIResponse(this._client, errMsg);
+      return new SNACAPIResponse(_client, errMsg);
     }
 
     // verify any related IDs
@@ -450,13 +451,13 @@ public class SNACResourceItem extends SNACUploadItem {
       return validationError;
     }
 
-    String resourceJSON = this.toJSON();
+    JSONObject req = new JSONObject();
 
-    String apiStr = "\"apikey\": \"" + this._client.apiKey() + "\"";
-    String apiQuery =
-        "{ \"command\": \"insert_resource\", " + apiStr + ", \"resource\": " + resourceJSON + " }";
+    req.put("command", "insert_resource");
+    req.put("apikey", _client.apiKey());
+    req.put("resource", new JSONObject(toJSON()));
 
-    SNACAPIResponse insertResponse = this._client.post(apiQuery);
+    SNACAPIResponse insertResponse = _client.post(req);
 
     logger.info("resource upload complete");
 

@@ -26,14 +26,13 @@ public class SNACTermCache {
 
   private Term lookupTerm(SNACAPIClient client, String key) {
     try {
-      String apiQuery =
-          "{ \"command\": \"vocabulary\", \"query_string\": \""
-              + key
-              + "\", \"type\": \""
-              + _type
-              + "\" }";
+      JSONObject req = new JSONObject();
 
-      SNACAPIResponse lookupResponse = client.post(apiQuery);
+      req.put("command", "vocabulary");
+      req.put("query_string", key);
+      req.put("type", _type);
+
+      SNACAPIResponse lookupResponse = client.post(req);
 
       JSONArray results = new JSONObject(lookupResponse.getAPIResponse()).optJSONArray("results");
 

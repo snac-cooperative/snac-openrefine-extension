@@ -7,6 +7,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.util.SNACEnvironment;
@@ -62,13 +63,17 @@ public class SNACAPIClient {
     return webURL() + "vocab_administrator/resources/" + id;
   }
 
-  public SNACAPIResponse post(String apiJSON) {
+  public SNACAPIResponse post(JSONObject req) {
+    return post(req.toString());
+  }
+
+  public SNACAPIResponse post(String req) {
     try {
-      logger.debug("API POST data: [" + apiJSON + "]");
-      StringEntity apiCasted = new StringEntity(apiJSON, "UTF-8");
+      logger.debug("API POST data: [" + req + "]");
+      StringEntity apiCasted = new StringEntity(req, "UTF-8");
       _post.setEntity(apiCasted);
-      HttpResponse response = _client.execute(_post);
-      String result = EntityUtils.toString(response.getEntity());
+      HttpResponse res = _client.execute(_post);
+      String result = EntityUtils.toString(res.getEntity());
       return new SNACAPIResponse(this, result);
     } catch (IOException e) {
       logger.error(e.toString());
