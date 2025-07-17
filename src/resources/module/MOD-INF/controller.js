@@ -35,6 +35,7 @@ function init() {
      */
     RefineServlet.registerCommand(module, "save-schema", new SNACSaveSchemaCommand());
     RefineServlet.registerCommand(module, "preview-schema", new SNACPreviewSchemaCommand());
+    RefineServlet.registerCommand(module, "migrate-schema", new SNACMigrateSchemaCommand());
     RefineServlet.registerCommand(module, "perform-uploads", new SNACPerformUploadsCommand());
     RefineServlet.registerCommand(module, "perform-validation", new SNACPerformValidationCommand());
     RefineServlet.registerCommand(module, "export-json", new SNACExportJSONCommand());

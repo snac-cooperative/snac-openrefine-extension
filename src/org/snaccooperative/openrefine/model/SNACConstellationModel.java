@@ -1,8 +1,10 @@
 package org.snaccooperative.openrefine.model;
 
-import org.apache.http.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
@@ -37,7 +39,7 @@ public class SNACConstellationModel
   static final Logger logger = LoggerFactory.getLogger("SNACConstellationModel");
 
   public SNACConstellationModel() {
-    super("constellation", ConstellationModelField.NONE);
+    super(ModelType.CONSTELLATION, ConstellationModelField.NONE);
 
     addField(
         ConstellationModelField.CPF_TYPE,
@@ -51,9 +53,8 @@ public class SNACConstellationModel
     addField(
         ConstellationModelField.CPF_ID,
         new SNACModelField(
-            // "CPF ID",
-            // new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
-            "SNAC CPF ID",
+            "CPF ID",
+            new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,

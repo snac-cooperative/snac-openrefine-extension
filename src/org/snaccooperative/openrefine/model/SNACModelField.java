@@ -100,19 +100,27 @@ public class SNACModelField {
     return _tooltip;
   }
 
-  private Boolean stringsAreEqual(String a, String b) {
-    return a.toLowerCase().equals(b.toLowerCase());
-  }
-
-  public Boolean isNameForField(String s) {
-    if (stringsAreEqual(s, _name)) {
+  public Boolean isCurrentName(String s) {
+    if (s.equalsIgnoreCase(_name)) {
       return true;
     }
 
+    return false;
+  }
+
+  public Boolean isPreviousName(String s) {
     for (int i = 0; i < _previousNames.size(); i++) {
-      if (stringsAreEqual(s, _previousNames.get(i))) {
+      if (s.equalsIgnoreCase(_previousNames.get(i))) {
         return true;
       }
+    }
+
+    return false;
+  }
+
+  public Boolean isKnownName(String s) {
+    if (isCurrentName(s) || isPreviousName(s)) {
+      return true;
     }
 
     return false;

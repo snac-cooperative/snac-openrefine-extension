@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACExportJSONCommand extends Command {
@@ -77,7 +77,14 @@ public class SNACExportJSONCommand extends Command {
         return;
       }
 
-      List<SNACUploadItem> items = schema.evaluateRecords(project, engine);
+      List<SNACAbstractItem> items = schema.evaluateRecords(project, engine);
+
+      logger.info(
+          "generated "
+              + items.size()
+              + " (out of "
+              + project.recordModel.getRecordCount()
+              + ") export items");
 
       Writer w = response.getWriter();
       JsonGenerator writer = ParsingUtilities.mapper.getFactory().createGenerator(w);
@@ -93,12 +100,12 @@ public class SNACExportJSONCommand extends Command {
 
       writer.writeEndObject();
 
-      logger.info("SNAC JSON export succeeded");
-
       writer.flush();
       writer.close();
       w.flush();
       w.close();
+
+      logger.info("SNAC JSON export succeeded");
     } catch (Exception e) {
       logger.error("SNAC JSON export: exception: [" + e + "]");
       respondException(response, e);

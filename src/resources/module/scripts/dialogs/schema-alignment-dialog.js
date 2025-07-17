@@ -57,7 +57,34 @@ SNACSchemaAlignmentDialog.getCases = function(str) {
 }
 
 SNACSchemaAlignmentDialog.setup = function(onDone) {
-   this.setupModel(onDone);
+   snacDebug(`***** [ setup ] *****`);
+   this.migrateSchema(onDone);
+}
+
+SNACSchemaAlignmentDialog.migrateSchema = function(onDone) {
+   snacDebug(`***** [ migrateSchema ] *****`);
+
+   var _this = this;
+
+   Refine.postProcess(
+      "snac",
+      "migrate-schema",
+      {},
+      {},
+      { modelsChanged: true },
+      {
+         onDone: function(data) {
+            snacDebug(`migrateSchema(): SUCCESS  data = [${JSON.stringify(data)}]`);
+
+            _this.setupModel(onDone);
+         },
+         onError: function(e) {
+            snacDebug(`migrateSchema(): FAILURE: [${e}]`);
+
+            _this.setupModel(onDone);
+         },
+      }
+   );
 }
 
 SNACSchemaAlignmentDialog.setupModel = function(onDone) {
@@ -400,18 +427,22 @@ SNACSchemaAlignmentDialog.hideAndDisable = function(type) {
 };
 
 SNACSchemaAlignmentDialog.hideAndDisableResource = function() {
+   snacDebug(`***** [ hideAndDisableResource ] *****`);
    this.hideAndDisable('resource');
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableConstellation = function() {
+   snacDebug(`***** [ hideAndDisableConstellatio ] *****`);
    this.hideAndDisable('constellation');
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableRelation = function() {
+   snacDebug(`***** [ hideAndDisableRelation ] *****`);
    this.hideAndDisable('relation');
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableAll = function() {
+   snacDebug(`***** [ hideAndDisableAll ] *****`);
    this.hideAndDisableResource();
    this.hideAndDisableConstellation();
    this.hideAndDisableRelation();
@@ -582,6 +613,7 @@ SNACSchemaAlignmentDialog.isSetUp = function() {
 }
 
 SNACSchemaAlignmentDialog.switchToSchemaPanel = function() {
+   snacDebug(`***** [ switchToSchemaPanel ] *****`);
    $('.main-view-panel-tab-header').show();
    SNACSchemaAlignmentDialog.switchTab('#snac-schema-panel');
 }
@@ -638,9 +670,9 @@ SNACSchemaAlignmentDialog.save = function(onDone) {
       "save-schema",
       {},
       { schema: JSON.stringify(schema) },
-      {},
+      { modelsChanged: true },
       {
-         onDone: function() {
+         onDone: function(data) {
             snacDebug(`save(): SUCCESS`);
             theProject.overlayModels.snacSchema = schema;
             snacDebug(`save(): new overlay model: [${JSON.stringify(theProject.overlayModels.snacSchema)}]`);
@@ -752,6 +784,8 @@ SNACSchemaAlignmentDialog.schemaIsValid = function() {
 };
 
 SNACSchemaAlignmentDialog.evaluateCurrentSchema = function(enableButtons) {
+   snacDebug(`***** [ evaluateCurrentSchema ] *****`);
+
    // disable save button if schema is not valid
 
    snacDebug(`evaluateCurrentSchema() calling preview()`);
@@ -797,6 +831,8 @@ SNACSchemaAlignmentDialog.hasChanged = function() {
 }
 
 SNACSchemaAlignmentDialog.updateItemPreviewText = function(itemType, itemCount, totalCount) {
+   snacDebug(`***** [ updateItemPreviewText ] *****`);
+
    this._previewElmts.previewExplanation.text(
       $.i18n('snac-schema/preview-explanation')
          .replace('{preview_type}', itemType)
@@ -866,6 +902,8 @@ Refine.registerUpdateFunction(function(options) {
  *************************/
 
 SNACSchemaAlignmentDialog.updateWarnings = function(warnings, totalCount) {
+   snacDebug(`***** [ updateWarnings ] *****`);
+
    var mainDiv = $('#snac-issues-panel');
    var countsElem = this.issuesTabCount;
 

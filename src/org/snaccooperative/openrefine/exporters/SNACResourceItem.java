@@ -1,7 +1,5 @@
 package org.snaccooperative.openrefine.exporters;
 
-import static org.snaccooperative.openrefine.schema.SNACSchemaUtilities.getCellValueForRowByColumnName;
-
 import com.google.refine.model.Project;
 import com.google.refine.model.Record;
 import com.google.refine.model.Row;
@@ -10,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.http.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +22,7 @@ import org.snaccooperative.openrefine.model.SNACResourceModel;
 import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
-public class SNACResourceItem extends SNACUploadItem {
+public class SNACResourceItem extends SNACAbstractItem {
 
   static final Logger logger = LoggerFactory.getLogger("SNACResourceItem");
 

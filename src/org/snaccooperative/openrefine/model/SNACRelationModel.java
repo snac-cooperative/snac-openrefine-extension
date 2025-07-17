@@ -1,8 +1,10 @@
 package org.snaccooperative.openrefine.model;
 
-import org.apache.http.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
@@ -22,7 +24,7 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
   static final Logger logger = LoggerFactory.getLogger("SNACRelationModel");
 
   public SNACRelationModel() {
-    super("relation", RelationModelField.NONE);
+    super(ModelType.RELATION, RelationModelField.NONE);
 
     addField(
         RelationModelField.CPF_TYPE,
@@ -36,9 +38,8 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     addField(
         RelationModelField.CPF_ID,
         new SNACModelField(
-            // "CPF ID",
-            // new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
-            "SNAC CPF ID",
+            "CPF ID",
+            new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
@@ -56,9 +57,8 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     addField(
         RelationModelField.RELATED_CPF_ID,
         new SNACModelField(
-            // "Related CPF ID",
-            // new ArrayList<String>(Arrays.asList("Related SNAC CPF ID")), // previous name(s)
-            "Related SNAC CPF ID",
+            "Related CPF ID",
+            new ArrayList<String>(Arrays.asList("Related SNAC CPF ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.IDENTIFIER,
@@ -76,9 +76,8 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     addField(
         RelationModelField.RELATED_RESOURCE_ID,
         new SNACModelField(
-            // "Resource ID",
-            // new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
-            "SNAC Resource ID",
+            "Resource ID",
+            new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.IDENTIFIER,

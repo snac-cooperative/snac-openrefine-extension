@@ -1,7 +1,6 @@
 package org.snaccooperative.openrefine.cache;
 
 import java.util.HashMap;
-import org.apache.http.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +58,7 @@ public class SNACTermCache {
           continue;
         }
 
-        if (!gotTerm.toLowerCase().equals(key.toLowerCase())) {
+        if (!gotTerm.equalsIgnoreCase(key)) {
           continue;
         }
 

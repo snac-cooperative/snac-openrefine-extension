@@ -2,7 +2,6 @@ package org.snaccooperative.openrefine.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
-import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

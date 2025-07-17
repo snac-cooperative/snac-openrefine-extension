@@ -1,9 +1,12 @@
 package org.snaccooperative.openrefine.exporters;
 
+import com.google.refine.model.Column;
+import com.google.refine.model.Project;
+import com.google.refine.model.Row;
 import java.util.List;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
-public abstract class SNACUploadItem {
+public abstract class SNACAbstractItem {
 
   public abstract String getPreviewText();
 
@@ -14,6 +17,42 @@ public abstract class SNACUploadItem {
   public abstract SNACAPIResponse performValidation();
 
   public abstract SNACAPIResponse performUpload();
+
+  // openrefine row/column/cell helpers
+
+  protected int getCellIndexForRowByColumnName(Project project, Row row, String name) {
+    Column column = project.columnModel.getColumnByName(name);
+
+    if (column == null) {
+      return -1;
+    }
+
+    return column.getCellIndex();
+  }
+
+  protected String getCellValueForRowByCellIndex(Row row, int cellIndex) {
+    if (cellIndex < 0) {
+      return "";
+    }
+
+    Object cellValue = row.getCellValue(cellIndex);
+
+    if (cellValue == null) {
+      return "";
+    }
+
+    return cellValue.toString();
+  }
+
+  protected String getCellValueForRowByColumnName(Project project, Row row, String name) {
+    int cellIndex = getCellIndexForRowByColumnName(project, row, name);
+
+    if (cellIndex < 0) {
+      return "";
+    }
+
+    return getCellValueForRowByCellIndex(row, cellIndex);
+  }
 
   // preview text helpers
 

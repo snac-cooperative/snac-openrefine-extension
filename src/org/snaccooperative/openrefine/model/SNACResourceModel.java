@@ -1,8 +1,10 @@
 package org.snaccooperative.openrefine.model;
 
-import org.apache.http.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
@@ -26,7 +28,7 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
   static final Logger logger = LoggerFactory.getLogger("SNACResourceModel");
 
   public SNACResourceModel() {
-    super("resource", ResourceModelField.NONE);
+    super(ModelType.RESOURCE, ResourceModelField.NONE);
 
     addField(
         ResourceModelField.RESOURCE_TYPE,
@@ -40,9 +42,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
     addField(
         ResourceModelField.RESOURCE_ID,
         new SNACModelField(
-            // "Resource ID",
-            // new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
-            "SNAC Resource ID",
+            "Resource ID",
+            new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,
@@ -69,10 +70,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
     addField(
         ResourceModelField.HOLDING_REPOSITORY_ID,
         new SNACModelField(
-            // "Holding Repository ID",
-            // new ArrayList<String>(Arrays.asList("Holding Repository SNAC ID")), // previous
-            // name(s)
-            "Holding Repository SNAC ID",
+            "Holding Repository ID",
+            new ArrayList<String>(Arrays.asList("Holding Repository SNAC ID")), // previous name(s)
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.IDENTIFIER,

@@ -1,7 +1,6 @@
 package org.snaccooperative.openrefine.cache;
 
 import java.util.HashMap;
-import org.apache.http.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

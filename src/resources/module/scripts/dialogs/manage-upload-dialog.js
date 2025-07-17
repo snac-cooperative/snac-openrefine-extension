@@ -10,16 +10,23 @@ SNACManageUploadDialog.launch = function(callback) {
       return;
    }
 
-  $.get(
+  Refine.postCSRF(
     "command/snac/preferences",
+    {},
     function(data) {
-      if (data.api_key === '') {
-        alert($.i18n('snac-upload/missing-key'));
-        callback(null);
+      if ("code" in data && data.code === "error") {
+        alert(`${$.i18n('snac-preferences/error-loading')}: ${data.message}`);
       } else {
-        SNACManageUploadDialog.display(data, callback);
+        if (data.api_key === '') {
+          alert($.i18n('snac-upload/missing-key'));
+          callback(null);
+        } else {
+          SNACManageUploadDialog.display(data, callback);
+        }
       }
-    });
+    },
+    "json"
+  );
 };
 
 SNACManageUploadDialog.display = function(data, callback) {

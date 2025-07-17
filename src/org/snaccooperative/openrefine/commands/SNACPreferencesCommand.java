@@ -21,15 +21,25 @@ public class SNACPreferencesCommand extends Command {
       throws ServletException, IOException {
     SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
+    if (!hasValidCSRFToken(request)) {
+      logger.error("SNAC preferences: invalid CSRF token");
+      respondCSRFError(response);
+      return;
+    }
+
     // save preferences if provided
     if (request.getParameter("snacenv") != null) {
+      logger.info("saving SNAC preferences...");
       prefsManager.savePreferences(
           request.getParameter("snacenv"),
           request.getParameter("snackeydev"),
           request.getParameter("snackeyprod"),
           request.getParameter("snacmaxpreviewitems"),
           request.getParameter("snacincludeapiresponse"));
+      logger.info("SNAC preferences saved successfully");
     }
+
+    logger.info("loading SNAC preferences...");
 
     // return current preference in all cases
     response.setCharacterEncoding("UTF-8");
@@ -71,6 +81,8 @@ public class SNACPreferencesCommand extends Command {
     writer.close();
     w.flush();
     w.close();
+
+    logger.info("SNAC preferences loaded successfully");
   }
 
   @Override

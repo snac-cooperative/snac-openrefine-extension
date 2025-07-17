@@ -10,11 +10,18 @@ SNACManageValidationDialog.launch = function(callback) {
       return;
    }
 
-  $.get(
+  Refine.postCSRF(
     "command/snac/preferences",
+    {},
     function(data) {
-      SNACManageValidationDialog.display(data, callback);
-    });
+      if ("code" in data && data.code === "error") {
+        alert(`${$.i18n('snac-preferences/error-loading')}: ${data.message}`);
+      } else {
+        SNACManageValidationDialog.display(data, callback);
+      }
+    },
+    "json"
+  );
 };
 
 SNACManageValidationDialog.display = function(data, callback) {

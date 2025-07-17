@@ -42,9 +42,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.api.SNACAPIClient;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
 import org.snaccooperative.openrefine.exporters.SNACConstellationItem;
 import org.snaccooperative.openrefine.exporters.SNACResourceItem;
-import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SNACSchema implements OverlayModel {
@@ -83,15 +84,15 @@ public class SNACSchema implements OverlayModel {
     return _columnMappings;
   }
 
-  public List<SNACUploadItem> evaluateRecords(Project project, Engine engine) {
+  public List<SNACAbstractItem> evaluateRecords(Project project, Engine engine) {
     return evaluateRecords(project, engine, 0);
   }
 
-  public List<SNACUploadItem> evaluateRecords(Project project, Engine engine, int maxRecords) {
+  public List<SNACAbstractItem> evaluateRecords(Project project, Engine engine, int maxRecords) {
     Mode prevMode = engine.getMode();
     engine.setMode(Mode.RecordBased);
 
-    List<SNACUploadItem> items = new ArrayList<SNACUploadItem>();
+    List<SNACAbstractItem> items = new ArrayList<SNACAbstractItem>();
     FilteredRecords filteredRecords = engine.getFilteredRecords();
     filteredRecords.accept(project, new SNACRecordVisitor(items, this, maxRecords));
 
@@ -101,7 +102,7 @@ public class SNACSchema implements OverlayModel {
   }
 
   protected class SNACRecordVisitor implements RecordVisitor {
-    private List<SNACUploadItem> _items;
+    private List<SNACAbstractItem> _items;
     private SNACSchema _schema;
     private SNACAPIClient _client;
     private SNACLookupCache _cache;
@@ -109,11 +110,11 @@ public class SNACSchema implements OverlayModel {
 
     final Logger logger = LoggerFactory.getLogger("SNACRecordVisitor");
 
-    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema) {
+    public SNACRecordVisitor(List<SNACAbstractItem> items, SNACSchema schema) {
       this(items, schema, 0);
     }
 
-    public SNACRecordVisitor(List<SNACUploadItem> items, SNACSchema schema, int maxRecords) {
+    public SNACRecordVisitor(List<SNACAbstractItem> items, SNACSchema schema, int maxRecords) {
       this._items = items;
       this._schema = schema;
       this._maxRecords = maxRecords;
@@ -131,18 +132,20 @@ public class SNACSchema implements OverlayModel {
         return true;
       }
 
-      SNACUploadItem item;
+      SNACAbstractItem item;
 
-      switch (_schema.getSchemaType()) {
-        case "constellation":
+      ModelType modelType = ModelType.fromString(_schema.getSchemaType());
+
+      switch (modelType) {
+        case CONSTELLATION:
           item = new SNACConstellationItem(project, _schema, _client, _cache, record);
           break;
 
-        case "relation":
+        case RELATION:
           item = new SNACConstellationItem(project, _schema, _client, _cache, record);
           break;
 
-        case "resource":
+        case RESOURCE:
           item = new SNACResourceItem(project, _schema, _client, _cache, record);
           break;
 

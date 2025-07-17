@@ -1,11 +1,17 @@
 var SNACManagePreferencesDialog = {};
 
 SNACManagePreferencesDialog.launch = function(callback) {
-  $.get(
+  Refine.postCSRF(
     "command/snac/preferences",
+    {},
     function(data) {
-      SNACManagePreferencesDialog.display(data, callback);
-    }
+      if ("code" in data && data.code === "error") {
+        alert(`${$.i18n('snac-preferences/error-loading')}: ${data.message}`);
+      } else {
+        SNACManagePreferencesDialog.display(data, callback);
+      }
+    },
+    "json"
   );
 };
 
@@ -70,19 +76,24 @@ SNACManagePreferencesDialog.display = function(data, callback) {
   });
 
   elmts.saveButton.on('click', function() {
-      frame.hide();
-      $.post(
-          "command/snac/preferences",
-          elmts.snacPreferencesForm.serialize(),
-          function(data) {
-              if (data) {
-                dismiss();
-                callback(data);
-              } else {
-                dismiss();
-                callback(null);
-              }
-          });
+    frame.hide();
+    Refine.postCSRF(
+      "command/snac/preferences",
+      elmts.snacPreferencesForm.serialize(),
+      function(data) {
+        if (data) {
+          if ("code" in data && data.code === "error") {
+            alert(`${$.i18n('snac-preferences/error-saving')}: ${data.message}`);
+          }
+          dismiss();
+          callback(data);
+        } else {
+          dismiss();
+          callback(null);
+        }
+      },
+      "json"
+    );
   });
 
 };

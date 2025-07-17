@@ -18,7 +18,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
-import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformValidationOperation extends EngineDependentOperation {
@@ -63,13 +63,13 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
 
     @Override
     public void run() {
-      List<SNACUploadItem> items = _schema.evaluateRecords(_project, _engine);
+      List<SNACAbstractItem> items = _schema.evaluateRecords(_project, _engine);
 
       List<CellAtRow> results = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> messages = new ArrayList<CellAtRow>(items.size());
 
       for (int i = 0; i < items.size(); i++) {
-        SNACUploadItem item = items.get(i);
+        SNACAbstractItem item = items.get(i);
         int row = item.rowIndex();
 
         SNACAPIResponse validationResponse = item.performValidation();

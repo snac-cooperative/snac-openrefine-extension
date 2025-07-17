@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.openrefine.exporters.SNACUploadItem;
+import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
 import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
@@ -82,8 +82,15 @@ public class SNACPreviewSchemaCommand extends Command {
 
       int recordCount = project.recordModel.getRecordCount();
 
-      List<SNACUploadItem> items =
+      List<SNACAbstractItem> items =
           schema.evaluateRecords(project, engine, prefsManager.getMaxPreviewItems());
+
+      logger.info(
+          "generated "
+              + items.size()
+              + " (out of "
+              + project.recordModel.getRecordCount()
+              + ") preview items");
 
       Writer w = response.getWriter();
       JsonGenerator writer = ParsingUtilities.mapper.getFactory().createGenerator(w);
@@ -101,12 +108,12 @@ public class SNACPreviewSchemaCommand extends Command {
 
       writer.writeEndObject();
 
-      logger.info("SNAC preview generation succeeded");
-
       writer.flush();
       writer.close();
       w.flush();
       w.close();
+
+      logger.info("SNAC preview generation succeeded");
     } catch (Exception e) {
       logger.error("SNAC preview generation: exception: [" + e + "]");
       respondException(response, e);

@@ -28,7 +28,6 @@ import com.google.refine.commands.Command;
 import com.google.refine.model.AbstractOperation;
 import com.google.refine.model.Project;
 import com.google.refine.process.Process;
-import com.google.refine.util.ParsingUtilities;
 import java.io.IOException;
 import java.util.Properties;
 import javax.servlet.ServletException;
@@ -65,7 +64,7 @@ public class SNACSaveSchemaCommand extends Command {
         return;
       }
 
-      SNACSchema schema = ParsingUtilities.mapper.readValue(schemaJSON, SNACSchema.class);
+      SNACSchema schema = SNACSchema.reconstruct(schemaJSON);
 
       AbstractOperation op = new SNACSaveSchemaOperation(schema);
       Process process = op.createProcess(project, new Properties());

@@ -46,14 +46,21 @@ public class SNACSaveSchemaOperation extends AbstractOperation {
   @JsonProperty("schema")
   protected final SNACSchema _schema;
 
+  protected final String _action;
+
   @JsonCreator
   public SNACSaveSchemaOperation(@JsonProperty("schema") SNACSchema schema) {
+    this(schema, "Save");
+  }
+
+  public SNACSaveSchemaOperation(SNACSchema schema, String action) {
     this._schema = schema;
+    this._action = action;
   }
 
   @Override
   protected String getBriefDescription(Project project) {
-    return "Save SNAC Schema (" + _schema.getSchemaType() + ")";
+    return _action + " SNAC Schema (" + _schema.getSchemaType() + ")";
   }
 
   @Override
@@ -114,9 +121,9 @@ public class SNACSaveSchemaOperation extends AbstractOperation {
         String value = line.substring(equal + 1);
 
         if ("oldSnacSchema".equals(field) && value.length() > 0) {
-          oldSchema = ParsingUtilities.mapper.readValue(value, SNACSchema.class);
+          oldSchema = SNACSchema.reconstruct(value);
         } else if ("newSnacSchema".equals(field) && value.length() > 0) {
-          newSchema = ParsingUtilities.mapper.readValue(value, SNACSchema.class);
+          newSchema = SNACSchema.reconstruct(value);
         }
       }
 
