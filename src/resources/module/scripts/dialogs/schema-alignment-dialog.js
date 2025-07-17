@@ -425,7 +425,7 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
    var _this = this;
 
    var names = this._model[type].map(x => x.name);
-   var tooltips = this._model[type].map(x => x.tooltips);
+   var tooltips = this._model[type].map(x => x.tooltip);
 
    // openrefine column names and dropdowns are appended here
    var columnArea = $(`.snac-schema-alignment-dialog-openrefine-names-area-${types.lower}`);
