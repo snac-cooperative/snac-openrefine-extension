@@ -796,12 +796,12 @@ SNACSchemaAlignmentDialog.hasChanged = function() {
    this.evaluateCurrentSchema(true);
 }
 
-SNACSchemaAlignmentDialog.updateItemPreviewText = function(itemType, itemCount, previewCount) {
+SNACSchemaAlignmentDialog.updateItemPreviewText = function(itemType, itemCount, totalCount) {
    this._previewElmts.previewExplanation.text(
       $.i18n('snac-schema/preview-explanation')
-         .replace('{preview_count}', previewCount)
-         .replace('{item_type}', itemType)
-         .replace('{item_count}', itemCount));
+         .replace('{preview_type}', itemType)
+         .replace('{preview_count}', itemCount)
+         .replace('{total_count}', totalCount));
    this._previewElmts.previewNote.html($.i18n('snac-schema/preview-note'));
 }
 
@@ -827,20 +827,20 @@ SNACSchemaAlignmentDialog.preview = function() {
          _this.previewSpinner.hide();
          //snacDebug(`preview(): SUCCESS  data = [${JSON.stringify(data)}]`);
 
-         if ("items_preview" in data) {
+         if ('preview' in data) {
             var previewContainer = _this._previewPanes[0];
 
-            data.items_preview.forEach(function(item) {
+            data.preview.forEach(function(item) {
               $('<hr>').appendTo(previewContainer);
               $('<p></p>').html(item).appendTo(previewContainer);
             });
 
             $('<hr>').appendTo(previewContainer);
 
-            _this.updateItemPreviewText(schema.schemaType, data["item_count"], data.items_preview.length);
+            _this.updateItemPreviewText(schema.schemaType, data.preview.length, data.total);
          }
 
-         snacDebug(`preview(): added ${data["item_count"]} items`);
+         snacDebug(`preview(): added ${data.preview.length} items`);
 
          //_this.updateWarnings([], 0);
       },

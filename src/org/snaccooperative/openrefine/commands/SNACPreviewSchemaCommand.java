@@ -24,10 +24,13 @@
 
 package org.snaccooperative.openrefine.commands;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.refine.browsing.Engine;
 import com.google.refine.commands.Command;
 import com.google.refine.model.Project;
+import com.google.refine.util.ParsingUtilities;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -77,20 +80,33 @@ public class SNACPreviewSchemaCommand extends Command {
 
       SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
+      int recordCount = project.recordModel.getRecordCount();
+
       List<SNACUploadItem> items =
           schema.evaluateRecords(project, engine, prefsManager.getMaxPreviewItems());
 
-      SNACPreviewItems previewItems = new SNACPreviewItems();
+      Writer w = response.getWriter();
+      JsonGenerator writer = ParsingUtilities.mapper.getFactory().createGenerator(w);
 
+      writer.writeStartObject();
+
+      writer.writeFieldName("preview");
+      writer.writeStartArray();
       for (int i = 0; i < items.size(); i++) {
-        SNACUploadItem item = items.get(i);
-
-        previewItems.addPreviewItem(item.getPreviewText());
+        writer.writeString(items.get(i).getPreviewText());
       }
+      writer.writeEndArray();
+
+      writer.writeNumberField("total", project.recordModel.getRecordCount());
+
+      writer.writeEndObject();
 
       logger.info("SNAC preview generation succeeded");
 
-      respondJSON(response, previewItems);
+      writer.flush();
+      writer.close();
+      w.flush();
+      w.close();
     } catch (Exception e) {
       logger.error("SNAC preview generation: exception: [" + e + "]");
       respondException(response, e);
