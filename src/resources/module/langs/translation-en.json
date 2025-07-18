@@ -9,7 +9,7 @@
   "snac-preferences/dialog-header": "SNAC Preferences",
   "snac-preferences/error-loading": "An error was encountered while loading SNAC preferences",
   "snac-preferences/error-saving": "An error was encountered while saving SNAC preferences",
-  "snac-preferences/extension-version": "SNAC Extension version v1.0.0-rc3+",
+  "snac-preferences/extension-version": "SNAC Extension version v1.0.0-rc4",
   "snac-preferences/header-env": "Environment",
   "snac-preferences/header-key": "API Key",
   "snac-preferences/include-api-response": "Include API Response column when uploading?",
