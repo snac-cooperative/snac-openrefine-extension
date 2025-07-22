@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonPropertyOrder({"name", "required", "repeatable", "controlled", "tooltip"})
-public class SNACModelField {
+public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
 
   static final Logger logger = LoggerFactory.getLogger("SNACModelField");
 
@@ -39,7 +39,7 @@ public class SNACModelField {
   //  + "Exist Date Type" and "Exist Date Descriptive Note" depend on "Exist Date" being mapped
   //  + "Language Code" has an optional dependency on "Script Code", and vice versa
 
-  private String _name;
+  private E _fieldType;
   // names this field was formerly known as, for backwards compatibility
   private ArrayList<String> _previousNames;
   private FieldRequirement _requirement;
@@ -48,22 +48,22 @@ public class SNACModelField {
   private String _tooltip;
 
   public SNACModelField(
-      String name,
+      E fieldType,
       FieldRequirement requirement,
       FieldOccurence occurence,
       FieldVocabulary vocabulary,
       String tooltip) {
-    this(name, null, requirement, occurence, vocabulary, tooltip);
+    this(fieldType, null, requirement, occurence, vocabulary, tooltip);
   }
 
   public SNACModelField(
-      String name,
+      E fieldType,
       ArrayList<String> previousNames,
       FieldRequirement requirement,
       FieldOccurence occurence,
       FieldVocabulary vocabulary,
       String tooltip) {
-    _name = name;
+    _fieldType = fieldType;
     _previousNames = previousNames;
     _requirement = requirement;
     _occurence = occurence;
@@ -77,7 +77,7 @@ public class SNACModelField {
 
   @JsonProperty("name")
   public String getName() {
-    return _name;
+    return _fieldType.getName();
   }
 
   @JsonProperty("required")
@@ -100,8 +100,12 @@ public class SNACModelField {
     return _tooltip;
   }
 
+  public E getFieldType() {
+    return _fieldType;
+  }
+
   public Boolean isCurrentName(String s) {
-    if (s.equalsIgnoreCase(_name)) {
+    if (s.equalsIgnoreCase(getName())) {
       return true;
     }
 

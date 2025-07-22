@@ -5,15 +5,19 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SNACAbstractModel<E extends Enum<E>> {
+public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
 
   public enum ModelType {
+    NONE,
     CONSTELLATION("constellation"),
     RESOURCE("resource"),
-    RELATION("relation"),
-    NONE("");
+    RELATION("relation");
 
     private final String _type;
+
+    ModelType() {
+      this("");
+    }
 
     ModelType(String type) {
       this._type = type;
@@ -49,9 +53,9 @@ public class SNACAbstractModel<E extends Enum<E>> {
     _fieldMap = new HashMap<E, SNACModelField>();
   }
 
-  protected void addField(E fieldType, SNACModelField field) {
+  protected void addField(SNACModelField<E> field) {
     _fieldList.add(field);
-    _fieldMap.put(fieldType, field);
+    _fieldMap.put(field.getFieldType(), field);
   }
 
   public ModelType getType() {

@@ -11,18 +11,32 @@ import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
 
 public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.ResourceModelField> {
 
-  public enum ResourceModelField {
+  public enum ResourceModelField implements SNACModelFieldType {
     NONE,
-    RESOURCE_TYPE,
-    RESOURCE_ID,
-    TITLE,
-    RESOURCE_URL,
-    HOLDING_REPOSITORY_ID,
-    ABSTRACT,
-    EXTENT,
-    DATE,
-    LANGUAGE_CODE,
-    SCRIPT_CODE
+    RESOURCE_TYPE("Resource Type"),
+    RESOURCE_ID("Resource ID"),
+    TITLE("Title"),
+    RESOURCE_URL("Resource URL"),
+    HOLDING_REPOSITORY_ID("Holding Repository ID"),
+    ABSTRACT("Abstract"),
+    EXTENT("Extent"),
+    DATE("Date"),
+    LANGUAGE_CODE("Language Code"),
+    SCRIPT_CODE("Script Code");
+
+    private final String _name;
+
+    ResourceModelField() {
+      this("");
+    }
+
+    ResourceModelField(String name) {
+      this._name = name;
+    }
+
+    public String getName() {
+      return this._name;
+    }
   }
 
   static final Logger logger = LoggerFactory.getLogger("SNACResourceModel");
@@ -31,18 +45,16 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
     super(ModelType.RESOURCE, ResourceModelField.NONE);
 
     addField(
-        ResourceModelField.RESOURCE_TYPE,
-        new SNACModelField(
-            "Resource Type",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.RESOURCE_TYPE,
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.CONTROLLED,
             "Resource Type may have the following values: ArchivalResource, BibliographicResource, DigitalArchivalResource, OralHistoryResource"));
 
     addField(
-        ResourceModelField.RESOURCE_ID,
-        new SNACModelField(
-            "Resource ID",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.RESOURCE_ID,
             new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
@@ -50,27 +62,24 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             "SNAC identifier for Resource Description.  Leave blank if Resource Description is NOT in SNAC."));
 
     addField(
-        ResourceModelField.TITLE,
-        new SNACModelField(
-            "Title",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.TITLE,
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
             "Title of a resource that may or may not include dates (e.g. Jacob Miller Papers, 1809-1882)."));
 
     addField(
-        ResourceModelField.RESOURCE_URL,
-        new SNACModelField(
-            "Resource URL",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.RESOURCE_URL,
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
             "URL of the local Resource Description"));
 
     addField(
-        ResourceModelField.HOLDING_REPOSITORY_ID,
-        new SNACModelField(
-            "Holding Repository ID",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.HOLDING_REPOSITORY_ID,
             new ArrayList<String>(Arrays.asList("Holding Repository SNAC ID")), // previous name(s)
             FieldRequirement.REQUIRED,
             FieldOccurence.SINGLE,
@@ -78,45 +87,40 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             "SNAC identifier for the holding repository description.  The holding repository must be created in SNAC before adding Resource Descriptions."));
 
     addField(
-        ResourceModelField.ABSTRACT,
-        new SNACModelField(
-            "Abstract",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.ABSTRACT,
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
             "Brief prose abstract of scope and contents of the resource."));
 
     addField(
-        ResourceModelField.EXTENT,
-        new SNACModelField(
-            "Extent",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.EXTENT,
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
             "Extent of the resource."));
 
     addField(
-        ResourceModelField.DATE,
-        new SNACModelField(
-            "Date",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.DATE,
             FieldRequirement.OPTIONAL,
             FieldOccurence.SINGLE,
             FieldVocabulary.FREETEXT,
             "Date or dates of the resource (YYYY or YYYY-YYYY)"));
 
     addField(
-        ResourceModelField.LANGUAGE_CODE,
-        new SNACModelField(
-            "Language Code",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.LANGUAGE_CODE,
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
             "ISO 639 Language Code, e.g. 'eng', 'ger', 'jpn'.  Combinable with a Script Code in the same row."));
 
     addField(
-        ResourceModelField.SCRIPT_CODE,
-        new SNACModelField(
-            "Script Code",
+        new SNACModelField<ResourceModelField>(
+            ResourceModelField.SCRIPT_CODE,
             FieldRequirement.OPTIONAL,
             FieldOccurence.MULTIPLE,
             FieldVocabulary.CONTROLLED,
