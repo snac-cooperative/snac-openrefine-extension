@@ -182,8 +182,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       .hide()
       .appendTo(schemaButton);
 
-   $('.main-view-panel-tab-header').hide();
-
    $('.main-view-panel-tab-header').on('click', function(e) {
       var targetTab = $(this).attr('href');
       _this.switchTab(targetTab);
