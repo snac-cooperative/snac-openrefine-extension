@@ -63,6 +63,12 @@ public class SNACConstellationModel
                 FieldOccurence.SINGLE,
                 FieldVocabulary.CONTROLLED,
                 "Type of CPF entity.")
+            .withDependencies(
+                new SNACModelFieldRelations<ConstellationModelField>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<ConstellationModelField>(
+                                ConstellationModelField.CPF_ID, FieldRelationType.OPTIONAL)))))
             .withSampleValues(
                 new ArrayList<String>(Arrays.asList("corporateBody", "person", "family")))
             .build());
@@ -75,6 +81,12 @@ public class SNACConstellationModel
                 FieldVocabulary.IDENTIFIER,
                 "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC.")
             .withPreviousNames(new ArrayList<String>(Arrays.asList("SNAC CPF ID")))
+            .withDependencies(
+                new SNACModelFieldRelations<ConstellationModelField>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<ConstellationModelField>(
+                                ConstellationModelField.CPF_TYPE, FieldRelationType.REQUIRED)))))
             .build());
 
     addField(

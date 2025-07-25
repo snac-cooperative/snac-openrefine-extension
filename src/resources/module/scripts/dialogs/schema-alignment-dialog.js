@@ -549,7 +549,8 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, schemaType) {
 
       toolTipText.append(toolTipDefs);
 
-      if (field.dependencies.length > 0 || field.dependents.length > 0) {
+      // only add explanation for fields with required dependen{cies,ts}
+      if ([...field.dependencies, ...field.dependents].filter(x => x.relation === 'required').length > 0) {
          toolTipText.append( $('<p></p>')
             .text(`${$.i18n('snac-schema/tooltip-row-explanation')}`) );
       }
