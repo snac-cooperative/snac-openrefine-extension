@@ -92,7 +92,8 @@ public class SNACResourceItem extends SNACAbstractItem {
               res.setOperation("update");
             } catch (NumberFormatException e) {
               // If no numeric ID, leave operation as "insert"
-              _validationErrors.add("Invalid SNAC Resource ID: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid " + ResourceModelField.RESOURCE_ID.getName() + ": [" + cellValue + "]");
             }
             continue;
 
@@ -101,7 +102,12 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (typeTerm == null) {
               logger.warn("skipping unknown resource type [" + cellValue + "]");
-              _validationErrors.add("Invalid SNAC Resource Type: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ResourceModelField.RESOURCE_TYPE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -137,7 +143,12 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (languageCodeTerm == null) {
               logger.warn("skipping unknown language code [" + cellValue + "]");
-              _validationErrors.add("Invalid Language Code: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ResourceModelField.LANGUAGE_CODE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -162,9 +173,13 @@ public class SNACResourceItem extends SNACAbstractItem {
                 } else {
                   logger.warn("omitting invalid script code [" + scriptCode + "]");
                   _validationErrors.add(
-                      "Invalid Script Code: ["
+                      "Invalid "
+                          + ResourceModelField.SCRIPT_CODE.getName()
+                          + ": ["
                           + scriptCode
-                          + "] for Language Code: ["
+                          + "] for "
+                          + ResourceModelField.LANGUAGE_CODE.getName()
+                          + ": ["
                           + cellValue
                           + "]");
                   continue;
@@ -208,7 +223,8 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (scriptCodeTerm == null) {
               logger.warn("skipping unknown script code [" + cellValue + "]");
-              _validationErrors.add("Invalid Script Code: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid " + ResourceModelField.SCRIPT_CODE.getName() + ": [" + cellValue + "]");
               continue;
             }
 
@@ -233,7 +249,12 @@ public class SNACResourceItem extends SNACAbstractItem {
                 _relatedConstellations.add(id);
               }
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid Holding Repository SNAC ID: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ResourceModelField.HOLDING_REPOSITORY_ID.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
             }
             continue;
 

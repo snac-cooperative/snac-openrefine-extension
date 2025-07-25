@@ -29,6 +29,7 @@ import org.snaccooperative.data.Term;
 import org.snaccooperative.openrefine.api.SNACAPIClient;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACConstellationModel;
 import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
 import org.snaccooperative.openrefine.model.SNACRelationModel;
@@ -124,7 +125,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
               int id = Integer.parseInt(cellValue);
               con.setID(id);
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid SNAC CPF ID: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid " + ConstellationModelField.CPF_ID.getName() + ": [" + cellValue + "]");
             }
             continue;
 
@@ -132,7 +134,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term entityTypeTerm = _cache.getEntityTypeTerm(cellValue);
 
             if (entityTypeTerm == null) {
-              _validationErrors.add("Invalid CPF Type: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ConstellationModelField.CPF_TYPE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -169,7 +176,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
             if (dateTypeColumn == null) {
               logger.warn("no exist date type column found");
               _validationErrors.add(
-                  "Missing required Exist Date Type column for Exist Date: [" + cellValue + "]");
+                  "Missing required "
+                      + ConstellationModelField.EXIST_DATE_TYPE.getName()
+                      + " column for "
+                      + ConstellationModelField.EXIST_DATE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -178,9 +191,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
             if (dateType == "") {
               logger.warn("no matching exist date type for date: [" + cellValue + "]");
               _validationErrors.add(
-                  "Invalid Exist Date Type: ["
+                  "Invalid "
+                      + ConstellationModelField.EXIST_DATE_TYPE.getName()
+                      + ": ["
                       + dateType
-                      + "] for Exist Date: ["
+                      + "] for "
+                      + ConstellationModelField.EXIST_DATE.getName()
+                      + ": ["
                       + cellValue
                       + "]");
               continue;
@@ -190,9 +207,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             if (dateTypeTerm == null) {
               _validationErrors.add(
-                  "Invalid Exist Date Type: ["
+                  "Invalid "
+                      + ConstellationModelField.EXIST_DATE_TYPE.getName()
+                      + ": ["
                       + dateType
-                      + "] for Exist Date: ["
+                      + "] for "
+                      + ConstellationModelField.EXIST_DATE.getName()
+                      + ": ["
                       + cellValue
                       + "]");
               continue;
@@ -228,7 +249,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term subjectTerm = _cache.getSubjectTerm(cellValue);
 
             if (subjectTerm == null) {
-              _validationErrors.add("Invalid Subject: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid " + ConstellationModelField.SUBJECT.getName() + ": [" + cellValue + "]");
               continue;
             }
 
@@ -262,7 +284,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
               place.setType(placeTypeTerm);
             } else {
               _validationErrors.add(
-                  "Invalid Place Type: [" + placeType + "] for Place: [" + cellValue + "]");
+                  "Invalid "
+                      + ConstellationModelField.PLACE_TYPE.getName()
+                      + ": ["
+                      + placeType
+                      + "] for "
+                      + ConstellationModelField.PLACE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -280,7 +310,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 place.setRole(placeRoleTerm);
               } else {
                 _validationErrors.add(
-                    "Invalid Place Role: [" + placeRole + "] for Place: [" + cellValue + "]");
+                    "Invalid "
+                        + ConstellationModelField.PLACE_ROLE.getName()
+                        + ": ["
+                        + placeRole
+                        + "] for "
+                        + ConstellationModelField.PLACE.getName()
+                        + ": ["
+                        + cellValue
+                        + "]");
                 continue;
               }
             }
@@ -335,7 +373,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term occupationTerm = _cache.getOccupationTerm(cellValue);
 
             if (occupationTerm == null) {
-              _validationErrors.add("Invalid Occupation: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ConstellationModelField.OCCUPATION.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -351,7 +394,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term activityTerm = _cache.getActivityTerm(cellValue);
 
             if (activityTerm == null) {
-              _validationErrors.add("Invalid Activity: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ConstellationModelField.ACTIVITY.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -371,7 +419,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             if (languageCodeTerm == null) {
               logger.warn("skipping unknown language code [" + cellValue + "]");
-              _validationErrors.add("Invalid Language Code: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ConstellationModelField.LANGUAGE_CODE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -396,9 +449,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 } else {
                   logger.warn("omitting invalid script code [" + scriptCode + "]");
                   _validationErrors.add(
-                      "Invalid Script Code: ["
+                      "Invalid "
+                          + ConstellationModelField.SCRIPT_CODE.getName()
+                          + ": ["
                           + scriptCode
-                          + "] for Language Code: ["
+                          + "] for "
+                          + ConstellationModelField.LANGUAGE_CODE.getName()
+                          + ": ["
                           + cellValue
                           + "]");
                   continue;
@@ -442,7 +499,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             if (scriptCodeTerm == null) {
               logger.warn("skipping unknown script code [" + cellValue + "]");
-              _validationErrors.add("Invalid Script Code: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + ConstellationModelField.SCRIPT_CODE.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -473,7 +535,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
               _validationErrors.add(
                   "Invalid Record Type: ["
                       + defaultExternalRelatedCPFUrlType
-                      + "] for External Related CPF URL: ["
+                      + "] for "
+                      + ConstellationModelField.EXTERNAL_RELATED_CPF_URL.getName()
+                      + ": ["
                       + cellValue
                       + "]");
               continue;
@@ -490,6 +554,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
         }
 
         // handle relation model fields that are not in common with constellation model
+        // FIXME: enforce required dependencies
         switch (relationField) {
           case RELATED_RESOURCE_ID:
             try {
@@ -501,35 +566,55 @@ public class SNACConstellationItem extends SNACAbstractItem {
               resourceRelation.setOperation("insert");
               resourceRelation.setResource(resource);
 
-              // find and add optional associated 'cpf to resource relation type' in this row
+              // find and add required associated 'cpf to resource relation type' in this row
               String resourceRoleColumn =
                   _relationModel.getEntryForFieldType(
                       RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
                       _schema.getColumnMappings());
 
-              if (resourceRoleColumn != null) {
-                String resourceRole =
-                    getCellValueForRowByColumnName(_project, row, resourceRoleColumn);
+              if (resourceRoleColumn == null) {
+                logger.warn("no cpf to resource relation type column found");
+                _validationErrors.add(
+                    "Missing required "
+                        + RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName()
+                        + " column for "
+                        + RelationModelField.RELATED_RESOURCE_ID.getName()
+                        + ": ["
+                        + cellValue
+                        + "]");
+                continue;
+              }
 
-                Term resourceRoleTerm = _cache.getDocumentRoleTerm(resourceRole);
+              String resourceRole =
+                  getCellValueForRowByColumnName(_project, row, resourceRoleColumn);
 
-                if (resourceRoleTerm != null) {
-                  resourceRelation.setRole(resourceRoleTerm);
-                } else {
-                  _validationErrors.add(
-                      "Invalid CPF to Resource Relation Type: ["
-                          + resourceRole
-                          + "] for SNAC Resource ID: ["
-                          + cellValue
-                          + "]");
-                  continue;
-                }
+              Term resourceRoleTerm = _cache.getDocumentRoleTerm(resourceRole);
+
+              if (resourceRoleTerm != null) {
+                resourceRelation.setRole(resourceRoleTerm);
+              } else {
+                _validationErrors.add(
+                    "Invalid "
+                        + RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName()
+                        + ": ["
+                        + resourceRole
+                        + "] for "
+                        + RelationModelField.RELATED_RESOURCE_ID.getName()
+                        + ": ["
+                        + cellValue
+                        + "]");
+                continue;
               }
 
               resourceRelations.add(resourceRelation);
               _relatedResources.add(targetResource);
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid Related SNAC CPF ID: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + RelationModelField.RELATED_RESOURCE_ID.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -561,9 +646,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   cpfRelation.setOperation("insert");
                 } else {
                   _validationErrors.add(
-                      "Invalid CPF to CPF Relation Type: ["
+                      "Invalid "
+                          + RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName()
+                          + ": ["
                           + cpfRelationType
-                          + "] for Related SNAC CPF ID: ["
+                          + "] for "
+                          + RelationModelField.RELATED_CPF_ID.getName()
+                          + ": ["
                           + cellValue
                           + "]");
                   continue;
@@ -573,7 +662,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
               cpfRelations.add(cpfRelation);
               _relatedConstellations.add(targetConstellation);
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid Related SNAC CPF ID: [" + cellValue + "]");
+              _validationErrors.add(
+                  "Invalid "
+                      + RelationModelField.RELATED_CPF_ID.getName()
+                      + ": ["
+                      + cellValue
+                      + "]");
               continue;
             }
 
@@ -889,6 +983,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
     // These existence checks should really be made in SNAC proper, but
     // it's easier (and effective) to perform them here for now.
+
+    // FIXME: check for join model upload with no related cpf/resource
 
     List<String> relationErrors = new LinkedList<String>();
 
