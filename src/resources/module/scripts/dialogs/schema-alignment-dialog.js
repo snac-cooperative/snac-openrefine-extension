@@ -41,7 +41,21 @@ FIXME ISSUES:
 
 var SNACSchemaAlignmentDialog = {
    _ignoreChanges: true,
-   _debug: false
+   _debug: false,
+   _schemaTypes: {
+      resource: {
+         type: 'resource',
+         desc: $.i18n('snac-schema/model-header-resource')
+      },
+      constellation: {
+         type: 'constellation',
+         desc: $.i18n('snac-schema/model-header-constellation')
+      },
+      relation: {
+         type: 'relation',
+         desc: $.i18n('snac-schema/model-header-relation')
+      }
+   }
 };
 
 var snacDebug = function(s) {
@@ -51,9 +65,9 @@ var snacDebug = function(s) {
 };
 
 SNACSchemaAlignmentDialog.getCases = function(str) {
-  var lower = str.toLowerCase();                              // e.g. 'resource'
-  var upper = lower.charAt(0).toUpperCase() + lower.slice(1); // e.g. 'Resource'
-  return { lower: lower, upper: upper };
+   var lower = str.toLowerCase();                                // e.g. 'resource'
+   var capital = lower.charAt(0).toUpperCase() + lower.slice(1); // e.g. 'Resource'
+   return { lower: lower, capital: capital };
 }
 
 SNACSchemaAlignmentDialog.setup = function(onDone) {
@@ -105,6 +119,17 @@ SNACSchemaAlignmentDialog.setupModel = function(onDone) {
       });
 };
 
+SNACSchemaAlignmentDialog.resizeCanvas = function(type) {
+   // set canvas height based on the number of this type's schema elements,
+   // plus a bit extra so that tooltips do not get cut off
+
+   var rowItems = this._model[type].length ?? 0;
+   var rowHeight = $('.snac-dynamic-table td').height() ?? 30;
+   var canvasHeight = (rowItems + 10) * rowHeight;
+
+   this._schemaElmts.canvas.height(canvasHeight);
+}
+
 /**
  * Installs the tabs in the UI the first time the snac
  * extension is called.
@@ -115,7 +140,7 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
    var _this = this;
 
    // set up the initial schema
-   this._defaultSchema = { schemaType: 'resource', columnMappings: {} }
+   this._defaultSchema = { schemaType: this._schemaTypes.resource.type, columnMappings: {} }
    this._schema = theProject.overlayModels.snacSchema || this._defaultSchema;
 
    this._ignoreChanges = true;
@@ -213,10 +238,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
    // init the radio buttons
 
    $('#uploadingResourceButton').on('click', function() {
-      // Show Resources
-      $(".snac-schema-alignment-dialog-openrefine-names-area-resource").show();
-      $(".snac-schema-alignment-dialog-schema-fields-area-resource").show();
-
       // Hide Constellations
       $(".snac-schema-alignment-dialog-openrefine-names-area-constellation").hide();
       $(".snac-schema-alignment-dialog-schema-fields-area-constellation").hide();
@@ -225,7 +246,12 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-openrefine-names-area-relation").hide();
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").hide();
 
-      snacDebug(`uploadingRes calling hasChanged()`);
+      // Show Resources
+      _this.resizeCanvas(_this._schemaTypes.resource.type);
+      $(".snac-schema-alignment-dialog-openrefine-names-area-resource").show();
+      $(".snac-schema-alignment-dialog-schema-fields-area-resource").show();
+
+      snacDebug(`#uploadingResourceButton calling hasChanged()`);
       _this.hasChanged();
    });
 
@@ -234,15 +260,16 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-openrefine-names-area-resource").hide();
       $(".snac-schema-alignment-dialog-schema-fields-area-resource").hide();
 
-      // Show Constellations
-      $(".snac-schema-alignment-dialog-openrefine-names-area-constellation").show();
-      $(".snac-schema-alignment-dialog-schema-fields-area-constellation").show();
-
       // Hide Relations
       $(".snac-schema-alignment-dialog-openrefine-names-area-relation").hide();
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").hide();
 
-      snacDebug(`uploadingCon calling hasChanged()`);
+      // Show Constellations
+      _this.resizeCanvas(_this._schemaTypes.constellation.type);
+      $(".snac-schema-alignment-dialog-openrefine-names-area-constellation").show();
+      $(".snac-schema-alignment-dialog-schema-fields-area-constellation").show();
+
+      snacDebug(`#uploadingConstellationButton calling hasChanged()`);
       _this.hasChanged();
    });
 
@@ -256,18 +283,18 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-schema-fields-area-constellation").hide();
 
       // Show Relations
+      _this.resizeCanvas(_this._schemaTypes.relation.type);
       $(".snac-schema-alignment-dialog-openrefine-names-area-relation").show();
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").show();
 
-      snacDebug(`uploadingRelation calling hasChanged()`);
+      snacDebug(`#uploadingRelationButton calling hasChanged()`);
       _this.hasChanged();
    });
 
    // Init the column area
    this.updateColumns(this._schema);
 
-   $('.snac-schema-alignment-dialog-openrefine-names-area-constellation').hide();
-   $('.snac-schema-alignment-dialog-schema-fields-area-constellation').hide();
+   $('#uploadingResourceButton').trigger('click');
 
    var url = ReconciliationManager.ensureDefaultServicePresent();
    this._reconService = ReconciliationManager.getServiceFromUrl(url);
@@ -304,12 +331,10 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
 *******************************************************************/
 
 // Create a table for the fields of the given type
-SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
+SNACSchemaAlignmentDialog.addTable = function (schema, type) {
    var types = this.getCases(type);
 
    snacDebug(`***** [ addTable(${types.lower}) ] *****`);
-
-   //snacDebug(`addTable(): schema: [${JSON.stringify(schema)}]`);
 
    var columns = theProject.columnModel.columns;
 
@@ -319,13 +344,11 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       columnMappings = schema.columnMappings;
    }
 
-   //snacDebug(`addTable(${types.lower}): columnMappings: [${JSON.stringify(columnMappings)}]`);
-
-   var myTableDiv = document.getElementById(`snacDynamicTable${types.upper}`);
+   var myTableDiv = document.getElementById(`snacDynamicTable${types.capital}`);
    if (myTableDiv == null) {
       var myClassDiv = document.getElementsByClassName('snac-dynamic-data-container');
       var myTableDiv = document.createElement("div");
-      myTableDiv.setAttribute('id', `snacDynamicTable${types.upper}`);
+      myTableDiv.setAttribute('id', `snacDynamicTable${types.capital}`);
       myClassDiv[0].parentNode.insertBefore(myTableDiv, myClassDiv[0]);
    }
 
@@ -358,7 +381,7 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       selectList.addClass('snac-cell-select-dropdown')
       //selectList.addClass('snac-select-field')
       selectList.addClass(`snac-select-values-${types.lower}`)
-      selectList.addClass(`${column.name}${types.upper}DropDown`);
+      selectList.addClass(`${column.name}${types.capital}DropDown`);
 
       // Create and append the options
       var defaultoption = document.createElement("option");
@@ -367,10 +390,10 @@ SNACSchemaAlignmentDialog.addTable = function (schema, type, names) {
       defaultoption.classList.add(`dropdown-default-${types.lower}`);
       selectList.append(defaultoption);
 
-      for (var j = 0; j < names.length; j++) {
+      for (var j = 0; j < this._model[type].length; j++) {
          var option = document.createElement("option");
-         option.setAttribute('value', names[j]);
-         option.text = names[j];
+         option.setAttribute('value', this._model[type][j].name);
+         option.text = this._model[type][j].name;
          option.classList.add(`dropdown-option-${types.lower}`);
          selectList.append(option);
       }
@@ -426,17 +449,17 @@ SNACSchemaAlignmentDialog.hideAndDisable = function(type) {
 
 SNACSchemaAlignmentDialog.hideAndDisableResource = function() {
    snacDebug(`***** [ hideAndDisableResource ] *****`);
-   this.hideAndDisable('resource');
+   this.hideAndDisable(this._schemaTypes.resource.type);
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableConstellation = function() {
    snacDebug(`***** [ hideAndDisableConstellatio ] *****`);
-   this.hideAndDisable('constellation');
+   this.hideAndDisable(this._schemaTypes.constellation.type);
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableRelation = function() {
    snacDebug(`***** [ hideAndDisableRelation ] *****`);
-   this.hideAndDisable('relation');
+   this.hideAndDisable(this._schemaTypes.relation.type);
 }
 
 SNACSchemaAlignmentDialog.hideAndDisableAll = function() {
@@ -446,15 +469,12 @@ SNACSchemaAlignmentDialog.hideAndDisableAll = function() {
    this.hideAndDisableRelation();
 }
 
-SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
-   var types = this.getCases(type);
+SNACSchemaAlignmentDialog.updateColumn = function(schema, schemaType) {
+   var types = this.getCases(schemaType.type);
 
    snacDebug(`***** [ updateColumn(${types.lower}) ] *****`);
 
    var _this = this;
-
-   var names = this._model[type].map(x => x.name);
-   var tooltips = this._model[type].map(x => x.tooltip);
 
    // openrefine column names and dropdowns are appended here
    var columnArea = $(`.snac-schema-alignment-dialog-openrefine-names-area-${types.lower}`);
@@ -464,7 +484,7 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
 
    var columnDiv = $('<div></div>');
    columnDiv.addClass('snac-dynamic-table');
-   columnDiv.append(this.addTable(schema, types.lower, names));
+   columnDiv.append(this.addTable(schema, types.lower));
 
    columnArea.append(columnDiv);
 
@@ -472,7 +492,7 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
    var refcolumnArea = $(`.snac-schema-alignment-dialog-schema-fields-area-${types.lower}`);
    refcolumnArea.addClass('snac-area-schema-field');
    refcolumnArea.empty();
-   refcolumnArea.html(`<h2>${header}</h2>`);
+   refcolumnArea.html(`<h2>${schemaType.desc}</h2>`);
 
    var refDiv = $('<div></div>');
    refDiv.addClass('snac-dynamic-table');
@@ -481,7 +501,7 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
    var refTableBody = document.createElement("tbody");
    refTable.appendChild(refTableBody);
 
-   this._model[type].forEach((field) => {
+   this._model[schemaType.type].forEach((field) => {
       var tr = document.createElement("tr");
       var td = document.createElement("td");
 
@@ -505,11 +525,55 @@ SNACSchemaAlignmentDialog.updateColumn = function(schema, type, header) {
    refcolumnArea.append(refDiv);
 
    // add tooltips to elements of this type's drag class by index
-   for (var i = 0; i < tooltips.length; i++) {
+   for (var i = 0; i < this._model[schemaType.type].length; i++) {
+      var field = this._model[schemaType.type][i];
+
       var toolTipSpan = document.createElement("span");
-      var toolTiptext = document.createTextNode(tooltips[i]);
+
+      var toolTipText = $('<div></div>');
+
+      toolTipText.append($('<p></p>').text(`${field.tooltip}`));
+
+      var toolTipDefs = $('<ul></ul>')
+        .append( $('<li></li>').text(`${$.i18n('snac-schema/tooltip-field-requirement')}: ${field.requirement}`) )
+        .append( $('<li></li>').text(`${$.i18n('snac-schema/tooltip-field-occurence')}: ${field.occurence}`) )
+        .append( $('<li></li>').text(`${$.i18n('snac-schema/tooltip-field-vocabulary')}: ${field.vocabulary}`) );
+
+      if (field.sample_values.length > 0) {
+         toolTipDefs.append( $('<li></li>').text(`${$.i18n('snac-schema/tooltip-field-sample-values')}: ${field.sample_values.join(', ')}`) );
+      }
+
+      if (field.default_value != "") {
+         toolTipDefs.append( $('<li></li>').text(`${$.i18n('snac-schema/tooltip-field-default-value')}: ${field.default_value}`) );
+      }
+
+      toolTipText.append(toolTipDefs);
+
+      if (field.dependencies.length > 0 || field.dependents.length > 0) {
+         toolTipText.append( $('<p></p>')
+            .text(`${$.i18n('snac-schema/tooltip-row-explanation')}`) );
+      }
+
+      if (field.dependencies.length > 0) {
+         var toolTipDeps = $('<ul></ul>');
+         for (var j = 0; j < field.dependencies.length; j++) {
+            toolTipDeps.append($('<li></li>')
+               .text(`${field.dependencies[j].field} (${field.dependencies[j].relation})`));
+         }
+         toolTipText.append( $('<p></p>').text(`${$.i18n('snac-schema/tooltip-row-dependencies')}:`) ).append(toolTipDeps);
+      }
+
+      if (field.dependents.length > 0) {
+         var toolTipDeps = $('<ul></ul>');
+         for (var j = 0; j < field.dependents.length; j++) {
+            toolTipDeps.append($('<li></li>')
+               .text(`${field.dependents[j].field} (${field.dependents[j].relation})`));
+         }
+         toolTipText.append( $('<p></p>').text(`${$.i18n('snac-schema/tooltip-row-dependents')}:`) ).append(toolTipDeps);
+      }
+
       toolTipSpan.classList.add('snac-tooltip-text');
-      toolTipSpan.appendChild(toolTiptext);
+      toolTipSpan.appendChild(toolTipText[0]);
       $(`.snac-drag-${types.lower}`)[i].appendChild(toolTipSpan);
    }
 
@@ -526,13 +590,11 @@ SNACSchemaAlignmentDialog.updateColumns = function(schema) {
 
    var _this = this;
 
-   //snacDebug(`updateColumns(): schema: [${JSON.stringify(schema)}]`);
-
    var columns = theProject.columnModel.columns;
 
-   this.updateColumn(schema, 'resource',      "SNAC Resource Description Model");
-   this.updateColumn(schema, 'constellation', "SNAC CPF Model");
-   this.updateColumn(schema, 'relation',      "SNAC Join Model");
+   this.updateColumn(schema, this._schemaTypes.resource);
+   this.updateColumn(schema, this._schemaTypes.constellation);
+   this.updateColumn(schema, this._schemaTypes.relation);
 
    // Allow names column (first column) to be droppable
    $(".snac-cell-openrefine-name").droppable({
@@ -591,13 +653,6 @@ SNACSchemaAlignmentDialog.switchTab = function(targetTab) {
 
    $(targetTab).show();
    resizeAll();
-   var panelHeight = this._viewPanel.height();
-   this._schemaPanel.height(panelHeight);
-   this._issuesPanel.height(panelHeight);
-   this._previewPanel.height(panelHeight);
-   // Resize the inside of the schema panel
-   var headerHeight = this._schemaElmts.schemaHeader.outerHeight();
-   this._schemaElmts.canvas.height(panelHeight - headerHeight - 10);
 
    if (targetTab === "#view-panel") {
       ui.dataTableView.render();
@@ -649,7 +704,7 @@ SNACSchemaAlignmentDialog.reset = function(schema) {
 
    $('#snac-areas-container').empty();
    this.updateColumns(this._schema);
-   $(`#uploading${types.upper}Button`).trigger('click');
+   $(`#uploading${types.capital}Button`).trigger('click');
 
    this._ignoreChanges = false;
 };
@@ -658,7 +713,7 @@ SNACSchemaAlignmentDialog.save = function(onDone) {
    snacDebug(`***** [ save ] *****`);
 
    var _this = this;
-   var schema = this.getJSON();
+   var schema = this.getSchema();
 
    snacDebug(`save(): cur overlay model: [${JSON.stringify(theProject.overlayModels.snacSchema)}]`);
    snacDebug(`save(): new schema 2 save: [${JSON.stringify(schema)}]`);
@@ -710,19 +765,19 @@ SNACSchemaAlignmentDialog.changesCleared = function() {
       .addClass('disabled');
 }
 
-SNACSchemaAlignmentDialog.getJSON = function() {
-   snacDebug(`***** [ getJSON ] *****`);
+SNACSchemaAlignmentDialog.getSchema = function() {
+   snacDebug(`***** [ getSchema ] *****`);
 
    // determine source of schema values
 
    var schemaType;
 
    if ($('#uploadingResourceButton').is(':checked')) {
-      schemaType = 'resource';
+      schemaType = this._schemaTypes.resource.type;
    } else if ($('#uploadingConstellationButton').is(':checked')) {
-      schemaType = 'constellation';
+      schemaType = this._schemaTypes.constellation.type;
    } else if ($('#uploadingRelationButton').is(':checked')) {
-      schemaType = 'relation';
+      schemaType = this._schemaTypes.relation.type;
    } else {
       // should never get here... but just in case, force a default
       schemaType = this._defaultSchema.schemaType;
@@ -746,7 +801,7 @@ SNACSchemaAlignmentDialog.getJSON = function() {
       }
    }
 
-   snacDebug(`getJSON(): schema: [${JSON.stringify(schema)}]`);
+   snacDebug(`getSchema(): schema: [${JSON.stringify(schema)}]`);
 
    return schema;
 };
@@ -754,15 +809,12 @@ SNACSchemaAlignmentDialog.getJSON = function() {
 SNACSchemaAlignmentDialog.schemaIsValid = function() {
    snacDebug(`***** [ schemaIsValid ] *****`);
 
-   var schema = this.getJSON();
+   var schema = this.getSchema();
 
    var required = this._model[schema.schemaType].filter(x => x.required === true).map(x => x.name);
 
    var warnings = [];
    var mappedColumns = Object.values(schema.columnMappings);
-
-   //snacDebug(`mappedColumns:`);
-   //snacDebug(mappedColumns);
 
    // ensure each required column is present in the list
    for (var i = 0; i < required.length; i++) {
@@ -848,7 +900,7 @@ SNACSchemaAlignmentDialog.preview = function() {
    this.updateItemPreviewText("item", 0, 0);
 //   this.issueSpinner.show();
    this.previewSpinner.show();
-   var schema = this.getJSON();
+   var schema = this.getSchema();
    if (schema === null) {
       return;
    }
@@ -859,7 +911,6 @@ SNACSchemaAlignmentDialog.preview = function() {
       function(data) {
          //_this.issueSpinner.hide();
          _this.previewSpinner.hide();
-         //snacDebug(`preview(): SUCCESS  data = [${JSON.stringify(data)}]`);
 
          if ('preview' in data) {
             var previewContainer = _this._previewPanes[0];

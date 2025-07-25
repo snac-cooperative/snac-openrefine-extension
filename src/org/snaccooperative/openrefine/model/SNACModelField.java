@@ -1,77 +1,181 @@
 package org.snaccooperative.openrefine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@JsonPropertyOrder({"name", "required", "repeatable", "controlled", "tooltip"})
+@JsonPropertyOrder({
+  "name",
+  "required",
+  "requirement",
+  "repeatable",
+  "occurence",
+  "controlled",
+  "vocabulary",
+  "dependencies",
+  "dependents",
+  "sample_values",
+  "default_value",
+  "tooltip"
+})
 public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
 
   static final Logger logger = LoggerFactory.getLogger("SNACModelField");
 
-  public enum FieldRequirement {
-    REQUIRED,
-    OPTIONAL
+  public enum FieldRequirement implements SNACModelFieldType {
+    REQUIRED("Required"),
+    OPTIONAL("Optional");
+
+    private final String _name;
+
+    FieldRequirement() {
+      this("");
+    }
+
+    FieldRequirement(String name) {
+      this._name = name;
+    }
+
+    public String getName() {
+      return this._name;
+    }
   };
 
-  public enum FieldOccurence {
-    SINGLE,
-    MULTIPLE
+  public enum FieldOccurence implements SNACModelFieldType {
+    SINGLE("One per record"),
+    MULTIPLE("Multiple per record");
+
+    private final String _name;
+
+    FieldOccurence() {
+      this("");
+    }
+
+    FieldOccurence(String name) {
+      this._name = name;
+    }
+
+    public String getName() {
+      return this._name;
+    }
   };
 
-  public enum FieldVocabulary {
-    CONTROLLED,
-    FREETEXT,
-    IDENTIFIER
+  public enum FieldVocabulary implements SNACModelFieldType {
+    CONTROLLED("SNAC Controlled Vocabulary"),
+    FREETEXT("Free Text"),
+    IDENTIFIER("Numeric SNAC Identifier");
+
+    private final String _name;
+
+    FieldVocabulary() {
+      this("");
+    }
+
+    FieldVocabulary(String name) {
+      this._name = name;
+    }
+
+    public String getName() {
+      return this._name;
+    }
   };
 
-  // TODO: field dependencies:
-  //
-  // Some fields have a required or optional dependency on other fields being mapped. (*)
-  // Currently these are conveyed through the field tooltips, but this can be improved:
-  //   * we can have a separate "dependencies" text description field (defined here)
-  //   * and/or a FieldDependencies enum to specify whether a field is dependent on other(s)
-  // Then the front end can use this info for better tooltips/visual dependency indication/etc.
-  //
-  // (*) some examples:
-  //  + "Exist Date Type" and "Exist Date Descriptive Note" depend on "Exist Date" being mapped
-  //  + "Language Code" has an optional dependency on "Script Code", and vice versa
+  private final E _fieldType;
+  private final FieldRequirement _requirement;
+  private final FieldOccurence _occurence;
+  private final FieldVocabulary _vocabulary;
+  private final ArrayList<String> _previousNames;
+  private final ArrayList<String> _sampleValues;
+  private final String _defaultValue;
+  private final String _tooltip;
+  private final SNACModelFieldRelations<E> _dependencies;
+  private final SNACModelFieldRelations<E> _dependents;
 
-  private E _fieldType;
-  // names this field was formerly known as, for backwards compatibility
-  private ArrayList<String> _previousNames;
-  private FieldRequirement _requirement;
-  private FieldOccurence _occurence;
-  private FieldVocabulary _vocabulary;
-  private String _tooltip;
-
-  public SNACModelField(
-      E fieldType,
-      FieldRequirement requirement,
-      FieldOccurence occurence,
-      FieldVocabulary vocabulary,
-      String tooltip) {
-    this(fieldType, null, requirement, occurence, vocabulary, tooltip);
+  private SNACModelField(Builder<E> builder) {
+    _fieldType = builder._fieldType;
+    _requirement = builder._requirement;
+    _occurence = builder._occurence;
+    _vocabulary = builder._vocabulary;
+    _tooltip = builder._tooltip;
+    _previousNames = builder._previousNames;
+    _sampleValues = builder._sampleValues;
+    _defaultValue = builder._defaultValue;
+    _dependencies = builder._dependencies;
+    _dependents = builder._dependents;
   }
 
-  public SNACModelField(
-      E fieldType,
-      ArrayList<String> previousNames,
-      FieldRequirement requirement,
-      FieldOccurence occurence,
-      FieldVocabulary vocabulary,
-      String tooltip) {
-    _fieldType = fieldType;
-    _previousNames = previousNames;
-    _requirement = requirement;
-    _occurence = occurence;
-    _vocabulary = vocabulary;
-    _tooltip = tooltip;
+  public static class Builder<E extends Enum<E> & SNACModelFieldType> {
+    // required fields
+    private final E _fieldType;
+    private final FieldRequirement _requirement;
+    private final FieldOccurence _occurence;
+    private final FieldVocabulary _vocabulary;
+    private final String _tooltip;
+    // optional fields
+    private ArrayList<String> _previousNames = new ArrayList<String>();
+    private ArrayList<String> _sampleValues = new ArrayList<String>();
+    private String _defaultValue = "";
+    private SNACModelFieldRelations<E> _dependencies = new SNACModelFieldRelations<E>();
+    private SNACModelFieldRelations<E> _dependents = new SNACModelFieldRelations<E>();
 
-    if (_previousNames == null) {
-      _previousNames = new ArrayList<String>();
+    public Builder(
+        E fieldType,
+        FieldRequirement requirement,
+        FieldOccurence occurence,
+        FieldVocabulary vocabulary,
+        String tooltip) {
+      this._fieldType = fieldType;
+      this._requirement = requirement;
+      this._occurence = occurence;
+      this._vocabulary = vocabulary;
+
+      if (tooltip != null) {
+        this._tooltip = tooltip;
+      } else {
+        this._tooltip = "";
+      }
+    }
+
+    public Builder<E> withPreviousNames(ArrayList<String> previousNames) {
+      if (previousNames != null) {
+        this._previousNames = previousNames;
+      }
+      return this;
+    }
+
+    public Builder<E> withSampleValues(ArrayList<String> sampleValues) {
+      if (sampleValues != null) {
+        this._sampleValues = sampleValues;
+      }
+      return this;
+    }
+
+    public Builder<E> withDefaultValue(String defaultValue) {
+      if (defaultValue != null) {
+        this._defaultValue = defaultValue;
+      }
+      return this;
+    }
+
+    public Builder<E> withDependencies(SNACModelFieldRelations<E> dependencies) {
+      if (dependencies != null) {
+        this._dependencies = dependencies;
+      }
+      return this;
+    }
+
+    public Builder<E> withDependents(SNACModelFieldRelations<E> dependents) {
+      if (dependents != null) {
+        this._dependents = dependents;
+      }
+      return this;
+    }
+
+    public SNACModelField<E> build() {
+      return new SNACModelField<E>(this);
     }
   }
 
@@ -85,9 +189,19 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return (_requirement == FieldRequirement.REQUIRED);
   }
 
+  @JsonProperty("requirement")
+  public String getRequirement() {
+    return _requirement.getName();
+  }
+
   @JsonProperty("repeatable")
   public Boolean isRepeatable() {
     return (_occurence == FieldOccurence.MULTIPLE);
+  }
+
+  @JsonProperty("occurence")
+  public String getOccurence() {
+    return _occurence.getName();
   }
 
   @JsonProperty("controlled")
@@ -95,11 +209,49 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return (_vocabulary == FieldVocabulary.CONTROLLED);
   }
 
+  @JsonProperty("vocabulary")
+  public String getVocabulary() {
+    return _vocabulary.getName();
+  }
+
+  @JsonProperty("dependencies")
+  public ArrayList<SNACModelFieldRelation<E>> getDependencies() {
+    return _dependencies.getRelations();
+  }
+
+  @JsonProperty("dependents")
+  public ArrayList<SNACModelFieldRelation<E>> getDependents() {
+    return _dependents.getRelations();
+  }
+
+  @JsonProperty("sample_values")
+  public ArrayList<String> getSampleValues() {
+    return _sampleValues;
+  }
+
+  @JsonProperty("default_value")
+  public String getDefaultValue() {
+    return _defaultValue;
+  }
+
+  /*
+    @JsonProperty("dependencies_string")
+    public String getDependenciesString() {
+      return _dependencies.getRelationsString();
+    }
+
+    @JsonProperty("dependents_string")
+    public String getDependentsString() {
+      return _dependents.getRelationsString();
+    }
+  */
+
   @JsonProperty("tooltip")
   public String getTooltip() {
     return _tooltip;
   }
 
+  @JsonIgnore
   public E getFieldType() {
     return _fieldType;
   }

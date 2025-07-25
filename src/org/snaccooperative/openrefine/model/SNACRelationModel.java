@@ -8,6 +8,7 @@ import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
+import org.snaccooperative.openrefine.model.SNACModelFieldRelation.FieldRelationType;
 
 public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.RelationModelField> {
 
@@ -41,54 +42,106 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     super(ModelType.RELATION, RelationModelField.NONE);
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.CPF_TYPE,
-            FieldRequirement.REQUIRED,
-            FieldOccurence.SINGLE,
-            FieldVocabulary.CONTROLLED,
-            "Type of CPF entity.  Possible values are: corporateBody, person, family"));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.CPF_TYPE,
+                FieldRequirement.REQUIRED,
+                FieldOccurence.SINGLE,
+                FieldVocabulary.CONTROLLED,
+                "Type of CPF entity.")
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.CPF_ID, FieldRelationType.OPTIONAL)))))
+            .withSampleValues(
+                new ArrayList<String>(Arrays.asList("corporateBody", "person", "family")))
+            .build());
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.CPF_ID,
-            new ArrayList<String>(Arrays.asList("SNAC CPF ID")), // previous name(s)
-            FieldRequirement.OPTIONAL,
-            FieldOccurence.SINGLE,
-            FieldVocabulary.IDENTIFIER,
-            "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC."));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.CPF_ID,
+                FieldRequirement.OPTIONAL,
+                FieldOccurence.SINGLE,
+                FieldVocabulary.IDENTIFIER,
+                "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC.")
+            .withPreviousNames(new ArrayList<String>(Arrays.asList("SNAC CPF ID")))
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.CPF_TYPE, FieldRelationType.REQUIRED)))))
+            .build());
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.CPF_TO_CPF_RELATION_TYPE,
-            FieldRequirement.OPTIONAL,
-            FieldOccurence.MULTIPLE,
-            FieldVocabulary.CONTROLLED,
-            "Nature of the relation of the CPF entity with the related CPF entity.  The following values may be used: associatedWith, correspondedWith.  Only used if Related CPF ID field is defined in the same row."));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.CPF_TO_CPF_RELATION_TYPE,
+                FieldRequirement.OPTIONAL,
+                FieldOccurence.MULTIPLE,
+                FieldVocabulary.CONTROLLED,
+                "Nature of the relation of the CPF entity with the related CPF entity.")
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.RELATED_CPF_ID, FieldRelationType.REQUIRED)))))
+            .withSampleValues(
+                new ArrayList<String>(Arrays.asList("associatedWith", "correspondedWith")))
+            .build());
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.RELATED_CPF_ID,
-            new ArrayList<String>(Arrays.asList("Related SNAC CPF ID")), // previous name(s)
-            FieldRequirement.OPTIONAL,
-            FieldOccurence.MULTIPLE,
-            FieldVocabulary.IDENTIFIER,
-            "SNAC ID of a CPF entity in SNAC related to the CPF entity."));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.RELATED_CPF_ID,
+                FieldRequirement.OPTIONAL,
+                FieldOccurence.MULTIPLE,
+                FieldVocabulary.IDENTIFIER,
+                "SNAC ID of a CPF entity in SNAC related to the CPF entity.")
+            .withPreviousNames(new ArrayList<String>(Arrays.asList("Related SNAC CPF ID")))
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.CPF_TO_CPF_RELATION_TYPE,
+                                FieldRelationType.REQUIRED)))))
+            .build());
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
-            FieldRequirement.OPTIONAL,
-            FieldOccurence.MULTIPLE,
-            FieldVocabulary.CONTROLLED,
-            "Role of the CPF entity in relation to the Resource.  The following values may be used: contributorOf, creatorOf, editorOf, referencedIn.  Only used if Resource ID field is defined in the same row."));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
+                FieldRequirement.OPTIONAL,
+                FieldOccurence.MULTIPLE,
+                FieldVocabulary.CONTROLLED,
+                "Role of the CPF entity in relation to the Resource.")
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.RELATED_RESOURCE_ID,
+                                FieldRelationType.REQUIRED)))))
+            .withSampleValues(
+                new ArrayList<String>(
+                    Arrays.asList("contributorOf", "creatorOf", "editorOf", "referencedIn")))
+            .build());
 
     addField(
-        new SNACModelField<RelationModelField>(
-            RelationModelField.RELATED_RESOURCE_ID,
-            new ArrayList<String>(Arrays.asList("SNAC Resource ID")), // previous name(s)
-            FieldRequirement.OPTIONAL,
-            FieldOccurence.MULTIPLE,
-            FieldVocabulary.IDENTIFIER,
-            "SNAC ID for a related Resource in SNAC."));
+        new SNACModelField.Builder<RelationModelField>(
+                RelationModelField.RELATED_RESOURCE_ID,
+                FieldRequirement.OPTIONAL,
+                FieldOccurence.MULTIPLE,
+                FieldVocabulary.IDENTIFIER,
+                "SNAC ID for a related Resource in SNAC.")
+            .withPreviousNames(new ArrayList<String>(Arrays.asList("SNAC Resource ID")))
+            .withDependencies(
+                new SNACModelFieldRelations<RelationModelField>(
+                    new ArrayList<SNACModelFieldRelation<RelationModelField>>(
+                        Arrays.asList(
+                            new SNACModelFieldRelation<RelationModelField>(
+                                RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
+                                FieldRelationType.REQUIRED)))))
+            .build());
   }
 }
