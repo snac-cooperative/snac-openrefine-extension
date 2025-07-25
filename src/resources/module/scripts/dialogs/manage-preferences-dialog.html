@@ -15,6 +15,7 @@
                       <td></td>
                       <td><label bind="snacEnvHeader" style="font-weight: bold;"></label></td>
                       <td><label bind="snacKeyHeader" style="font-weight: bold;"></label></td>
+                      <td><label bind="snacStatusHeader" style="font-weight: bold;"></label></td>
                     </tr>
                     <tr class="snac-preference-row" id="snacrowdev">
                       <td>
@@ -24,7 +25,10 @@
                         <label for="snacenvdev" bind="snacLabelEnvDev"></label>
                       </td>
                       <td align="left">
-                        <input type="text" size="44" id="snackeydev" name="snackeydev" bind="snacKeyDev"/>
+                        <input type="text" size="40" id="snackeydev" name="snackeydev" bind="snacKeyDev"/>
+                      </td>
+                      <td align="left">
+                        <button type="button" id="snactestkeydev" bind="snacTestKeyDev"></button>
                       </td>
                     </tr>
                     <tr class="snac-preference-row" id="snacrowprod">
@@ -35,7 +39,10 @@
                         <label for="snacenvprod" bind="snacLabelEnvProd"></label>
                       </td>
                       <td align="left">
-                        <input type="text" size="44" id="snackeyprod" name="snackeyprod" bind="snacKeyProd"/>
+                        <input type="text" size="40" id="snackeyprod" name="snackeyprod" bind="snacKeyProd"/>
+                      </td>
+                      <td align="left">
+                        <button type="button" id="snactestkeyprod" bind="snacTestKeyProd"></button>
                       </td>
                     </tr>
                   </table>

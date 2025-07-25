@@ -15,6 +15,81 @@ SNACManagePreferencesDialog.launch = function(callback) {
   );
 };
 
+SNACManagePreferencesDialog.resetTestButton = function(button, field) {
+  var _button = $(button);
+  var _field = $(field);
+
+  _button
+    .text($.i18n('snac-preferences/test-key-button-default'))
+    .prop('disabled', _field.val() == '')
+    .removeClass('snac-api-key-valid')
+    .removeClass('snac-api-key-invalid')
+    .removeClass('snac-api-key-unknown');
+}
+
+SNACManagePreferencesDialog.testAPIKey = function(url, field, button) {
+  this.resetTestButton(button, field);
+
+  var _button = $(button);
+  _button
+    .prop('disabled', true)
+    .text($.i18n('snac-preferences/test-key-button-checking'));
+
+  var _field = $(field);
+
+  // field's 'input' event should prevent this from being empty, but check anyway
+  // because the snac command we use below will not fail with an empty api key
+  if (_field.val() == "") {
+    return;
+  }
+
+  _field.prop('disabled', true);
+
+  var req = { command: "vocabulary", query_string: "person", type: "entity_type", apikey: _field.val() }
+
+   $.ajax({
+      url: url,
+      type: 'POST',
+      data: JSON.stringify(req),
+      success: function(response) {
+        _button
+          .addClass('snac-api-key-valid')
+          .text($.i18n('snac-preferences/test-key-button-valid'));
+
+        _button.prop('disabled', false);
+        _field.prop('disabled', false);
+      },
+      error: function(xhr, status, error) {
+        // mold any non-snac response into a snac-like error response
+        // (assumes a valid snac error response if parsing succeeds)
+        var data;
+        try {
+          data = JSON.parse(xhr.responseText);
+        } catch (error) {
+          data = { error: { type: "xhr", message: xhr.responseText ?? "unknown error" } }
+        }
+
+        //console.log(`ERROR: data = [${JSON.stringify(data)}]`);
+
+        var invalidKeyRegex = "API Key is not authorized";
+        var regex = new RegExp(invalidKeyRegex, "i");
+
+        if (data.error.type != "xhr" && regex.test(data.error.message)) {
+          _button
+            .addClass('snac-api-key-invalid')
+            .text($.i18n('snac-preferences/test-key-button-invalid'));
+        } else {
+          _button
+            .addClass('snac-api-key-unknown')
+            .text($.i18n('snac-preferences/test-key-button-unknown'));
+        }
+
+        _button.prop('disabled', false);
+        _field.prop('disabled', false);
+      }
+   });
+}
+
 SNACManagePreferencesDialog.display = function(data, callback) {
   var _this = this;
   var frame = $(DOM.loadHTML("snac", "scripts/dialogs/manage-preferences-dialog.html"));
@@ -29,6 +104,7 @@ SNACManagePreferencesDialog.display = function(data, callback) {
   this._elmts.snacLabelEnvDev.html(`<a href="${data.dev.web_url}" target="_blank">${data.dev.name}</a>`);
   this._elmts.snacLabelEnvProd.html(`<a href="${data.prod.web_url}" target="_blank">${data.prod.name}</a>`);
   this._elmts.snacKeyHeader.html($.i18n('snac-preferences/header-key'));
+  this._elmts.snacStatusHeader.html($.i18n('snac-preferences/header-status'));
   this._elmts.snacKeyDev.attr("placeholder", $.i18n('snac-preferences/key-placeholder').replace('{environment}', data.dev.name));
   this._elmts.snacKeyProd.attr("placeholder", $.i18n('snac-preferences/key-placeholder').replace('{environment}', data.prod.name));
   this._elmts.snacLabelMaxPreviewItems.text($.i18n('snac-preferences/max-preview-items'));
@@ -52,10 +128,29 @@ SNACManagePreferencesDialog.display = function(data, callback) {
     }
   });
 
-  elmts.snacKeyDev.val(data.dev.api_key);
-  elmts.snacKeyProd.val(data.prod.api_key);
+  elmts.snacKeyDev
+    .val(data.dev.api_key)
+    .on('input', function() { _this.resetTestButton('#snactestkeydev', this); });
+
+  elmts.snacTestKeyDev
+    .text($.i18n('snac-preferences/test-key-button-default'))
+    .addClass('snac-test-api-key-button')
+    .prop('disabled', $('#snackeydev').val() == '')
+    .on('click', function() { _this.testAPIKey(data.dev.api_url, '#snackeydev', this); });
+
+  elmts.snacKeyProd
+    .val(data.prod.api_key)
+    .on('input', function() { _this.resetTestButton('#snactestkeyprod', this); });
+
+  elmts.snacTestKeyProd
+    .text($.i18n('snac-preferences/test-key-button-default'))
+    .addClass('snac-test-api-key-button')
+    .prop('disabled', $('#snackeyprod').val() == '')
+    .on('click', function() { _this.testAPIKey(data.prod.api_url, '#snackeyprod', this); });
+
   elmts.snacMaxPreviewItems.val(data.preview.max_items);
-  elmts.snacIncludeAPIResponse.prop("checked", data.upload.api_response);
+
+  elmts.snacIncludeAPIResponse.prop('checked', data.upload.api_response);
 
   this._level = DialogSystem.showDialog(frame);
 

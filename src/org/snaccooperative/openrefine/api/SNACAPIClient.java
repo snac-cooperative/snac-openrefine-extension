@@ -23,9 +23,17 @@ public class SNACAPIClient {
   protected HttpPost _post;
 
   public SNACAPIClient() {
+    this(null);
+  }
+
+  public SNACAPIClient(String env) {
     SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
 
-    _env = prefsManager.getEnvironment();
+    if (env == null) {
+      _env = prefsManager.getEnvironment();
+    } else {
+      _env = prefsManager.getEnvironment(env);
+    }
 
     this._client = HttpClientBuilder.create().build();
     this._post = new HttpPost(_env.getAPIURL());

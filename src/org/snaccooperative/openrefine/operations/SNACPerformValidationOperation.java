@@ -32,7 +32,7 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
 
   @Override
   protected String getBriefDescription(Project project) {
-    return "Validate data against SNAC";
+    return "Validate data with SNAC";
   }
 
   @Override
