@@ -45,9 +45,9 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
 
     final Logger logger = LoggerFactory.getLogger("SNACPerformValidationProcess");
 
-    protected Project _project;
-    protected Engine _engine;
-    protected SNACSchema _schema;
+    private Project _project;
+    private Engine _engine;
+    private SNACSchema _schema;
 
     public SNACPerformValidationProcess(Project project, Engine engine, String description) {
       super(description);

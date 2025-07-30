@@ -219,9 +219,29 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return _dependencies.getRelations();
   }
 
+  @JsonIgnore
+  public ArrayList<SNACModelFieldRelation<E>> getRequiredDependencies() {
+    return _dependencies.getRequiredRelations();
+  }
+
+  @JsonIgnore
+  public ArrayList<E> getRequiredDependenciesFieldTypes() {
+    return _dependencies.getRequiredRelationFieldTypes();
+  }
+
   @JsonProperty("dependents")
   public ArrayList<SNACModelFieldRelation<E>> getDependents() {
     return _dependents.getRelations();
+  }
+
+  @JsonIgnore
+  public ArrayList<SNACModelFieldRelation<E>> getRequiredDependents() {
+    return _dependents.getRequiredRelations();
+  }
+
+  @JsonIgnore
+  public ArrayList<E> getRequiredDependentsFieldTypes() {
+    return _dependents.getRequiredRelationFieldTypes();
   }
 
   @JsonProperty("sample_values")
@@ -233,18 +253,6 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
   public String getDefaultValue() {
     return _defaultValue;
   }
-
-  /*
-    @JsonProperty("dependencies_string")
-    public String getDependenciesString() {
-      return _dependencies.getRelationsString();
-    }
-
-    @JsonProperty("dependents_string")
-    public String getDependentsString() {
-      return _dependents.getRelationsString();
-    }
-  */
 
   @JsonProperty("tooltip")
   public String getTooltip() {

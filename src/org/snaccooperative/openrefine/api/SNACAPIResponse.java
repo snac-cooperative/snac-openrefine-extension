@@ -12,14 +12,14 @@ public class SNACAPIResponse {
 
   static final Logger logger = LoggerFactory.getLogger("SNACAPIResponse");
 
-  protected String _apiResponse;
-  protected String _result;
-  protected String _message;
-  protected String _uri;
-  protected Resource _resource;
-  protected Constellation _constellation;
-  protected int _id;
-  protected int _version;
+  private String _apiResponse;
+  private String _result;
+  private String _message;
+  private String _uri;
+  private Resource _resource;
+  private Constellation _constellation;
+  private int _id;
+  private int _version;
 
   public SNACAPIResponse(SNACAPIClient client, String apiResponse) {
     this._apiResponse = apiResponse;

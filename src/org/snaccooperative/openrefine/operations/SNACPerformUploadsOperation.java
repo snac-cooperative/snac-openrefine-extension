@@ -46,9 +46,9 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
     final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsProcess");
 
-    protected Project _project;
-    protected Engine _engine;
-    protected SNACSchema _schema;
+    private Project _project;
+    private Engine _engine;
+    private SNACSchema _schema;
 
     public SNACPerformUploadsProcess(Project project, Engine engine, String description) {
       super(description);

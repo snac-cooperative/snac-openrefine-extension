@@ -21,23 +21,24 @@ import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.model.SNACResourceModel;
 import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
+import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACResourceItem extends SNACAbstractItem {
 
   static final Logger logger = LoggerFactory.getLogger("SNACResourceItem");
 
-  protected Project _project;
-  protected Record _record;
-  protected SNACSchema _schema;
-  protected SNACAPIClient _client;
-  protected SNACLookupCache _cache;
-  protected int _rowIndex;
+  private Project _project;
+  private Record _record;
+  private SNACSchema _schema;
+  private SNACAPIClient _client;
+  private SNACLookupCache _cache;
+  private int _rowIndex;
 
-  protected Resource _resource;
-  protected List<Integer> _relatedConstellations;
-  protected List<String> _validationErrors;
+  private Resource _resource;
+  private List<Integer> _relatedConstellations;
+  private List<String> _validationErrors;
 
-  protected SNACResourceModel _resourceModel;
+  private SNACResourceModel _resourceModel;
 
   public SNACResourceItem(
       Project project,
@@ -61,6 +62,8 @@ public class SNACResourceItem extends SNACAbstractItem {
   private void buildResource() {
     _resource = null;
 
+    SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
+
     _relatedConstellations = new LinkedList<Integer>();
     _validationErrors = new ArrayList<String>();
 
@@ -78,9 +81,15 @@ public class SNACResourceItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = getCellValueForRowByColumnName(_project, row, csvColumn);
+        String cellValue = schemaUtils.getCellValueForRowByColumnName(row, csvColumn);
 
         if (cellValue.equals("")) {
+          continue;
+        }
+
+        // quick check: ensure all required dependency/dependent fields exist and are not empty
+        if (!_resourceModel.hasRequiredFieldsInRow(
+            resourceField, cellValue, csvColumn, row, _schema, schemaUtils, _validationErrors)) {
           continue;
         }
 
@@ -92,8 +101,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               res.setOperation("update");
             } catch (NumberFormatException e) {
               // If no numeric ID, leave operation as "insert"
-              _validationErrors.add(
-                  "Invalid " + ResourceModelField.RESOURCE_ID.getName() + ": [" + cellValue + "]");
+              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
             }
             continue;
 
@@ -102,12 +110,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (typeTerm == null) {
               logger.warn("skipping unknown resource type [" + cellValue + "]");
-              _validationErrors.add(
-                  "Invalid "
-                      + ResourceModelField.RESOURCE_TYPE.getName()
-                      + ": ["
-                      + cellValue
-                      + "]");
+              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
               continue;
             }
 
@@ -143,12 +146,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (languageCodeTerm == null) {
               logger.warn("skipping unknown language code [" + cellValue + "]");
-              _validationErrors.add(
-                  "Invalid "
-                      + ResourceModelField.LANGUAGE_CODE.getName()
-                      + ": ["
-                      + cellValue
-                      + "]");
+              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
               continue;
             }
 
@@ -163,7 +161,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                     ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
-              String scriptCode = getCellValueForRowByColumnName(_project, row, scriptCodeColumn);
+              String scriptCode = schemaUtils.getCellValueForRowByColumnName(row, scriptCodeColumn);
 
               if (!scriptCode.equals("")) {
                 Term scriptCodeTerm = _cache.getScriptCodeTerm(scriptCode);
@@ -178,7 +176,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                           + ": ["
                           + scriptCode
                           + "] for "
-                          + ResourceModelField.LANGUAGE_CODE.getName()
+                          + resourceField.getName()
                           + ": ["
                           + cellValue
                           + "]");
@@ -206,7 +204,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (languageCodeColumn != null) {
               String languageCode =
-                  getCellValueForRowByColumnName(_project, row, languageCodeColumn);
+                  schemaUtils.getCellValueForRowByColumnName(row, languageCodeColumn);
 
               if (!languageCode.equals("")) {
                 // this scenario is handled in the "language code" section
@@ -223,8 +221,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             if (scriptCodeTerm == null) {
               logger.warn("skipping unknown script code [" + cellValue + "]");
-              _validationErrors.add(
-                  "Invalid " + ResourceModelField.SCRIPT_CODE.getName() + ": [" + cellValue + "]");
+              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
               continue;
             }
 
@@ -249,12 +246,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                 _relatedConstellations.add(id);
               }
             } catch (NumberFormatException e) {
-              _validationErrors.add(
-                  "Invalid "
-                      + ResourceModelField.HOLDING_REPOSITORY_ID.getName()
-                      + ": ["
-                      + cellValue
-                      + "]");
+              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
             }
             continue;
 

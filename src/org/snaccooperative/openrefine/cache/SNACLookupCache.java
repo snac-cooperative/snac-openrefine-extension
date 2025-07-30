@@ -15,25 +15,25 @@ public class SNACLookupCache {
 
   static final Logger logger = LoggerFactory.getLogger("SNACLookupCache");
 
-  protected SNACAPIClient _client;
-  protected SNACAPIClient _termClient;
-  protected HashMap<String, Language> _languageCodes;
-  protected HashMap<Integer, Boolean> _constellationExists;
-  protected HashMap<Integer, Boolean> _resourceExists;
+  private SNACAPIClient _client;
+  private SNACAPIClient _termClient;
+  private HashMap<String, Language> _languageCodes;
+  private HashMap<Integer, Boolean> _constellationExists;
+  private HashMap<Integer, Boolean> _resourceExists;
 
-  protected SNACTermCache _subjectTerms;
-  protected SNACTermCache _activityTerms;
-  protected SNACTermCache _occupationTerms;
-  protected SNACTermCache _entityTypeTerms;
-  protected SNACTermCache _dateTypeTerms;
-  protected SNACTermCache _placeRoleTerms;
-  protected SNACTermCache _documentRoleTerms;
-  protected SNACTermCache _relationTypeTerms;
-  protected SNACTermCache _languageCodeTerms;
-  protected SNACTermCache _scriptCodeTerms;
-  protected SNACTermCache _documentTypeTerms;
-  protected SNACTermCache _recordTypeTerms;
-  protected SNACTermCache _placeTypeTerms;
+  private SNACTermCache _subjectTerms;
+  private SNACTermCache _activityTerms;
+  private SNACTermCache _occupationTerms;
+  private SNACTermCache _entityTypeTerms;
+  private SNACTermCache _dateTypeTerms;
+  private SNACTermCache _placeRoleTerms;
+  private SNACTermCache _documentRoleTerms;
+  private SNACTermCache _relationTypeTerms;
+  private SNACTermCache _languageCodeTerms;
+  private SNACTermCache _scriptCodeTerms;
+  private SNACTermCache _documentTypeTerms;
+  private SNACTermCache _recordTypeTerms;
+  private SNACTermCache _placeTypeTerms;
 
   public SNACLookupCache(SNACAPIClient client) {
     this._client = client;

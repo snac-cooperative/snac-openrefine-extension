@@ -17,10 +17,10 @@ public class SNACAPIClient {
 
   static final Logger logger = LoggerFactory.getLogger("SNACAPIClient");
 
-  protected SNACEnvironment _env;
+  private SNACEnvironment _env;
 
-  protected CloseableHttpClient _client;
-  protected HttpPost _post;
+  private CloseableHttpClient _client;
+  private HttpPost _post;
 
   public SNACAPIClient() {
     this(null);

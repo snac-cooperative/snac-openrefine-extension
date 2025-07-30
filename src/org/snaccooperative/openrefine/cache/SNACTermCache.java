@@ -14,9 +14,9 @@ public class SNACTermCache {
 
   static final Logger logger = LoggerFactory.getLogger("SNACTermCache");
 
-  protected String _type;
+  private String _type;
 
-  protected HashMap<String, Term> _terms;
+  private HashMap<String, Term> _terms;
 
   public SNACTermCache(String type) {
     this._type = type;

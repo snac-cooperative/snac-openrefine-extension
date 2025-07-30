@@ -44,9 +44,9 @@ public class SNACSaveSchemaOperation extends AbstractOperation {
   static final Logger logger = LoggerFactory.getLogger("SNACSaveSchemaOperation");
 
   @JsonProperty("schema")
-  protected final SNACSchema _schema;
+  private final SNACSchema _schema;
 
-  protected final String _action;
+  private final String _action;
 
   @JsonCreator
   public SNACSaveSchemaOperation(@JsonProperty("schema") SNACSchema schema) {
@@ -75,8 +75,8 @@ public class SNACSaveSchemaOperation extends AbstractOperation {
 
   public static class SNACSchemaChange implements Change {
 
-    protected final SNACSchema _newSchema;
-    protected SNACSchema _oldSchema = null;
+    private final SNACSchema _newSchema;
+    private SNACSchema _oldSchema = null;
     public static final String overlayModelKey = "snacSchema";
 
     public SNACSchemaChange(SNACSchema newSchema) {
@@ -133,7 +133,7 @@ public class SNACSaveSchemaOperation extends AbstractOperation {
       return change;
     }
 
-    protected static void writeSNACSchema(SNACSchema s, Writer writer) throws IOException {
+    private static void writeSNACSchema(SNACSchema s, Writer writer) throws IOException {
       if (s != null) {
         ParsingUtilities.defaultWriter.writeValue(writer, s);
       }

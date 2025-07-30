@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.api.SNACAPIClient;
@@ -53,10 +54,10 @@ public class SNACSchema implements OverlayModel {
   static final Logger logger = LoggerFactory.getLogger("SNACSchema");
 
   @JsonProperty("schemaType")
-  protected String _schemaType;
+  private String _schemaType;
 
   @JsonProperty("columnMappings")
-  protected HashMap<String, String> _columnMappings;
+  private HashMap<String, String> _columnMappings;
 
   /*
    * Constructor.
@@ -101,7 +102,22 @@ public class SNACSchema implements OverlayModel {
     return items;
   }
 
-  protected class SNACRecordVisitor implements RecordVisitor {
+  public String getColumnFromSNACField(String field) {
+    for (Map.Entry<String, String> entry : _columnMappings.entrySet()) {
+      String val = entry.getValue();
+      if (val.equals(field)) {
+        return entry.getKey();
+      }
+    }
+
+    return null;
+  }
+
+  public String getSNACFieldFromColumn(String column) {
+    return _columnMappings.get(column);
+  }
+
+  private class SNACRecordVisitor implements RecordVisitor {
     private List<SNACAbstractItem> _items;
     private SNACSchema _schema;
     private SNACAPIClient _client;
