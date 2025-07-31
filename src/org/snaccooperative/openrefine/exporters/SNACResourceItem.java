@@ -424,43 +424,35 @@ public class SNACResourceItem extends SNACAbstractItem {
     return Resource.toJSON(_resource);
   }
 
-  private SNACAPIResponse verifyRelatedIDs() {
-    // Before uploading, we verify existence of any related holding
-    // repository IDs in the selected SNAC environment.
-
-    List<String> relationErrors = new LinkedList<String>();
-
-    logger.info("verifying existence of holding repository constellations...");
+  private void verifyRelatedIDs() {
+    // verify existence of any related holding repository IDs in the
+    // selected SNAC environment (there will be at most one)
 
     for (int i = 0; i < _relatedConstellations.size(); i++) {
       int id = _relatedConstellations.get(i);
-      logger.info("verifying existence of holding repository constellation: " + id);
       if (!_cache.constellationExists(id)) {
-        relationErrors.add("* Holding Repository SNAC ID " + id + " not found in SNAC");
+        _errors.addMissingHoldingRepositoryError(id);
       }
     }
-
-    if (relationErrors.size() > 0) {
-      String errMsg = String.join("\n\n", relationErrors);
-      logger.warn("resource validation error: [" + errMsg + "]");
-      return new SNACAPIResponse(_client, errMsg);
-    }
-
-    return new SNACAPIResponse(_client, "success");
   }
 
   public SNACAPIResponse performValidation() {
+    // create the resource, validating any controlled vocabulary terms
+    // against the selected SNAC environment
+
     buildResourceAgainstSNAC();
 
-    logger.info("validating resource data...");
+    // verify existence of any related IDs
 
-    // return error if validation errors were encountered earlier
+    verifyRelatedIDs();
+
+    // return error if validation errors were encountered at any point
+
     if (_errors.hasErrors()) {
       return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
     }
 
-    // verify any related IDs
-    return verifyRelatedIDs();
+    return null;
   }
 
   public SNACAPIResponse performUpload() {
@@ -468,7 +460,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
     // validate resource data before uploading
     SNACAPIResponse validationError = performValidation();
-    if (validationError != null && !validationError.getResult().equals("success")) {
+    if (validationError != null) {
       return validationError;
     }
 

@@ -959,7 +959,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
     return Constellation.toJSON(_constellation);
   }
 
-  private SNACAPIResponse verifyRelatedIDs() {
+  private void verifyRelatedIDs() {
     // Before uploading, we verify existence of any related CPF and resource
     // IDs in the selected SNAC environment.  This is because SNAC will
     // accept related CPF IDs that do not actually exist, then crash when
@@ -970,55 +970,45 @@ public class SNACConstellationItem extends SNACAbstractItem {
     // These existence checks should really be made in SNAC proper, but
     // it's easier (and effective) to perform them here for now.
 
-    List<String> relationErrors = new LinkedList<String>();
-
     if (_modelType == ModelType.RELATION
         && _relatedConstellations.size() == 0
         && _relatedResources.size() == 0) {
-      relationErrors.add("* No related CPFs or Resources defined for this record");
+      _errors.addError("No related CPFs or Resources defined for this record");
+      return;
     }
-
-    logger.info("verifying existence of related constellations...");
 
     for (int i = 0; i < _relatedConstellations.size(); i++) {
       int id = _relatedConstellations.get(i);
-      logger.info("verifying existence of related constellation: " + id);
       if (!_cache.constellationExists(id)) {
-        relationErrors.add("* Related CPF ID " + id + " not found in SNAC");
+        _errors.addMissingRelatedCPFError(id);
       }
     }
-
-    logger.info("verifying existence of related resources...");
 
     for (int i = 0; i < _relatedResources.size(); i++) {
       int id = _relatedResources.get(i);
-      logger.info("verifying existence of related resource: " + id);
       if (!_cache.resourceExists(id)) {
-        relationErrors.add("* Related Resource ID " + id + " not found in SNAC");
+        _errors.addMissingRelatedResourceError(id);
       }
     }
-
-    if (relationErrors.size() > 0) {
-      String errMsg = String.join("\n\n", relationErrors);
-      logger.warn("constellation validation error: [" + errMsg + "]");
-      return new SNACAPIResponse(_client, errMsg);
-    }
-
-    return new SNACAPIResponse(_client, "success");
   }
 
   public SNACAPIResponse performValidation() {
+    // create the constellation, validating any controlled vocabulary
+    // terms against the selected SNAC environment
+
     buildConstellationAgainstSNAC();
 
-    logger.info("validating constellation data...");
+    // verify existence of any related IDs
 
-    // return error if validation errors were encountered earlier
+    verifyRelatedIDs();
+
+    // return error if validation errors were encountered at any point
+
     if (_errors.hasErrors()) {
       return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
     }
 
-    // verify any related IDs
-    return verifyRelatedIDs();
+    return null;
   }
 
   public SNACAPIResponse performUpload() {

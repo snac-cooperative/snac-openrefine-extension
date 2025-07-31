@@ -42,7 +42,7 @@ public class SNACValidationErrors {
     return String.join("\n", errs);
   }
 
-  // specific error formats go here
+  // invalid field value errors
 
   private void addInvalidFieldError(
       String fieldType,
@@ -100,6 +100,8 @@ public class SNACValidationErrors {
     addInvalidFieldError(
         "controlled vocabulary", fieldName, fieldValue, fieldColumn, depName, depValue, depColumn);
   }
+
+  // required field dependency errors
 
   private void addRequiredFieldError(
       String errMsg,
@@ -169,4 +171,27 @@ public class SNACValidationErrors {
       String fieldName, String fieldValue, String fieldColumn, String depName, String depColumn) {
     addRequiredFieldEmptyError(fieldName, fieldValue, fieldColumn, depName, depColumn, "dependent");
   }
+
+  // related SNAC entity errors
+
+  private void addMissingIDError(String idType, int id) {
+    String err;
+
+    err = idType + " ID " + id + " not found in SNAC";
+
+    addError(err);
+  }
+
+  public void addMissingRelatedCPFError(int id) {
+    addMissingIDError("Related CPF", id);
+  }
+
+  public void addMissingRelatedResourceError(int id) {
+    addMissingIDError("Related Resource", id);
+  }
+
+  public void addMissingHoldingRepositoryError(int id) {
+    addMissingIDError("Holding Repository", id);
+  }
+
 }
