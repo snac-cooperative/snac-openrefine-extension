@@ -1,5 +1,4 @@
 package org.snaccooperative.openrefine.cache;
-import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -69,19 +68,11 @@ public class SNACLookupCache {
     this._resourceExists = new HashMap<Integer, Boolean>();
     this._termCaches = new HashMap<TermType, SNACTermCache>();
 
-    newTermCache(TermType.ACTIVITY);
-    newTermCache(TermType.DATE_TYPE);
-    newTermCache(TermType.DOCUMENT_ROLE);
-    newTermCache(TermType.DOCUMENT_TYPE);
-    newTermCache(TermType.ENTITY_TYPE);
-    newTermCache(TermType.LANGUAGE_CODE);
-    newTermCache(TermType.OCCUPATION);
-    newTermCache(TermType.PLACE_ROLE);
-    newTermCache(TermType.PLACE_TYPE);
-    newTermCache(TermType.RECORD_TYPE);
-    newTermCache(TermType.RELATION_TYPE);
-    newTermCache(TermType.SCRIPT_CODE);
-    newTermCache(TermType.SUBJECT);
+    for (TermType term : TermType.values()) {
+      if (term != TermType.NONE) {
+        newTermCache(term);
+      }
+    }
   }
 
   private void newTermCache(TermType term) {
