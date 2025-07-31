@@ -31,7 +31,7 @@ SNACManageValidationDialog.display = function(data, callback) {
 
   this._elmts.dialogHeader.text($.i18n('snac-validation/dialog-header'));
   this._elmts.validationEnvironment.html($.i18n('snac-validation/validation-environment')
-    .replace('{environment}', `<a href="${data.web_url}" target="_blank">SNAC ${data.name}</a>`)
+    .replace('{environment}', `<a href="${data[data.env].web_url}" target="_blank">SNAC ${data[data.env].name}</a>`)
   );
   this._elmts.validationExplanation.html($.i18n('snac-validation/validation-explanation'));
   this._elmts.validationDetails.html($.i18n('snac-validation/validation-details'));

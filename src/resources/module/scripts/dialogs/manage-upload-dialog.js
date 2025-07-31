@@ -17,7 +17,7 @@ SNACManageUploadDialog.launch = function(callback) {
       if ("code" in data && data.code === "error") {
         alert(`${$.i18n('snac-preferences/error-loading')}: ${data.message}`);
       } else {
-        if (data.api_key === '') {
+        if (data[data.env].api_key === '') {
           alert($.i18n('snac-upload/missing-key'));
           callback(null);
         } else {
@@ -36,8 +36,8 @@ SNACManageUploadDialog.display = function(data, callback) {
 
   this._elmts.dialogHeader.text($.i18n('snac-upload/dialog-header'));
   this._elmts.uploadEnvironment.html($.i18n('snac-upload/upload-environment')
-    .replace('{environment}', `<a href="${data.web_url}" target="_blank">SNAC ${data.name}</a>`)
-    .replace('{apikey}', data.api_key.substr(0,8))
+    .replace('{environment}', `<a href="${data[data.env].web_url}" target="_blank">SNAC ${data[data.env].name}</a>`)
+    .replace('{apikey}', data[data.env].api_key.substr(0,8))
   );
   this._elmts.uploadExplanation.html($.i18n('snac-upload/upload-explanation'));
   this._elmts.uploadDetails.html($.i18n('snac-upload/upload-details'));

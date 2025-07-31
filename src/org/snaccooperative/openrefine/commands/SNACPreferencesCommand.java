@@ -51,10 +51,6 @@ public class SNACPreferencesCommand extends Command {
     writer.writeStartObject();
 
     writer.writeStringField("env", prefsManager.getID());
-    writer.writeStringField("name", prefsManager.getName());
-    writer.writeStringField("web_url", prefsManager.getWebURL());
-    writer.writeStringField("api_key", prefsManager.getAPIKey());
-    writer.writeStringField("api_url", prefsManager.getAPIURL());
 
     String[] ids = prefsManager.getIDs();
     for (int i = 0; i < ids.length; i++) {
