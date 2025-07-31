@@ -452,7 +452,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
     }
 
-    return null;
+    return new SNACAPIResponse("success");
   }
 
   public SNACAPIResponse performUpload() {
@@ -460,7 +460,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
     // validate resource data before uploading
     SNACAPIResponse validationError = performValidation();
-    if (validationError != null) {
+    if (validationError != null && !validationError.getResult().equals("success")) {
       return validationError;
     }
 

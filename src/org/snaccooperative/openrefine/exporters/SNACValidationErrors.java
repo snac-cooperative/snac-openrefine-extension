@@ -35,7 +35,7 @@ public class SNACValidationErrors {
     List<String> errs = new ArrayList<String>();
 
     for (int i = 0; i < _validationErrors.size(); i++) {
-      errs.add("* " + _validationErrors.get(i));
+      errs.add((i + 1) + ". " + _validationErrors.get(i));
       errs.add("\n");
     }
 
@@ -193,5 +193,4 @@ public class SNACValidationErrors {
   public void addMissingHoldingRepositoryError(int id) {
     addMissingIDError("Holding Repository", id);
   }
-
 }

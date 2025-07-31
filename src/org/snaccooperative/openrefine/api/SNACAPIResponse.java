@@ -21,6 +21,10 @@ public class SNACAPIResponse {
   private int _id;
   private int _version;
 
+  public SNACAPIResponse(String apiResponse) {
+    this((SNACAPIClient) null, apiResponse);
+  }
+
   public SNACAPIResponse(SNACAPIClient client, String apiResponse) {
     this._apiResponse = apiResponse;
     this._result = "";
@@ -31,8 +35,9 @@ public class SNACAPIResponse {
     this._id = 0;
     this._version = 0;
 
-    // if supplied with an apiResponse of "success", create a simple success object
-    if (apiResponse.equals("success")) {
+    // if no client is supplied, just treat the apiResponse value as the "result".
+    // client should always be defined unless the abbreviated constructor above is used
+    if (client == null) {
       this._result = apiResponse;
       this._message = "";
       return;
