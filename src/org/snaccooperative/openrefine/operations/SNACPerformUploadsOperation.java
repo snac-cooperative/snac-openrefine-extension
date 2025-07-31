@@ -24,16 +24,20 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
+  protected SNACPreferencesManager _prefsManager;
+
   static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsOperation");
 
   @JsonCreator
   public SNACPerformUploadsOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
     super(engineConfig);
+
+    _prefsManager = SNACPreferencesManager.getInstance();
   }
 
   @Override
   protected String getBriefDescription(Project project) {
-    return "Upload data to SNAC";
+    return "Upload data to SNAC " + _prefsManager.getName();
   }
 
   @Override
@@ -81,6 +85,9 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
         int row = item.rowIndex();
 
         SNACAPIResponse uploadResponse = item.performUpload();
+        if (uploadResponse == null) {
+          uploadResponse = new SNACAPIResponse("unknown");
+        }
 
         logger.info(
             "["
@@ -114,11 +121,12 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
       _progress = 100;
 
       if (!_canceled) {
-        String resultColumn = "*SNAC*: Result";
-        String messageColumn = "*SNAC*: Message";
-        String idColumn = "*SNAC*: ID";
-        String uriColumn = "*SNAC*: Link";
-        String responseColumn = "*SNAC*: API Response";
+        String snacPrefix = "*SNAC " + prefsManager.getName() + "*: ";
+        String resultColumn = snacPrefix + "Result";
+        String messageColumn = snacPrefix + "Message";
+        String idColumn = snacPrefix + "ID";
+        String uriColumn = snacPrefix + "Link";
+        String responseColumn = snacPrefix + "API Response";
 
         int i = 0;
         boolean found = false;

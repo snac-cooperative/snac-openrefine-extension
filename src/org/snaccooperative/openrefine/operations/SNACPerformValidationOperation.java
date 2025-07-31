@@ -19,20 +19,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
+import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformValidationOperation extends EngineDependentOperation {
+
+  protected SNACPreferencesManager _prefsManager;
 
   static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationOperation");
 
   @JsonCreator
   public SNACPerformValidationOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
     super(engineConfig);
+
+    _prefsManager = SNACPreferencesManager.getInstance();
   }
 
   @Override
   protected String getBriefDescription(Project project) {
-    return "Validate data with SNAC";
+    return "Validate data with SNAC " + _prefsManager.getName();
   }
 
   @Override
@@ -68,11 +73,16 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
       List<CellAtRow> results = new ArrayList<CellAtRow>(items.size());
       List<CellAtRow> messages = new ArrayList<CellAtRow>(items.size());
 
+      SNACPreferencesManager prefsManager = SNACPreferencesManager.getInstance();
+
       for (int i = 0; i < items.size(); i++) {
         SNACAbstractItem item = items.get(i);
         int row = item.rowIndex();
 
         SNACAPIResponse validationResponse = item.performValidation();
+        if (validationResponse == null) {
+          validationResponse = new SNACAPIResponse("unknown");
+        }
 
         logger.info(
             "["
@@ -96,8 +106,9 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
       _progress = 100;
 
       if (!_canceled) {
-        String resultColumn = "*SNAC*: Validation Result";
-        String messageColumn = "*SNAC*: Validation Message";
+        String snacPrefix = "*SNAC " + prefsManager.getName() + "*: ";
+        String resultColumn = snacPrefix + "Validation Result";
+        String messageColumn = snacPrefix + "Validation Message";
 
         int i = 0;
         boolean found = false;
