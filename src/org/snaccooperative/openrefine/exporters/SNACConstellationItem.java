@@ -1016,7 +1016,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
     // validate constellation data before uploading
     SNACAPIResponse validationError = performValidation();
-    if (validationError != null && !validationError.getResult().equals("success")) {
+    if (validationError != null) {
       return validationError;
     }
 
