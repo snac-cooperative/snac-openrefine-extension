@@ -52,11 +52,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
   private Constellation _constellation;
   private List<Integer> _relatedConstellations;
   private List<Integer> _relatedResources;
-  private List<String> _validationErrors;
 
   private SNACConstellationModel _constellationModel;
   private SNACRelationModel _relationModel;
   private ModelType _modelType;
+
+  private SNACValidationErrors _errors;
 
   public SNACConstellationItem(
       Project project,
@@ -87,7 +88,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
     _relatedConstellations = new LinkedList<Integer>();
     _relatedResources = new LinkedList<Integer>();
-    _validationErrors = new ArrayList<String>();
+    _errors = new SNACValidationErrors();
 
     Constellation con = new Constellation();
     con.setOperation("insert");
@@ -120,19 +121,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
         switch (_modelType) {
           case CONSTELLATION:
-
             ConstellationModelField constellationField =
                 _constellationModel.getFieldType(entry.getValue());
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
             if (!_constellationModel.hasRequiredFieldsInRow(
-                constellationField,
-                cellValue,
-                csvColumn,
-                row,
-                _schema,
-                schemaUtils,
-                _validationErrors)) {
+                constellationField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
               continue;
             }
 
@@ -144,8 +138,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   int id = Integer.parseInt(cellValue);
                   con.setID(id);
                 } catch (NumberFormatException e) {
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidNumericFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                 }
                 continue;
 
@@ -155,8 +149,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
 
                 if (entityTypeTerm == null) {
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -165,7 +159,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case NAME_ENTRY:
-
                 NameEntry preferredName = new NameEntry();
 
                 preferredName.setOriginal(cellValue);
@@ -177,7 +170,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case VARIANT_NAME_ENTRY:
-
                 NameEntry variantName = new NameEntry();
 
                 variantName.setOriginal(cellValue);
@@ -200,16 +192,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 Term dateTypeTerm = _cache.getTerm(TermType.DATE_TYPE, dateType);
 
                 if (dateTypeTerm == null) {
-                  _validationErrors.add(
-                      "Invalid "
-                          + ConstellationModelField.EXIST_DATE_TYPE.getName()
-                          + ": ["
-                          + dateType
-                          + "] for "
-                          + constellationField.getName()
-                          + ": ["
-                          + cellValue
-                          + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      ConstellationModelField.EXIST_DATE_TYPE.getName(),
+                      dateType,
+                      dateTypeColumn,
+                      constellationField.getName(),
+                      cellValue,
+                      csvColumn);
                   continue;
                 }
 
@@ -241,12 +230,11 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case SUBJECT:
-
                 Term subjectTerm = _cache.getTerm(TermType.SUBJECT, cellValue);
 
                 if (subjectTerm == null) {
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -259,7 +247,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case PLACE:
-
                 Place place = new Place();
                 place.setOriginal(cellValue);
                 place.setOperation("insert");
@@ -281,16 +268,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 if (placeTypeTerm != null) {
                   place.setType(placeTypeTerm);
                 } else {
-                  _validationErrors.add(
-                      "Invalid "
-                          + ConstellationModelField.PLACE_TYPE.getName()
-                          + ": ["
-                          + placeType
-                          + "] for "
-                          + constellationField.getName()
-                          + ": ["
-                          + cellValue
-                          + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      ConstellationModelField.PLACE_TYPE.getName(),
+                      placeType,
+                      placeTypeColumn,
+                      constellationField.getName(),
+                      cellValue,
+                      csvColumn);
                   continue;
                 }
 
@@ -308,16 +292,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   if (placeRoleTerm != null) {
                     place.setRole(placeRoleTerm);
                   } else {
-                    _validationErrors.add(
-                        "Invalid "
-                            + ConstellationModelField.PLACE_ROLE.getName()
-                            + ": ["
-                            + placeRole
-                            + "] for "
-                            + constellationField.getName()
-                            + ": ["
-                            + cellValue
-                            + "]");
+                    _errors.addInvalidVocabularyFieldError(
+                        ConstellationModelField.PLACE_ROLE.getName(),
+                        placeRole,
+                        placeRoleColumn,
+                        constellationField.getName(),
+                        cellValue,
+                        csvColumn);
                     continue;
                   }
                 }
@@ -333,7 +314,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case SOURCE_CITATION:
-
                 Source source = new Source();
 
                 // set citation
@@ -372,12 +352,11 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case OCCUPATION:
-
                 Term occupationTerm = _cache.getTerm(TermType.OCCUPATION, cellValue);
 
                 if (occupationTerm == null) {
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -390,12 +369,11 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case ACTIVITY:
-
                 Term activityTerm = _cache.getTerm(TermType.ACTIVITY, cellValue);
 
                 if (activityTerm == null) {
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -414,9 +392,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
 
                 if (languageCodeTerm == null) {
-                  logger.warn("skipping unknown language code [" + cellValue + "]");
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -440,17 +417,13 @@ public class SNACConstellationItem extends SNACAbstractItem {
                       // add script code portion
                       lang.setScript(scriptCodeTerm);
                     } else {
-                      logger.warn("omitting invalid script code [" + scriptCode + "]");
-                      _validationErrors.add(
-                          "Invalid "
-                              + ConstellationModelField.SCRIPT_CODE.getName()
-                              + ": ["
-                              + scriptCode
-                              + "] for "
-                              + constellationField.getName()
-                              + ": ["
-                              + cellValue
-                              + "]");
+                      _errors.addInvalidVocabularyFieldError(
+                          ConstellationModelField.SCRIPT_CODE.getName(),
+                          scriptCode,
+                          scriptCodeColumn,
+                          constellationField.getName(),
+                          cellValue,
+                          csvColumn);
                       continue;
                     }
                   } else {
@@ -491,9 +464,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
 
                 if (scriptCodeTerm == null) {
-                  logger.warn("skipping unknown script code [" + cellValue + "]");
-                  _validationErrors.add(
-                      "Invalid " + constellationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      constellationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -507,7 +479,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case BIOG_HIST:
-
                 BiogHist biogHist = new BiogHist();
                 biogHist.setText(cellValue);
                 biogHist.setOperation("insert");
@@ -520,17 +491,17 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 // external related CPF URLs are always sameAs relations
 
                 String defaultExternalRelatedCPFUrlType = "sameAs";
-                Term sameAsTerm = _cache.getTerm(TermType.RECORD_TYPE, defaultExternalRelatedCPFUrlType);
+                Term sameAsTerm =
+                    _cache.getTerm(TermType.RECORD_TYPE, defaultExternalRelatedCPFUrlType);
 
                 if (sameAsTerm == null) {
-                  _validationErrors.add(
-                      "Invalid Record Type: ["
-                          + defaultExternalRelatedCPFUrlType
-                          + "] for "
-                          + constellationField.getName()
-                          + ": ["
-                          + cellValue
-                          + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      "Record Type",
+                      defaultExternalRelatedCPFUrlType,
+                      null,
+                      constellationField.getName(),
+                      cellValue,
+                      csvColumn);
                   continue;
                 }
 
@@ -547,18 +518,11 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case RELATION:
-
             RelationModelField relationField = _relationModel.getFieldType(entry.getValue());
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
             if (!_relationModel.hasRequiredFieldsInRow(
-                relationField,
-                cellValue,
-                csvColumn,
-                row,
-                _schema,
-                schemaUtils,
-                _validationErrors)) {
+                relationField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
               continue;
             }
 
@@ -570,8 +534,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   int id = Integer.parseInt(cellValue);
                   con.setID(id);
                 } catch (NumberFormatException e) {
-                  _validationErrors.add(
-                      "Invalid " + relationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidNumericFieldError(
+                      relationField.getName(), cellValue, csvColumn);
                 }
 
                 continue;
@@ -582,8 +546,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
 
                 if (entityTypeTerm == null) {
-                  _validationErrors.add(
-                      "Invalid " + relationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      relationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -592,7 +556,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case RELATED_RESOURCE_ID:
-
                 try {
                   int targetResource = Integer.parseInt(cellValue);
                   Resource resource = new Resource();
@@ -616,24 +579,21 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   if (resourceRoleTerm != null) {
                     resourceRelation.setRole(resourceRoleTerm);
                   } else {
-                    _validationErrors.add(
-                        "Invalid "
-                            + RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName()
-                            + ": ["
-                            + resourceRole
-                            + "] for "
-                            + relationField.getName()
-                            + ": ["
-                            + cellValue
-                            + "]");
+                    _errors.addInvalidVocabularyFieldError(
+                        RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName(),
+                        resourceRole,
+                        resourceRoleColumn,
+                        relationField.getName(),
+                        cellValue,
+                        csvColumn);
                     continue;
                   }
 
                   resourceRelations.add(resourceRelation);
                   _relatedResources.add(targetResource);
                 } catch (NumberFormatException e) {
-                  _validationErrors.add(
-                      "Invalid " + relationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidNumericFieldError(
+                      relationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -643,7 +603,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case RELATED_CPF_ID:
-
                 try {
                   int targetConstellation = Integer.parseInt(cellValue);
                   ConstellationRelation cpfRelation = new ConstellationRelation();
@@ -658,30 +617,28 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   String cpfRelationType =
                       schemaUtils.getCellValueForRowByColumnName(row, cpfRelationTypeColumn);
 
-                  Term cpfRelationTypeTerm = _cache.getTerm(TermType.RELATION_TYPE, cpfRelationType);
+                  Term cpfRelationTypeTerm =
+                      _cache.getTerm(TermType.RELATION_TYPE, cpfRelationType);
 
                   if (cpfRelationTypeTerm != null) {
                     cpfRelation.setType(cpfRelationTypeTerm);
                     cpfRelation.setOperation("insert");
                   } else {
-                    _validationErrors.add(
-                        "Invalid "
-                            + RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName()
-                            + ": ["
-                            + cpfRelationType
-                            + "] for "
-                            + relationField.getName()
-                            + ": ["
-                            + cellValue
-                            + "]");
+                    _errors.addInvalidVocabularyFieldError(
+                        RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName(),
+                        cpfRelationType,
+                        cpfRelationTypeColumn,
+                        relationField.getName(),
+                        cellValue,
+                        csvColumn);
                     continue;
                   }
 
                   cpfRelations.add(cpfRelation);
                   _relatedConstellations.add(targetConstellation);
                 } catch (NumberFormatException e) {
-                  _validationErrors.add(
-                      "Invalid " + relationField.getName() + ": [" + cellValue + "]");
+                  _errors.addInvalidNumericFieldError(
+                      relationField.getName(), cellValue, csvColumn);
                   continue;
                 }
 
@@ -1056,12 +1013,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
     logger.info("validating constellation data...");
 
     // return error if validation errors were encountered earlier
-    if (_validationErrors.size() > 0) {
-      for (int i = 0; i < _validationErrors.size(); i++) {
-        _validationErrors.set(i, "* " + _validationErrors.get(i));
-      }
-      String errMsg = String.join("\n", _validationErrors);
-      return new SNACAPIResponse(_client, errMsg);
+    if (_errors.hasErrors()) {
+      return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
     }
 
     // verify any related IDs

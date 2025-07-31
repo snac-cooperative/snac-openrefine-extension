@@ -37,9 +37,10 @@ public class SNACResourceItem extends SNACAbstractItem {
 
   private Resource _resource;
   private List<Integer> _relatedConstellations;
-  private List<String> _validationErrors;
 
   private SNACResourceModel _resourceModel;
+
+  private SNACValidationErrors _errors;
 
   public SNACResourceItem(
       Project project,
@@ -66,7 +67,7 @@ public class SNACResourceItem extends SNACAbstractItem {
     SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
 
     _relatedConstellations = new LinkedList<Integer>();
-    _validationErrors = new ArrayList<String>();
+    _errors = new SNACValidationErrors();
 
     Resource res = new Resource();
     res.setOperation("insert");
@@ -90,12 +91,11 @@ public class SNACResourceItem extends SNACAbstractItem {
 
         // quick check: ensure all required dependency/dependent fields exist and are not empty
         if (!_resourceModel.hasRequiredFieldsInRow(
-            resourceField, cellValue, csvColumn, row, _schema, schemaUtils, _validationErrors)) {
+            resourceField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
           continue;
         }
 
         switch (resourceField) {
-
           case RESOURCE_ID:
             // FIXME: does not enforce one value per record
 
@@ -104,7 +104,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               res.setID(id);
               res.setOperation("update");
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
+              _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
             }
 
             continue;
@@ -115,8 +115,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term typeTerm = _cache.getTerm(TermType.DOCUMENT_TYPE, cellValue);
 
             if (typeTerm == null) {
-              logger.warn("skipping unknown resource type [" + cellValue + "]");
-              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
+              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -166,8 +165,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
 
             if (languageCodeTerm == null) {
-              logger.warn("skipping unknown language code [" + cellValue + "]");
-              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
+              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -190,17 +188,13 @@ public class SNACResourceItem extends SNACAbstractItem {
                   // add script code portion
                   lang.setScript(scriptCodeTerm);
                 } else {
-                  logger.warn("omitting invalid script code [" + scriptCode + "]");
-                  _validationErrors.add(
-                      "Invalid "
-                          + ResourceModelField.SCRIPT_CODE.getName()
-                          + ": ["
-                          + scriptCode
-                          + "] for "
-                          + resourceField.getName()
-                          + ": ["
-                          + cellValue
-                          + "]");
+                  _errors.addInvalidVocabularyFieldError(
+                      ResourceModelField.SCRIPT_CODE.getName(),
+                      scriptCode,
+                      scriptCodeColumn,
+                      resourceField.getName(),
+                      cellValue,
+                      csvColumn);
                   continue;
                 }
               } else {
@@ -241,8 +235,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
 
             if (scriptCodeTerm == null) {
-              logger.warn("skipping unknown script code [" + cellValue + "]");
-              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
+              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -269,7 +262,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                 _relatedConstellations.add(id);
               }
             } catch (NumberFormatException e) {
-              _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
+              _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
             }
 
             continue;
@@ -462,12 +455,8 @@ public class SNACResourceItem extends SNACAbstractItem {
     logger.info("validating resource data...");
 
     // return error if validation errors were encountered earlier
-    if (_validationErrors.size() > 0) {
-      for (int i = 0; i < _validationErrors.size(); i++) {
-        _validationErrors.set(i, "* " + _validationErrors.get(i));
-      }
-      String errMsg = String.join("\n", _validationErrors);
-      return new SNACAPIResponse(_client, errMsg);
+    if (_errors.hasErrors()) {
+      return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
     }
 
     // verify any related IDs
