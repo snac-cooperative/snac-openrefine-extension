@@ -51,7 +51,7 @@ import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SNACSchema implements OverlayModel {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACSchema");
+  static final Logger logger = LoggerFactory.getLogger(SNACSchema.class);
 
   @JsonProperty("schemaType")
   private String _schemaType;
@@ -118,13 +118,14 @@ public class SNACSchema implements OverlayModel {
   }
 
   private class SNACRecordVisitor implements RecordVisitor {
+
+    final Logger logger = LoggerFactory.getLogger(SNACRecordVisitor.class);
+
     private List<SNACAbstractItem> _items;
     private SNACSchema _schema;
     private SNACAPIClient _client;
     private SNACLookupCache _cache;
     private int _maxRecords;
-
-    final Logger logger = LoggerFactory.getLogger("SNACRecordVisitor");
 
     public SNACRecordVisitor(List<SNACAbstractItem> items, SNACSchema schema) {
       this(items, schema, 0);
@@ -143,6 +144,7 @@ public class SNACSchema implements OverlayModel {
     public void start(Project project) {}
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean visit(Project project, Record record) {
       if (_maxRecords > 0 && _items.size() >= _maxRecords) {
         return true;
