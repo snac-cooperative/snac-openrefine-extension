@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
 
 public class SNACValidationErrors {
 
@@ -34,9 +35,14 @@ public class SNACValidationErrors {
   public String getAccumulatedErrorString() {
     List<String> errs = new ArrayList<String>();
 
+    if (_validationErrors.size() > 0) {
+      errs.add("Validation Errors:");
+      errs.add("");
+    }
+
     for (int i = 0; i < _validationErrors.size(); i++) {
       errs.add((i + 1) + ". " + _validationErrors.get(i));
-      errs.add("\n");
+      errs.add("");
     }
 
     return String.join("\n", errs);
@@ -54,27 +60,26 @@ public class SNACValidationErrors {
       String depColumn) {
     String err;
 
-    err = "Invalid";
-
+    err = "Field \"" + fieldName + "\"";
+    if (fieldColumn != null && !fieldColumn.equals("")) {
+      err += " (column \"" + fieldColumn + "\")";
+    }
+    err += " has invalid";
     if (fieldType != null && !fieldType.equals("")) {
       err += " " + fieldType;
     }
-
-    err += " field " + fieldName;
-    if (fieldColumn != null && !fieldColumn.equals("")) {
-      err += " (column " + fieldColumn + ")";
-    }
+    err += " value";
     if (fieldValue != null && !fieldValue.equals("")) {
       err += ": [" + fieldValue + "]";
     }
 
     if (depName != null && !depName.equals("")) {
-      err += " for field " + depName;
+      err += " for related field \"" + depName + "\"";
       if (depColumn != null && !depColumn.equals("")) {
-        err += " (column " + depColumn + ")";
+        err += " (column \"" + depColumn + "\")";
       }
       if (depValue != null && !depValue.equals("")) {
-        err += ": [" + depValue + "]";
+        err += " with value: [" + depValue + "]";
       }
     }
 
@@ -82,7 +87,8 @@ public class SNACValidationErrors {
   }
 
   public void addInvalidNumericFieldError(String fieldName, String fieldValue, String fieldColumn) {
-    addInvalidFieldError("numeric", fieldName, fieldValue, fieldColumn, null, null, null);
+    addInvalidFieldError(
+        FieldVocabulary.IDENTIFIER.getName(), fieldName, fieldValue, fieldColumn, null, null, null);
   }
 
   public void addInvalidVocabularyFieldError(
@@ -98,7 +104,13 @@ public class SNACValidationErrors {
       String depValue,
       String depColumn) {
     addInvalidFieldError(
-        "controlled vocabulary", fieldName, fieldValue, fieldColumn, depName, depValue, depColumn);
+        FieldVocabulary.CONTROLLED.getName(),
+        fieldName,
+        fieldValue,
+        fieldColumn,
+        depName,
+        depValue,
+        depColumn);
   }
 
   // required field dependency errors
@@ -113,16 +125,16 @@ public class SNACValidationErrors {
       String depType) {
     String err;
 
-    err = "Field " + depName;
+    err = "Field \"" + depName + "\"";
     if (depColumn != null && !depColumn.equals("")) {
-      err += " (column " + depColumn + ")";
+      err += " (column \"" + depColumn + "\")";
     }
 
     err += ", a required " + depType;
 
-    err += " of field " + fieldName;
+    err += " of field \"" + fieldName + "\"";
     if (fieldColumn != null && !fieldColumn.equals("")) {
-      err += " (column " + fieldColumn + ")";
+      err += " (column \"" + fieldColumn + "\")";
     }
 
     err += ", " + errMsg;
