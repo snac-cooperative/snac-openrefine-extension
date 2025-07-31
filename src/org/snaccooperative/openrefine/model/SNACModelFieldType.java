@@ -1,5 +1,5 @@
 package org.snaccooperative.openrefine.model;
 
-public interface SNACModelFieldType<E extends Enum<E>> {
+public interface SNACModelFieldType {
   public String getName();
 }

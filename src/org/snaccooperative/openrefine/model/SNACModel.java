@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
+import org.snaccooperative.openrefine.model.SNACRelationModel.RelationModelField;
+import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 
 @JsonPropertyOrder({"resource", "constellation", "relation"})
 public class SNACModel {
@@ -22,17 +25,17 @@ public class SNACModel {
   }
 
   @JsonProperty("constellation")
-  public ArrayList<SNACModelField> getConstellationModelFields() {
+  public ArrayList<SNACModelField<ConstellationModelField>> getConstellationModelFields() {
     return _constellationModel.getFields();
   }
 
   @JsonProperty("resource")
-  public ArrayList<SNACModelField> getResourceModelFields() {
+  public ArrayList<SNACModelField<ResourceModelField>> getResourceModelFields() {
     return _resourceModel.getFields();
   }
 
   @JsonProperty("relation")
-  public ArrayList<SNACModelField> getRelationModelFields() {
+  public ArrayList<SNACModelField<RelationModelField>> getRelationModelFields() {
     return _relationModel.getFields();
   }
 }

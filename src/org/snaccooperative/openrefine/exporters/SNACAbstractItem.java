@@ -1,19 +1,9 @@
 package org.snaccooperative.openrefine.exporters;
 
-import com.google.refine.model.Project;
-import com.google.refine.model.Record;
 import java.util.List;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
-import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
-import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public abstract class SNACAbstractItem {
-
-  private Project _project;
-  private Record _record;
-  private SNACSchema _schema;
-
-  private ModelType _modelType;
 
   public abstract String getPreviewText();
 

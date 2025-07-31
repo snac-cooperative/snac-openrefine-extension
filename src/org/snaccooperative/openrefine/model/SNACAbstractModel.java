@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
@@ -44,8 +43,8 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
   }
 
   private ModelType _type;
-  private ArrayList<SNACModelField> _fieldList;
-  private HashMap<E, SNACModelField> _fieldMap;
+  private ArrayList<SNACModelField<E>> _fieldList;
+  private HashMap<E, SNACModelField<E>> _fieldMap;
   private E _defaultFieldType;
 
   static final Logger logger = LoggerFactory.getLogger("SNACAbstractModel");
@@ -54,8 +53,8 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     this._type = type;
     this._defaultFieldType = defaultFieldType;
 
-    this._fieldList = new ArrayList<SNACModelField>();
-    this._fieldMap = new HashMap<E, SNACModelField>();
+    this._fieldList = new ArrayList<SNACModelField<E>>();
+    this._fieldMap = new HashMap<E, SNACModelField<E>>();
   }
 
   protected void addField(SNACModelField<E> field) {
@@ -67,7 +66,7 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     return _type;
   }
 
-  public ArrayList<SNACModelField> getFields() {
+  public ArrayList<SNACModelField<E>> getFields() {
     return _fieldList;
   }
 
@@ -85,8 +84,8 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     return _defaultFieldType;
   }
 
-  public SNACModelField getModelField(E fieldType) {
-    SNACModelField modelField = _fieldMap.get(fieldType);
+  public SNACModelField<E> getModelField(E fieldType) {
+    SNACModelField<E> modelField = _fieldMap.get(fieldType);
 
     if (modelField == null) {
       return null;
@@ -95,12 +94,12 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     return modelField;
   }
 
-  public SNACModelField getModelField(String s) {
+  public SNACModelField<E> getModelField(String s) {
     return getModelField(getFieldType(s));
   }
 
   public String getFieldName(E fieldType) {
-    SNACModelField modelField = _fieldMap.get(fieldType);
+    SNACModelField<E> modelField = _fieldMap.get(fieldType);
 
     if (modelField == null) {
       return null;
@@ -110,7 +109,7 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
   }
 
   public Boolean isNameForFieldType(E fieldType, String s) {
-    SNACModelField modelField = _fieldMap.get(fieldType);
+    SNACModelField<E> modelField = _fieldMap.get(fieldType);
 
     if (modelField == null) {
       return null;
@@ -166,8 +165,7 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
 
     for (int i = 0; i < getModelField(fieldType).getRequiredDependenciesFieldTypes().size(); i++) {
 
-      @SuppressWarnings("unchecked")
-      E requiredField = (E) getModelField(fieldType).getRequiredDependenciesFieldTypes().get(i);
+      E requiredField = getModelField(fieldType).getRequiredDependenciesFieldTypes().get(i);
 
       String requiredColumn = getEntryForFieldType(requiredField, schema.getColumnMappings());
 
@@ -202,8 +200,7 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
 
     for (int i = 0; i < getModelField(fieldType).getRequiredDependentsFieldTypes().size(); i++) {
 
-      @SuppressWarnings("unchecked")
-      E requiredField = (E) getModelField(fieldType).getRequiredDependentsFieldTypes().get(i);
+      E requiredField = getModelField(fieldType).getRequiredDependentsFieldTypes().get(i);
 
       String requiredColumn = getEntryForFieldType(requiredField, schema.getColumnMappings());
 

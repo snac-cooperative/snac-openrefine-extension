@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
-import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
