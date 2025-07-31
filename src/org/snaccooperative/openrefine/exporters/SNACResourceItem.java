@@ -18,6 +18,7 @@ import org.snaccooperative.data.Term;
 import org.snaccooperative.openrefine.api.SNACAPIClient;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
+import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACResourceModel;
 import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
@@ -94,19 +95,24 @@ public class SNACResourceItem extends SNACAbstractItem {
         }
 
         switch (resourceField) {
+
           case RESOURCE_ID:
+            // FIXME: does not enforce one value per record
+
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
               res.setOperation("update");
             } catch (NumberFormatException e) {
-              // If no numeric ID, leave operation as "insert"
               _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
             }
+
             continue;
 
           case RESOURCE_TYPE:
-            Term typeTerm = _cache.getDocumentTypeTerm(cellValue);
+            // FIXME: does not enforce one value per record
+
+            Term typeTerm = _cache.getTerm(TermType.DOCUMENT_TYPE, cellValue);
 
             if (typeTerm == null) {
               logger.warn("skipping unknown resource type [" + cellValue + "]");
@@ -119,30 +125,45 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case TITLE:
+            // FIXME: does not enforce one value per record
+
             res.setTitle(cellValue);
+
             continue;
 
           case RESOURCE_URL:
+            // FIXME: does not enforce one value per record
+
             res.setLink(cellValue);
+
             continue;
 
           case ABSTRACT:
+            // FIXME: does not enforce one value per record
+
             res.setAbstract(cellValue);
+
             continue;
 
           case EXTENT:
+            // FIXME: does not enforce one value per record
+
             res.setExtent(cellValue);
+
             continue;
 
           case DATE:
+            // FIXME: does not enforce one value per record
+
             res.setDate(cellValue);
+
             continue;
 
           case LANGUAGE_CODE: // queried alongside SCRIPT_CODE
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
-            Term languageCodeTerm = _cache.getLanguageCodeTerm(cellValue);
+            Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
 
             if (languageCodeTerm == null) {
               logger.warn("skipping unknown language code [" + cellValue + "]");
@@ -155,7 +176,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             lang.setOperation("insert");
             lang.setLanguage(languageCodeTerm);
 
-            // find and add optional associated script code in this row
+            // find and add optional 'script code' in this row
             String scriptCodeColumn =
                 _resourceModel.getEntryForFieldType(
                     ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
@@ -164,7 +185,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               String scriptCode = schemaUtils.getCellValueForRowByColumnName(row, scriptCodeColumn);
 
               if (!scriptCode.equals("")) {
-                Term scriptCodeTerm = _cache.getScriptCodeTerm(scriptCode);
+                Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, scriptCode);
                 if (scriptCodeTerm != null) {
                   // add script code portion
                   lang.setScript(scriptCodeTerm);
@@ -217,7 +238,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               // logger.info("no associated language code column found; proceeding");
             }
 
-            Term scriptCodeTerm = _cache.getScriptCodeTerm(cellValue);
+            Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
 
             if (scriptCodeTerm == null) {
               logger.warn("skipping unknown script code [" + cellValue + "]");
@@ -235,6 +256,8 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case HOLDING_REPOSITORY_ID:
+            // FIXME: does not enforce one value per record
+
             try {
               int id = Integer.parseInt(cellValue);
 
@@ -248,9 +271,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             } catch (NumberFormatException e) {
               _validationErrors.add("Invalid " + resourceField.getName() + ": [" + cellValue + "]");
             }
-            continue;
 
-          default:
             continue;
         }
       }

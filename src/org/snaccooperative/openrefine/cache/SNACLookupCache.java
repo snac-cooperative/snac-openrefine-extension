@@ -1,4 +1,5 @@
 package org.snaccooperative.openrefine.cache;
+import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -13,6 +14,43 @@ import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
 public class SNACLookupCache {
 
+  public enum TermType {
+    NONE,
+    ACTIVITY("activity", "Activity"),
+    DATE_TYPE("date_type", "Date Type"),
+    DOCUMENT_ROLE("document_role", "Document Role"),
+    DOCUMENT_TYPE("document_type", "Document Type"),
+    ENTITY_TYPE("entity_type", "Entity Type"),
+    LANGUAGE_CODE("language_code", "Language Code"),
+    OCCUPATION("occupation", "Occupation"),
+    PLACE_ROLE("place_role", "Place Role"),
+    PLACE_TYPE("place_type", "Place Type"),
+    RECORD_TYPE("record_type", "Record Type"),
+    RELATION_TYPE("relation_type", "Relation Type"),
+    SCRIPT_CODE("script_code", "Script Code"),
+    SUBJECT("subject", "Subject");
+
+    private final String _type;
+    private final String _name;
+
+    TermType() {
+      this("", "");
+    }
+
+    TermType(String type, String name) {
+      this._type = type;
+      this._name = name;
+    }
+
+    public String getType() {
+      return _type;
+    }
+
+    public String getName() {
+      return _name;
+    }
+  }
+
   static final Logger logger = LoggerFactory.getLogger("SNACLookupCache");
 
   private SNACAPIClient _client;
@@ -20,20 +58,7 @@ public class SNACLookupCache {
   private HashMap<String, Language> _languageCodes;
   private HashMap<Integer, Boolean> _constellationExists;
   private HashMap<Integer, Boolean> _resourceExists;
-
-  private SNACTermCache _subjectTerms;
-  private SNACTermCache _activityTerms;
-  private SNACTermCache _occupationTerms;
-  private SNACTermCache _entityTypeTerms;
-  private SNACTermCache _dateTypeTerms;
-  private SNACTermCache _placeRoleTerms;
-  private SNACTermCache _documentRoleTerms;
-  private SNACTermCache _relationTypeTerms;
-  private SNACTermCache _languageCodeTerms;
-  private SNACTermCache _scriptCodeTerms;
-  private SNACTermCache _documentTypeTerms;
-  private SNACTermCache _recordTypeTerms;
-  private SNACTermCache _placeTypeTerms;
+  private HashMap<TermType, SNACTermCache> _termCaches;
 
   public SNACLookupCache(SNACAPIClient client) {
     this._client = client;
@@ -42,20 +67,26 @@ public class SNACLookupCache {
     this._languageCodes = new HashMap<String, Language>();
     this._constellationExists = new HashMap<Integer, Boolean>();
     this._resourceExists = new HashMap<Integer, Boolean>();
+    this._termCaches = new HashMap<TermType, SNACTermCache>();
 
-    this._subjectTerms = new SNACTermCache("subject");
-    this._activityTerms = new SNACTermCache("activity");
-    this._occupationTerms = new SNACTermCache("occupation");
-    this._entityTypeTerms = new SNACTermCache("entity_type");
-    this._dateTypeTerms = new SNACTermCache("date_type");
-    this._placeRoleTerms = new SNACTermCache("place_role");
-    this._documentRoleTerms = new SNACTermCache("document_role");
-    this._relationTypeTerms = new SNACTermCache("relation_type");
-    this._languageCodeTerms = new SNACTermCache("language_code");
-    this._scriptCodeTerms = new SNACTermCache("script_code");
-    this._documentTypeTerms = new SNACTermCache("document_type");
-    this._recordTypeTerms = new SNACTermCache("record_type");
-    this._placeTypeTerms = new SNACTermCache("place_type");
+    newTermCache(TermType.ACTIVITY);
+    newTermCache(TermType.DATE_TYPE);
+    newTermCache(TermType.DOCUMENT_ROLE);
+    newTermCache(TermType.DOCUMENT_TYPE);
+    newTermCache(TermType.ENTITY_TYPE);
+    newTermCache(TermType.LANGUAGE_CODE);
+    newTermCache(TermType.OCCUPATION);
+    newTermCache(TermType.PLACE_ROLE);
+    newTermCache(TermType.PLACE_TYPE);
+    newTermCache(TermType.RECORD_TYPE);
+    newTermCache(TermType.RELATION_TYPE);
+    newTermCache(TermType.SCRIPT_CODE);
+    newTermCache(TermType.SUBJECT);
+  }
+
+  private void newTermCache(TermType term) {
+    SNACTermCache termCache = new SNACTermCache(term.getType());
+    _termCaches.put(term, termCache);
   }
 
   public void disableTermCache() {
@@ -66,56 +97,8 @@ public class SNACLookupCache {
     _termClient = _client;
   }
 
-  public Term getSubjectTerm(String key) {
-    return _subjectTerms.getTerm(_termClient, key);
-  }
-
-  public Term getActivityTerm(String key) {
-    return _activityTerms.getTerm(_termClient, key);
-  }
-
-  public Term getOccupationTerm(String key) {
-    return _occupationTerms.getTerm(_termClient, key);
-  }
-
-  public Term getEntityTypeTerm(String key) {
-    return _entityTypeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getDateTypeTerm(String key) {
-    return _dateTypeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getPlaceRoleTerm(String key) {
-    return _placeRoleTerms.getTerm(_termClient, key);
-  }
-
-  public Term getDocumentRoleTerm(String key) {
-    return _documentRoleTerms.getTerm(_termClient, key);
-  }
-
-  public Term getRelationTypeTerm(String key) {
-    return _relationTypeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getLanguageCodeTerm(String key) {
-    return _languageCodeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getScriptCodeTerm(String key) {
-    return _scriptCodeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getDocumentTypeTerm(String key) {
-    return _documentTypeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getRecordTypeTerm(String key) {
-    return _recordTypeTerms.getTerm(_termClient, key);
-  }
-
-  public Term getPlaceTypeTerm(String key) {
-    return _placeTypeTerms.getTerm(_termClient, key);
+  public Term getTerm(TermType term, String key) {
+    return _termCaches.get(term).getTerm(_termClient, key);
   }
 
   private Boolean lookupConstellation(Integer id) {

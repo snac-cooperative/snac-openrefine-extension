@@ -17,15 +17,15 @@ public abstract class SNACAbstractItem {
 
   // preview text helpers
 
-  public String htmlTable(String s) {
+  protected String htmlTable(String s) {
     return "<table><tbody>" + s + "</tbody></table>";
   }
 
-  public String htmlTableRow(String s) {
+  protected String htmlTableRow(String s) {
     return "<tr class=\"snac-schema-preview-row\">" + s + "</tr>";
   }
 
-  public String htmlTableColumn(String s, String attr) {
+  protected String htmlTableColumn(String s, String attr) {
     String html = "<td";
     if (attr != null) {
       html += " " + attr;
@@ -34,15 +34,15 @@ public abstract class SNACAbstractItem {
     return html;
   }
 
-  public String htmlTableColumnField(String s) {
+  protected String htmlTableColumnField(String s) {
     return htmlTableColumn(s, "class=\"snac-schema-preview-column-field\"");
   }
 
-  public String htmlTableColumnValue(String s) {
+  protected String htmlTableColumnValue(String s) {
     return htmlTableColumn(s, "class=\"snac-schema-preview-column-value\"");
   }
 
-  public String htmlOrderedList(List<String> s) {
+  protected String htmlOrderedList(List<String> s) {
     if (s.size() == 0) {
       return "";
     }
@@ -54,7 +54,7 @@ public abstract class SNACAbstractItem {
     return html;
   }
 
-  public String htmlLink(String url, String title) {
+  protected String htmlLink(String url, String title) {
     return "<a href=\"" + url + "\" target=\"_blank\">" + title + "</a>";
   }
 }
