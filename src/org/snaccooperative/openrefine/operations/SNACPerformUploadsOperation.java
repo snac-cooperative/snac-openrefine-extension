@@ -24,9 +24,9 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
-  protected SNACPreferencesManager _prefsManager;
+  static final Logger logger = LoggerFactory.getLogger(SNACPerformUploadsOperation.class);
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsOperation");
+  protected SNACPreferencesManager _prefsManager;
 
   @JsonCreator
   public SNACPerformUploadsOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
@@ -48,7 +48,7 @@ public class SNACPerformUploadsOperation extends EngineDependentOperation {
 
   public class SNACPerformUploadsProcess extends LongRunningProcess implements Runnable {
 
-    final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsProcess");
+    final Logger logger = LoggerFactory.getLogger(SNACPerformUploadsProcess.class);
 
     private Project _project;
     private Engine _engine;

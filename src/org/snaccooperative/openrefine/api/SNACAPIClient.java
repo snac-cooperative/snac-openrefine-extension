@@ -15,7 +15,7 @@ import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 
 public class SNACAPIClient {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACAPIClient");
+  static final Logger logger = LoggerFactory.getLogger(SNACAPIClient.class);
 
   private SNACEnvironment _env;
 

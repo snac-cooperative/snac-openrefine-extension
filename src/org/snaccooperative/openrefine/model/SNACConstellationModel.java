@@ -50,7 +50,7 @@ public class SNACConstellationModel
     }
   }
 
-  static final Logger logger = LoggerFactory.getLogger("SNACConstellationModel");
+  static final Logger logger = LoggerFactory.getLogger(SNACConstellationModel.class);
 
   public SNACConstellationModel() {
     super(ModelType.CONSTELLATION, ConstellationModelField.NONE);

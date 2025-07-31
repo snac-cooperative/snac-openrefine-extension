@@ -41,7 +41,7 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACSaveSchemaOperation extends AbstractOperation {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACSaveSchemaOperation");
+  static final Logger logger = LoggerFactory.getLogger(SNACSaveSchemaOperation.class);
 
   @JsonProperty("schema")
   private final SNACSchema _schema;

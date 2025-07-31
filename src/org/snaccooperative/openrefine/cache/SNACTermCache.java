@@ -12,7 +12,7 @@ import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
 public class SNACTermCache {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACTermCache");
+  static final Logger logger = LoggerFactory.getLogger(SNACTermCache.class);
 
   private String _type;
 

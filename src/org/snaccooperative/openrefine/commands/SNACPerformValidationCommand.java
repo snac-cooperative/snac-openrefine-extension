@@ -11,7 +11,7 @@ import org.snaccooperative.openrefine.operations.SNACPerformValidationOperation;
 
 public class SNACPerformValidationCommand extends EngineDependentCommand {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACPerformValidationCommand.class);
 
   @Override
   protected AbstractOperation createOperation(

@@ -12,11 +12,11 @@ import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField
 @JsonPropertyOrder({"resource", "constellation", "relation"})
 public class SNACModel {
 
+  static final Logger logger = LoggerFactory.getLogger(SNACModel.class);
+
   private SNACConstellationModel _constellationModel;
   private SNACResourceModel _resourceModel;
   private SNACRelationModel _relationModel;
-
-  static final Logger logger = LoggerFactory.getLogger("SNACModel");
 
   public SNACModel() {
     _constellationModel = new SNACConstellationModel();

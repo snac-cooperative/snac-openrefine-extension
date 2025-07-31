@@ -42,7 +42,7 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACExportJSONCommand extends Command {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACExportJSONCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACExportJSONCommand.class);
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)

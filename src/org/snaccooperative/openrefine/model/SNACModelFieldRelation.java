@@ -29,10 +29,10 @@ public class SNACModelFieldRelation<E extends Enum<E> & SNACModelFieldType> {
     }
   }
 
+  static final Logger logger = LoggerFactory.getLogger(SNACModelFieldRelation.class);
+
   private E _fieldType;
   private FieldRelationType _relationType;
-
-  static final Logger logger = LoggerFactory.getLogger("SNACModelFieldRelation");
 
   public SNACModelFieldRelation(E fieldType, FieldRelationType relationType) {
     _fieldType = fieldType;

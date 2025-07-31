@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class SNACPreferencesManager {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPreferencesManager");
+  static final Logger logger = LoggerFactory.getLogger(SNACPreferencesManager.class);
 
   // deprecated; existing value will be migrated on load of new preference keys
   private static final String LEGACY_PREF_STORE_KEY = "snac_apikey";

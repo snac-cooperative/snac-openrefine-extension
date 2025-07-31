@@ -11,7 +11,7 @@ import org.snaccooperative.openrefine.model.SNACModel;
 
 public class SNACGetModelCommand extends Command {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACGetModelCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACGetModelCommand.class);
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)

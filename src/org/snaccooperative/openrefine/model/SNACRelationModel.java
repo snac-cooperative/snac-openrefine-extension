@@ -35,7 +35,7 @@ public class SNACRelationModel extends SNACAbstractModel<SNACRelationModel.Relat
     }
   }
 
-  static final Logger logger = LoggerFactory.getLogger("SNACRelationModel");
+  static final Logger logger = LoggerFactory.getLogger(SNACRelationModel.class);
 
   public SNACRelationModel() {
     super(ModelType.RELATION, RelationModelField.NONE);

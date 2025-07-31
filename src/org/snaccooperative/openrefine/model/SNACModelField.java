@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 })
 public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACModelField");
+  static final Logger logger = LoggerFactory.getLogger(SNACModelField.class);
 
   public enum FieldRequirement implements SNACModelFieldType {
     REQUIRED("Required"),

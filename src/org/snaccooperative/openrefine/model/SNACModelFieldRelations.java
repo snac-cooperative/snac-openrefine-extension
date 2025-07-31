@@ -8,9 +8,9 @@ import org.snaccooperative.openrefine.model.SNACModelFieldRelation.FieldRelation
 
 public class SNACModelFieldRelations<E extends Enum<E> & SNACModelFieldType> {
 
-  private List<SNACModelFieldRelation<E>> _relationList;
+  static final Logger logger = LoggerFactory.getLogger(SNACModelFieldRelations.class);
 
-  static final Logger logger = LoggerFactory.getLogger("SNACModelFieldRelations");
+  private List<SNACModelFieldRelation<E>> _relationList;
 
   SNACModelFieldRelations() {
     this(new ArrayList<SNACModelFieldRelation<E>>());

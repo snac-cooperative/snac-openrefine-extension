@@ -10,7 +10,7 @@ import org.snaccooperative.data.Resource;
 
 public class SNACAPIResponse {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACAPIResponse");
+  static final Logger logger = LoggerFactory.getLogger(SNACAPIResponse.class);
 
   private String _apiResponse;
   private String _result;

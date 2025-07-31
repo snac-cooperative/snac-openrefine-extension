@@ -40,7 +40,7 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACSaveSchemaCommand extends Command {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACSaveSchemaCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACSaveSchemaCommand.class);
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)

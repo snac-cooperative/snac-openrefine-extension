@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 public class SNACValidationErrors {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACValidationErrors");
+  static final Logger logger = LoggerFactory.getLogger(SNACValidationErrors.class);
 
   private List<String> _validationErrors;
 

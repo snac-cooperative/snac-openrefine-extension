@@ -11,7 +11,7 @@ import org.snaccooperative.openrefine.operations.SNACPerformUploadsOperation;
 
 public class SNACPerformUploadsCommand extends EngineDependentCommand {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformUploadsCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACPerformUploadsCommand.class);
 
   @Override
   protected AbstractOperation createOperation(

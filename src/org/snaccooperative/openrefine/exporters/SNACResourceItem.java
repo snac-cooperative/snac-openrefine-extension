@@ -26,7 +26,7 @@ import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACResourceItem extends SNACAbstractItem {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACResourceItem");
+  static final Logger logger = LoggerFactory.getLogger(SNACResourceItem.class);
 
   private Project _project;
   private Record _record;

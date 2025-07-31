@@ -39,7 +39,7 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
     }
   }
 
-  static final Logger logger = LoggerFactory.getLogger("SNACResourceModel");
+  static final Logger logger = LoggerFactory.getLogger(SNACResourceModel.class);
 
   public SNACResourceModel() {
     super(ModelType.RESOURCE, ResourceModelField.NONE);

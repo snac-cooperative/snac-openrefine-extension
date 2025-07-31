@@ -43,12 +43,12 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     }
   }
 
+  static final Logger logger = LoggerFactory.getLogger(SNACAbstractModel.class);
+
   private ModelType _type;
   private List<SNACModelField<E>> _fieldList;
   private HashMap<E, SNACModelField<E>> _fieldMap;
   private E _defaultFieldType;
-
-  static final Logger logger = LoggerFactory.getLogger("SNACAbstractModel");
 
   public SNACAbstractModel(ModelType type, E defaultFieldType) {
     this._type = type;

@@ -1,9 +1,13 @@
 package org.snaccooperative.openrefine.exporters;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 
 public abstract class SNACAbstractItem {
+
+  static final Logger logger = LoggerFactory.getLogger(SNACAbstractItem.class);
 
   public abstract String getPreviewText();
 

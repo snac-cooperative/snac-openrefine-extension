@@ -43,7 +43,7 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPreviewSchemaCommand extends Command {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPreviewSchemaCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACPreviewSchemaCommand.class);
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)

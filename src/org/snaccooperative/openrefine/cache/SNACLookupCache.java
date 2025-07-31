@@ -50,7 +50,7 @@ public class SNACLookupCache {
     }
   }
 
-  static final Logger logger = LoggerFactory.getLogger("SNACLookupCache");
+  static final Logger logger = LoggerFactory.getLogger(SNACLookupCache.class);
 
   private SNACAPIClient _client;
   private SNACAPIClient _termClient;

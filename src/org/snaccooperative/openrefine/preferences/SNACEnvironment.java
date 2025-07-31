@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class SNACEnvironment {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACEnvironment");
+  static final Logger logger = LoggerFactory.getLogger(SNACEnvironment.class);
 
   private String _id;
   private String _name;

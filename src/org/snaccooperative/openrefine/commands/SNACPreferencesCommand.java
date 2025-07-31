@@ -14,7 +14,7 @@ import org.snaccooperative.openrefine.preferences.SNACPreferencesManager;
 
 public class SNACPreferencesCommand extends Command {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPreferencesCommand");
+  static final Logger logger = LoggerFactory.getLogger(SNACPreferencesCommand.class);
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)

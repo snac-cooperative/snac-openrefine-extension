@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 public class SNACSchemaUtilities {
 
+  static final Logger logger = LoggerFactory.getLogger(SNACSchemaUtilities.class);
+
   private Project _project;
   private SNACSchema _schema;
-
-  static final Logger logger = LoggerFactory.getLogger("SNACSchemaUtilities");
 
   public SNACSchemaUtilities(Project project, SNACSchema schema) {
     this._project = project;

@@ -40,7 +40,7 @@ import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACConstellationItem extends SNACAbstractItem {
 
-  static final Logger logger = LoggerFactory.getLogger("SNACConstellationItem");
+  static final Logger logger = LoggerFactory.getLogger(SNACConstellationItem.class);
 
   private Project _project;
   private Record _record;

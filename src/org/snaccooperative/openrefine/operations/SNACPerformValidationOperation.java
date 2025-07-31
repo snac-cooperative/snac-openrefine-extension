@@ -24,9 +24,9 @@ import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACPerformValidationOperation extends EngineDependentOperation {
 
-  protected SNACPreferencesManager _prefsManager;
+  static final Logger logger = LoggerFactory.getLogger(SNACPerformValidationOperation.class);
 
-  static final Logger logger = LoggerFactory.getLogger("SNACPerformValidationOperation");
+  protected SNACPreferencesManager _prefsManager;
 
   @JsonCreator
   public SNACPerformValidationOperation(@JsonProperty("engineConfig") EngineConfig engineConfig) {
@@ -48,7 +48,7 @@ public class SNACPerformValidationOperation extends EngineDependentOperation {
 
   public class SNACPerformValidationProcess extends LongRunningProcess implements Runnable {
 
-    final Logger logger = LoggerFactory.getLogger("SNACPerformValidationProcess");
+    final Logger logger = LoggerFactory.getLogger(SNACPerformValidationProcess.class);
 
     private Project _project;
     private Engine _engine;
