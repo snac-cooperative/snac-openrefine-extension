@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,8 +88,8 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
   private final FieldRequirement _requirement;
   private final FieldOccurence _occurence;
   private final FieldVocabulary _vocabulary;
-  private final ArrayList<String> _previousNames;
-  private final ArrayList<String> _sampleValues;
+  private final List<String> _previousNames;
+  private final List<String> _sampleValues;
   private final String _defaultValue;
   private final String _tooltip;
   private final SNACModelFieldRelations<E> _dependencies;
@@ -115,8 +116,8 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     private final FieldVocabulary _vocabulary;
     private final String _tooltip;
     // optional fields
-    private ArrayList<String> _previousNames = new ArrayList<String>();
-    private ArrayList<String> _sampleValues = new ArrayList<String>();
+    private List<String> _previousNames = new ArrayList<String>();
+    private List<String> _sampleValues = new ArrayList<String>();
     private String _defaultValue = "";
     private SNACModelFieldRelations<E> _dependencies = new SNACModelFieldRelations<E>();
     private SNACModelFieldRelations<E> _dependents = new SNACModelFieldRelations<E>();
@@ -139,14 +140,14 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
       }
     }
 
-    public Builder<E> withPreviousNames(ArrayList<String> previousNames) {
+    public Builder<E> withPreviousNames(List<String> previousNames) {
       if (previousNames != null) {
         this._previousNames = previousNames;
       }
       return this;
     }
 
-    public Builder<E> withSampleValues(ArrayList<String> sampleValues) {
+    public Builder<E> withSampleValues(List<String> sampleValues) {
       if (sampleValues != null) {
         this._sampleValues = sampleValues;
       }
@@ -215,37 +216,37 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
   }
 
   @JsonProperty("dependencies")
-  public ArrayList<SNACModelFieldRelation<E>> getDependencies() {
+  public List<SNACModelFieldRelation<E>> getDependencies() {
     return _dependencies.getRelations();
   }
 
   @JsonIgnore
-  public ArrayList<SNACModelFieldRelation<E>> getRequiredDependencies() {
+  public List<SNACModelFieldRelation<E>> getRequiredDependencies() {
     return _dependencies.getRequiredRelations();
   }
 
   @JsonIgnore
-  public ArrayList<E> getRequiredDependenciesFieldTypes() {
+  public List<E> getRequiredDependenciesFieldTypes() {
     return _dependencies.getRequiredRelationFieldTypes();
   }
 
   @JsonProperty("dependents")
-  public ArrayList<SNACModelFieldRelation<E>> getDependents() {
+  public List<SNACModelFieldRelation<E>> getDependents() {
     return _dependents.getRelations();
   }
 
   @JsonIgnore
-  public ArrayList<SNACModelFieldRelation<E>> getRequiredDependents() {
+  public List<SNACModelFieldRelation<E>> getRequiredDependents() {
     return _dependents.getRequiredRelations();
   }
 
   @JsonIgnore
-  public ArrayList<E> getRequiredDependentsFieldTypes() {
+  public List<E> getRequiredDependentsFieldTypes() {
     return _dependents.getRequiredRelationFieldTypes();
   }
 
   @JsonProperty("sample_values")
-  public ArrayList<String> getSampleValues() {
+  public List<String> getSampleValues() {
     return _sampleValues;
   }
 

@@ -1,13 +1,14 @@
 package org.snaccooperative.openrefine.model;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.model.SNACModelFieldRelation.FieldRelationType;
 
 public class SNACModelFieldRelations<E extends Enum<E> & SNACModelFieldType> {
 
-  private ArrayList<SNACModelFieldRelation<E>> _relationList;
+  private List<SNACModelFieldRelation<E>> _relationList;
 
   static final Logger logger = LoggerFactory.getLogger("SNACModelFieldRelations");
 
@@ -15,17 +16,16 @@ public class SNACModelFieldRelations<E extends Enum<E> & SNACModelFieldType> {
     this(new ArrayList<SNACModelFieldRelation<E>>());
   }
 
-  SNACModelFieldRelations(ArrayList<SNACModelFieldRelation<E>> relationList) {
+  SNACModelFieldRelations(List<SNACModelFieldRelation<E>> relationList) {
     _relationList = relationList;
   }
 
-  public ArrayList<SNACModelFieldRelation<E>> getRelations() {
+  public List<SNACModelFieldRelation<E>> getRelations() {
     return _relationList;
   }
 
-  public ArrayList<SNACModelFieldRelation<E>> getRequiredRelations() {
-    ArrayList<SNACModelFieldRelation<E>> requiredRelations =
-        new ArrayList<SNACModelFieldRelation<E>>();
+  public List<SNACModelFieldRelation<E>> getRequiredRelations() {
+    List<SNACModelFieldRelation<E>> requiredRelations = new ArrayList<SNACModelFieldRelation<E>>();
 
     for (int i = 0; i < _relationList.size(); i++) {
       SNACModelFieldRelation<E> relation = _relationList.get(i);
@@ -37,9 +37,9 @@ public class SNACModelFieldRelations<E extends Enum<E> & SNACModelFieldType> {
     return requiredRelations;
   }
 
-  public ArrayList<E> getRequiredRelationFieldTypes() {
-    ArrayList<SNACModelFieldRelation<E>> requiredRelations = getRequiredRelations();
-    ArrayList<E> requiredFieldTypes = new ArrayList<E>();
+  public List<E> getRequiredRelationFieldTypes() {
+    List<SNACModelFieldRelation<E>> requiredRelations = getRequiredRelations();
+    List<E> requiredFieldTypes = new ArrayList<E>();
 
     for (int i = 0; i < requiredRelations.size(); i++) {
       requiredFieldTypes.add(requiredRelations.get(i).getFieldType());

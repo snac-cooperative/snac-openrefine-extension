@@ -2,7 +2,7 @@ package org.snaccooperative.openrefine.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
@@ -25,17 +25,17 @@ public class SNACModel {
   }
 
   @JsonProperty("constellation")
-  public ArrayList<SNACModelField<ConstellationModelField>> getConstellationModelFields() {
+  public List<SNACModelField<ConstellationModelField>> getConstellationModelFields() {
     return _constellationModel.getFields();
   }
 
   @JsonProperty("resource")
-  public ArrayList<SNACModelField<ResourceModelField>> getResourceModelFields() {
+  public List<SNACModelField<ResourceModelField>> getResourceModelFields() {
     return _resourceModel.getFields();
   }
 
   @JsonProperty("relation")
-  public ArrayList<SNACModelField<RelationModelField>> getRelationModelFields() {
+  public List<SNACModelField<RelationModelField>> getRelationModelFields() {
     return _relationModel.getFields();
   }
 }
