@@ -68,9 +68,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ConstellationModelField> constellationValidator =
-        new SNACFieldValidator<ConstellationModelField>(_errors);
+        new SNACFieldValidator<ConstellationModelField>(_schema, _errors);
     SNACFieldValidator<RelationModelField> relationValidator =
-        new SNACFieldValidator<RelationModelField>(_errors);
+        new SNACFieldValidator<RelationModelField>(_schema, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);

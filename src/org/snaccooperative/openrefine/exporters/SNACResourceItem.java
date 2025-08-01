@@ -52,7 +52,7 @@ public class SNACResourceItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ResourceModelField> resourceValidator =
-        new SNACFieldValidator<ResourceModelField>(_errors);
+        new SNACFieldValidator<ResourceModelField>(_schema, _errors);
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);

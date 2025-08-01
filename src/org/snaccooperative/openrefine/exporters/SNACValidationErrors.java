@@ -205,4 +205,19 @@ public class SNACValidationErrors {
   public void addMissingHoldingRepositoryError(int id) {
     addMissingIDError("Holding Repository", id);
   }
+
+  // field validation errors
+
+  public void addOccurenceLimitError(String fieldName, String fieldColumn) {
+    String err;
+
+    err = "Field \"" + fieldName + "\"";
+    if (fieldColumn != null && !fieldColumn.equals("")) {
+      err += " (column \"" + fieldColumn + "\")";
+    }
+
+    err += " can only appear once per record";
+
+    addError(err);
+  }
 }
