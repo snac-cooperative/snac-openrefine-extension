@@ -71,9 +71,9 @@ public class SNACAPIResponse {
           String errorMessage = ((JSONObject) error).optString("message", "");
           String errorFull = "";
 
-          if (errorType != "") {
+          if (!errorType.equals("")) {
             errorFull = errorType;
-            if (errorMessage != "") {
+            if (!errorMessage.equals("")) {
               errorFull += " - " + errorMessage;
             }
           } else {
