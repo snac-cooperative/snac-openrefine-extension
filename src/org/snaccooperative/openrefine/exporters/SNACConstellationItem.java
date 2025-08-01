@@ -75,20 +75,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
 
-    // things to accumulate
-    List<NameEntry> nameEntries = new LinkedList<NameEntry>();
-    List<SNACDate> dates = new LinkedList<SNACDate>();
-    List<Subject> subjects = new LinkedList<Subject>();
-    List<Place> places = new LinkedList<Place>();
-    List<Source> sources = new LinkedList<Source>();
-    List<Occupation> occupations = new LinkedList<Occupation>();
-    List<Activity> activities = new LinkedList<Activity>();
-    List<Language> languages = new LinkedList<Language>();
-    List<BiogHist> biogHists = new LinkedList<BiogHist>();
-    List<SameAs> sameAsRelations = new LinkedList<SameAs>();
-    List<ResourceRelation> resourceRelations = new LinkedList<ResourceRelation>();
-    List<ConstellationRelation> cpfRelations = new LinkedList<ConstellationRelation>();
-
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
@@ -154,7 +140,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 preferredName.setPreferenceScore(99);
                 preferredName.setOperation(AbstractData.OPERATION_INSERT);
 
-                nameEntries.add(preferredName);
+                con.addNameEntry(preferredName);
 
                 continue;
 
@@ -165,7 +151,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 variantName.setPreferenceScore(0);
                 variantName.setOperation(AbstractData.OPERATION_INSERT);
 
-                nameEntries.add(variantName);
+                con.addNameEntry(variantName);
 
                 continue;
 
@@ -208,7 +194,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 date.setNote(dateNote);
                 date.setOperation(AbstractData.OPERATION_INSERT);
 
-                dates.add(date);
+                con.addDate(date);
 
                 continue;
 
@@ -231,7 +217,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 subject.setTerm(subjectTerm);
                 subject.setOperation(AbstractData.OPERATION_INSERT);
 
-                subjects.add(subject);
+                con.addSubject(subject);
 
                 continue;
 
@@ -291,7 +277,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   }
                 }
 
-                places.add(place);
+                con.addPlace(place);
 
                 continue;
 
@@ -329,7 +315,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 }
 
                 source.setOperation(AbstractData.OPERATION_INSERT);
-                sources.add(source);
+                con.addSource(source);
 
                 continue;
 
@@ -352,7 +338,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 occupation.setTerm(occupationTerm);
                 occupation.setOperation(AbstractData.OPERATION_INSERT);
 
-                occupations.add(occupation);
+                con.addOccupation(occupation);
 
                 continue;
 
@@ -369,7 +355,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 activity.setTerm(activityTerm);
                 activity.setOperation(AbstractData.OPERATION_INSERT);
 
-                activities.add(activity);
+                con.addActivity(activity);
 
                 continue;
 
@@ -420,7 +406,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   // logger.info("no associated script code column found; skipping");
                 }
 
-                languages.add(lang);
+                con.addLanguageUsed(lang);
 
                 continue;
 
@@ -461,7 +447,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 script.setOperation(AbstractData.OPERATION_INSERT);
                 script.setScript(scriptCodeTerm);
 
-                languages.add(script);
+                con.addLanguageUsed(script);
 
                 continue;
 
@@ -470,7 +456,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 biogHist.setText(cellValue);
                 biogHist.setOperation(AbstractData.OPERATION_INSERT);
 
-                biogHists.add(biogHist);
+                con.addBiogHist(biogHist);
 
                 continue;
 
@@ -497,7 +483,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 sameAs.setType(sameAsTerm);
                 sameAs.setOperation(AbstractData.OPERATION_INSERT);
 
-                sameAsRelations.add(sameAs);
+                con.addSameAsRelation(sameAs);
 
                 continue;
             }
@@ -580,7 +566,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                     continue;
                   }
 
-                  resourceRelations.add(resourceRelation);
+                  con.addResourceRelation(resourceRelation);
                   _relatedIDs.get(ModelType.RESOURCE).add(targetResource);
                 } catch (NumberFormatException e) {
                   _errors.addInvalidNumericFieldError(
@@ -625,7 +611,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                     continue;
                   }
 
-                  cpfRelations.add(cpfRelation);
+                  con.addRelation(cpfRelation);
                   _relatedIDs.get(ModelType.CONSTELLATION).add(targetConstellation);
                 } catch (NumberFormatException e) {
                   _errors.addInvalidNumericFieldError(
@@ -644,15 +630,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
       }
     }
 
-    // adjust dates
-    List<SNACDate> dateList = new LinkedList<SNACDate>();
+    // if user provided two dates, convert it into a range (for reasons lost to time)
+    // TODO: add support for specifying date ranges instead?
 
-    switch (dates.size()) {
-      case 0:
-        break;
+    List<SNACDate> dates = con.getDateList();
 
-      case 2:
-        // create range from original dates
+    if (dates.size() == 2) {
         SNACDate from = dates.get(0);
         SNACDate to = dates.get(1);
 
@@ -663,27 +646,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
         range.setToDate(to.getFromDate(), from.getFromDate(), from.getFromType());
         range.setOperation(AbstractData.OPERATION_INSERT);
 
-        dateList.add(range);
-        break;
-
-      default:
-        // add as individual dates
-        dateList = dates;
+        con.setDateList(new LinkedList<SNACDate>());
+        con.addDate(range);
     }
-
-    // add accumulated things
-    con.setNameEntries(nameEntries);
-    con.setSubjects(subjects);
-    con.setPlaces(places);
-    con.setOccupations(occupations);
-    con.setActivities(activities);
-    con.setLanguagesUsed(languages);
-    con.setBiogHists(biogHists);
-    con.setSameAsRelations(sameAsRelations);
-    con.setResourceRelations(resourceRelations);
-    con.setRelations(cpfRelations);
-    con.setDateList(dateList);
-    con.setSources(sources);
 
     _constellation = con;
 

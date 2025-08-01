@@ -57,9 +57,6 @@ public class SNACResourceItem extends SNACAbstractItem {
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
 
-    // things to accumulate
-    List<Language> languages = new LinkedList<Language>();
-
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
@@ -184,7 +181,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               // logger.info("no associated script code column found; skipping");
             }
 
-            languages.add(lang);
+            res.addLanguage(lang);
 
             continue;
 
@@ -223,7 +220,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             script.setOperation(AbstractData.OPERATION_INSERT);
             script.setScript(scriptCodeTerm);
 
-            languages.add(script);
+            res.addLanguage(script);
 
             continue;
 
@@ -246,9 +243,6 @@ public class SNACResourceItem extends SNACAbstractItem {
         }
       }
     }
-
-    // add accumulated languages
-    res.setLanguages(languages);
 
     _resource = res;
 
