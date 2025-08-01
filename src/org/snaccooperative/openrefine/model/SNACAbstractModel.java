@@ -82,13 +82,7 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
   }
 
   public SNACModelField<E> getModelField(E fieldType) {
-    SNACModelField<E> modelField = _fieldMap.get(fieldType);
-
-    if (modelField == null) {
-      return null;
-    }
-
-    return modelField;
+    return _fieldMap.get(fieldType);
   }
 
   public SNACModelField<E> getModelField(String s) {

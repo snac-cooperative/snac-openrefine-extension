@@ -72,16 +72,10 @@ public class SNACResourceItem extends SNACAbstractItem {
           continue;
         }
 
-        // quick check: ensure current field can be populated (right now this just
-        // prevents single-occurence fields from being specified multiple times)
-        // NOTE: fields are counted even if they are invalid and would be skipped!
-        if (resourceValidator.hasReachedLimit(_resourceModel.getModelField(resourceField))) {
-          continue;
-        }
-        resourceValidator.addOccurence(_resourceModel.getModelField(resourceField));
-
-        // quick check: ensure all required dependency/dependent fields exist and are not empty
-        if (!resourceValidator.hasRequiredFieldsInRow(resourceField, cellValue, row)) {
+        // quick check: ensure current field meets occurence and dependency requirements
+        // NOTE: fields are checked and counted even if they are invalid and would be skipped!
+        if (!resourceValidator.checkAndCountField(
+            _resourceModel.getModelField(resourceField), cellValue, row)) {
           continue;
         }
 

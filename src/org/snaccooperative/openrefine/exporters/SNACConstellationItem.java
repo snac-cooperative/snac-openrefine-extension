@@ -94,19 +94,10 @@ public class SNACConstellationItem extends SNACAbstractItem {
             ConstellationModelField constellationField =
                 _constellationModel.getFieldType(snacField);
 
-            // quick check: ensure current field can be populated (right now this just
-            // prevents single-occurence fields from being specified multiple times)
-            // NOTE: fields are counted even if they are invalid and would be skipped!
-            if (constellationValidator.hasReachedLimit(
-                _constellationModel.getModelField(constellationField))) {
-              continue;
-            }
-            constellationValidator.addOccurence(
-                _constellationModel.getModelField(constellationField));
-
-            // quick check: ensure all required dependency/dependent fields exist and are not empty
-            if (!constellationValidator.hasRequiredFieldsInRow(
-                constellationField, cellValue, row)) {
+            // quick check: ensure current field meets occurence and dependency requirements
+            // NOTE: fields are checked and counted even if they are invalid and would be skipped!
+            if (!constellationValidator.checkAndCountField(
+                _constellationModel.getModelField(constellationField), cellValue, row)) {
               continue;
             }
 
@@ -494,16 +485,10 @@ public class SNACConstellationItem extends SNACAbstractItem {
           case RELATION:
             RelationModelField relationField = _relationModel.getFieldType(snacField);
 
-            // quick check: ensure current field can be populated (right now this just
-            // prevents single-occurence fields from being specified multiple times)
-            // NOTE: fields are counted even if they are invalid and would be skipped!
-            if (relationValidator.hasReachedLimit(_relationModel.getModelField(relationField))) {
-              continue;
-            }
-            relationValidator.addOccurence(_relationModel.getModelField(relationField));
-
-            // quick check: ensure all required dependency/dependent fields exist and are not empty
-            if (!relationValidator.hasRequiredFieldsInRow(relationField, cellValue, row)) {
+            // quick check: ensure current field meets occurence and dependency requirements
+            // NOTE: fields are checked and counted even if they are invalid and would be skipped!
+            if (!relationValidator.checkAndCountField(
+                _relationModel.getModelField(relationField), cellValue, row)) {
               continue;
             }
 
