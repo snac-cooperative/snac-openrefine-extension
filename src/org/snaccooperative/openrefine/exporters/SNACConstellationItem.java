@@ -636,17 +636,17 @@ public class SNACConstellationItem extends SNACAbstractItem {
     List<SNACDate> dates = con.getDateList();
 
     if (dates.size() == 2) {
-        SNACDate from = dates.get(0);
-        SNACDate to = dates.get(1);
+      SNACDate from = dates.get(0);
+      SNACDate to = dates.get(1);
 
-        SNACDate range = new SNACDate();
-        range.setRange(true);
-        range.setFromDate(from.getFromDate(), from.getFromDate(), from.getFromType());
-        range.setToDate(to.getFromDate(), to.getFromDate(), to.getFromType());
-        range.setOperation(AbstractData.OPERATION_INSERT);
+      SNACDate range = new SNACDate();
+      range.setRange(true);
+      range.setFromDate(from.getFromDate(), from.getFromDate(), from.getFromType());
+      range.setToDate(to.getFromDate(), to.getFromDate(), to.getFromType());
+      range.setOperation(AbstractData.OPERATION_INSERT);
 
-        con.setDateList(new LinkedList<SNACDate>());
-        con.addDate(range);
+      con.setDateList(new LinkedList<SNACDate>());
+      con.addDate(range);
     }
 
     _constellation = con;
