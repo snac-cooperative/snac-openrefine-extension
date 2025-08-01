@@ -29,9 +29,9 @@ public class SNACResourceItem extends SNACAbstractItem {
 
   static final Logger logger = LoggerFactory.getLogger(SNACResourceItem.class);
 
-  private Resource _resource;
+  private Resource _item;
 
-  private SNACResourceModel _resourceModel;
+  private SNACResourceModel _model;
 
   public SNACResourceItem(
       Project project,
@@ -41,18 +41,18 @@ public class SNACResourceItem extends SNACAbstractItem {
       Record record) {
     super(project, schema, client, cache, record);
 
-    this._resourceModel = new SNACResourceModel();
+    this._model = new SNACResourceModel();
 
     buildItemVerbatim();
   }
 
   protected void buildItem() {
-    this._resource = null;
+    this._item = null;
     this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
     this._errors = new SNACValidationErrors();
 
-    SNACFieldValidator<ResourceModelField> resourceValidator =
-        new SNACFieldValidator<ResourceModelField>(_resourceModel, _schema, _utils, _errors);
+    SNACFieldValidator<ResourceModelField> validator =
+        new SNACFieldValidator<ResourceModelField>(_model, _schema, _utils, _errors);
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
@@ -61,7 +61,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
 
-      ResourceModelField resourceField = _resourceModel.getFieldType(snacField);
+      ResourceModelField field = _model.getFieldType(snacField);
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -74,19 +74,18 @@ public class SNACResourceItem extends SNACAbstractItem {
 
         // quick check: ensure current field meets occurence and dependency requirements
         // NOTE: fields are checked and counted even if they are invalid and would be skipped!
-        if (!resourceValidator.checkAndCountField(
-            _resourceModel.getModelField(resourceField), cellValue, row)) {
+        if (!validator.checkAndCountField(_model.getModelField(field), cellValue, row)) {
           continue;
         }
 
-        switch (resourceField) {
+        switch (field) {
           case RESOURCE_ID:
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
               res.setOperation(AbstractData.OPERATION_UPDATE);
             } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
+              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
             }
 
             continue;
@@ -95,7 +94,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term typeTerm = _cache.getTerm(TermType.DOCUMENT_TYPE, cellValue);
 
             if (typeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
+              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -135,7 +134,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
 
             if (languageCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
+              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -146,7 +145,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // find and add optional 'script code' in this row
             String scriptCodeColumn =
-                _resourceModel.getEntryForFieldType(
+                _model.getEntryForFieldType(
                     ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
@@ -162,7 +161,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                       ResourceModelField.SCRIPT_CODE.getName(),
                       scriptCode,
                       scriptCodeColumn,
-                      resourceField.getName(),
+                      field.getName(),
                       cellValue,
                       csvColumn);
                   continue;
@@ -184,7 +183,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCodeColumn =
-                _resourceModel.getEntryForFieldType(
+                _model.getEntryForFieldType(
                     ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
 
             if (languageCodeColumn != null) {
@@ -204,7 +203,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
 
             if (scriptCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(resourceField.getName(), cellValue, csvColumn);
+              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -229,7 +228,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                 _relatedIDs.get(ModelType.CONSTELLATION).add(id);
               }
             } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
+              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
             }
 
             continue;
@@ -237,7 +236,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       }
     }
 
-    _resource = res;
+    _item = res;
 
     logger.debug("built resource: [" + toJSON() + "]");
   }
@@ -248,41 +247,41 @@ public class SNACResourceItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      ResourceModelField resourceField = _resourceModel.getFieldType(snacField);
+      ResourceModelField field = _model.getFieldType(snacField);
 
-      switch (resourceField) {
+      switch (field) {
         case RESOURCE_TYPE:
-          Term previewTerm = _resource.getDocumentType();
+          Term previewTerm = _item.getDocumentType();
           if (previewTerm != null) {
             outFields.put(snacField, previewTerm.getTerm());
           }
-          break;
+          continue;
 
         case TITLE:
-          outFields.put(snacField, _resource.getTitle());
-          break;
+          outFields.put(snacField, _item.getTitle());
+          continue;
 
         case RESOURCE_URL:
-          outFields.put(snacField, htmlLink(_resource.getLink(), _resource.getLink()));
-          break;
+          outFields.put(snacField, htmlLink(_item.getLink(), _item.getLink()));
+          continue;
 
         case ABSTRACT:
-          outFields.put(snacField, _resource.getAbstract());
-          break;
+          outFields.put(snacField, _item.getAbstract());
+          continue;
 
         case EXTENT:
-          outFields.put(snacField, _resource.getExtent());
-          break;
+          outFields.put(snacField, _item.getExtent());
+          continue;
 
         case DATE:
-          outFields.put(snacField, _resource.getDate());
-          break;
+          outFields.put(snacField, _item.getDate());
+          continue;
 
         case LANGUAGE_CODE:
           List<String> langList = new ArrayList<>();
 
-          for (int i = 0; i < _resource.getLanguages().size(); i++) {
-            Term lang = _resource.getLanguages().get(i).getLanguage();
+          for (int i = 0; i < _item.getLanguages().size(); i++) {
+            Term lang = _item.getLanguages().get(i).getLanguage();
 
             String langFull = "";
 
@@ -296,7 +295,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               }
             }
 
-            Term script = _resource.getLanguages().get(i).getScript();
+            Term script = _item.getLanguages().get(i).getScript();
 
             String scriptFull = "";
 
@@ -329,28 +328,27 @@ public class SNACResourceItem extends SNACAbstractItem {
             outFields.put(snacField, htmlOrderedList(langList));
           }
 
-          break;
+          continue;
 
         case HOLDING_REPOSITORY_ID:
           snacField = "Repository ID";
-          if (_resource.getRepository() != null) {
-            int repo_id = _resource.getRepository().getID();
+          if (_item.getRepository() != null) {
+            int repo_id = _item.getRepository().getID();
             if (repo_id != 0) {
               outFields.put(
                   snacField,
                   htmlLink(_client.urlForConstellationID(repo_id), Integer.toString(repo_id)));
             }
           }
+          continue;
       }
     }
 
-    if (_resource.getOperation().equals(AbstractData.OPERATION_UPDATE)) {
+    if (_item.getOperation().equals(AbstractData.OPERATION_UPDATE)) {
       outFields.put(
           "*** Operation ***",
           "Edit Resource with ID: "
-              + htmlLink(
-                  _client.urlForResourceID(_resource.getID()),
-                  Integer.toString(_resource.getID())));
+              + htmlLink(_client.urlForResourceID(_item.getID()), Integer.toString(_item.getID())));
     } else {
       outFields.put("*** Operation ***", "Insert new Resource");
     }
@@ -371,7 +369,7 @@ public class SNACResourceItem extends SNACAbstractItem {
   }
 
   public String toJSON() {
-    return Resource.toJSON(_resource);
+    return Resource.toJSON(_item);
   }
 
   public SNACAPIResponse performUpload() {

@@ -45,6 +45,7 @@ import org.snaccooperative.openrefine.api.SNACAPIClient;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.exporters.SNACAbstractItem;
 import org.snaccooperative.openrefine.exporters.SNACConstellationItem;
+import org.snaccooperative.openrefine.exporters.SNACRelationItem;
 import org.snaccooperative.openrefine.exporters.SNACResourceItem;
 import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 
@@ -160,7 +161,7 @@ public class SNACSchema implements OverlayModel {
           break;
 
         case RELATION:
-          item = new SNACConstellationItem(project, _schema, _client, _cache, record);
+          item = new SNACRelationItem(project, _schema, _client, _cache, record);
           break;
 
         case RESOURCE:
