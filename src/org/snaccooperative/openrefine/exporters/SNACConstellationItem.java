@@ -37,28 +37,15 @@ import org.snaccooperative.openrefine.model.SNACConstellationModel.Constellation
 import org.snaccooperative.openrefine.model.SNACRelationModel;
 import org.snaccooperative.openrefine.model.SNACRelationModel.RelationModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
-import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACConstellationItem extends SNACAbstractItem {
 
   static final Logger logger = LoggerFactory.getLogger(SNACConstellationItem.class);
 
-  private Project _project;
-  private Record _record;
-  private SNACSchema _schema;
-  private SNACAPIClient _client;
-  private SNACLookupCache _cache;
-  private int _rowIndex;
-
   private Constellation _constellation;
-  private List<Integer> _relatedConstellations;
-  private List<Integer> _relatedResources;
 
   private SNACConstellationModel _constellationModel;
   private SNACRelationModel _relationModel;
-  private ModelType _modelType;
-
-  private SNACValidationErrors _errors;
 
   public SNACConstellationItem(
       Project project,
@@ -66,36 +53,24 @@ public class SNACConstellationItem extends SNACAbstractItem {
       SNACAPIClient client,
       SNACLookupCache cache,
       Record record) {
-    this._project = project;
-    this._schema = schema;
-    this._client = client;
-    this._cache = cache;
-    this._record = record;
-
-    this._rowIndex = record.fromRowIndex;
+    super(project, schema, client, cache, record);
 
     this._constellationModel = new SNACConstellationModel();
     this._relationModel = new SNACRelationModel();
 
-    this._modelType = ModelType.fromString(_schema.getSchemaType());
-
-    buildConstellationVerbatim();
+    buildItemVerbatim();
   }
 
-  private void buildConstellation() {
-    _constellation = null;
-
-    _errors = new SNACValidationErrors();
-
-    SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
+  protected void buildItem() {
+    this._constellation = null;
+    this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
+    this._relatedIDs.put(ModelType.RESOURCE, new LinkedList<Integer>());
+    this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ConstellationModelField> constellationValidator =
         new SNACFieldValidator<ConstellationModelField>(_errors);
     SNACFieldValidator<RelationModelField> relationValidator =
         new SNACFieldValidator<RelationModelField>(_errors);
-
-    _relatedConstellations = new LinkedList<Integer>();
-    _relatedResources = new LinkedList<Integer>();
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -121,7 +96,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = schemaUtils.getCellValueForRowByColumnName(row, csvColumn);
+        String cellValue = _utils.getCellValueForRowByColumnName(row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -144,7 +119,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
             if (!_constellationModel.hasRequiredFieldsInRow(
-                constellationField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
+                constellationField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
               continue;
             }
 
@@ -201,7 +176,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                     _constellationModel.getEntryForFieldType(
                         ConstellationModelField.EXIST_DATE_TYPE, _schema.getColumnMappings());
 
-                String dateType = schemaUtils.getCellValueForRowByColumnName(row, dateTypeColumn);
+                String dateType = _utils.getCellValueForRowByColumnName(row, dateTypeColumn);
 
                 Term dateTypeTerm = _cache.getTerm(TermType.DATE_TYPE, dateType);
 
@@ -224,7 +199,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 String dateNote = "";
                 if (dateNoteColumn != null) {
-                  dateNote = schemaUtils.getCellValueForRowByColumnName(row, dateNoteColumn);
+                  dateNote = _utils.getCellValueForRowByColumnName(row, dateNoteColumn);
                 }
 
                 SNACDate date = new SNACDate();
@@ -274,7 +249,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                         ConstellationModelField.PLACE_TYPE, _schema.getColumnMappings());
 
                 if (placeTypeColumn != null) {
-                  placeType = schemaUtils.getCellValueForRowByColumnName(row, placeTypeColumn);
+                  placeType = _utils.getCellValueForRowByColumnName(row, placeTypeColumn);
                 }
 
                 Term placeTypeTerm = _cache.getTerm(TermType.PLACE_TYPE, placeType);
@@ -298,8 +273,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                         ConstellationModelField.PLACE_ROLE, _schema.getColumnMappings());
 
                 if (placeRoleColumn != null) {
-                  String placeRole =
-                      schemaUtils.getCellValueForRowByColumnName(row, placeRoleColumn);
+                  String placeRole = _utils.getCellValueForRowByColumnName(row, placeRoleColumn);
 
                   Term placeRoleTerm = _cache.getTerm(TermType.PLACE_ROLE, placeRole);
 
@@ -339,7 +313,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                         ConstellationModelField.SOURCE_CITATION_URL, _schema.getColumnMappings());
 
                 if (urlColumn != null) {
-                  String url = schemaUtils.getCellValueForRowByColumnName(row, urlColumn);
+                  String url = _utils.getCellValueForRowByColumnName(row, urlColumn);
                   source.setURI(url);
                 }
 
@@ -350,7 +324,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                         _schema.getColumnMappings());
 
                 if (foundColumn != null) {
-                  String foundData = schemaUtils.getCellValueForRowByColumnName(row, foundColumn);
+                  String foundData = _utils.getCellValueForRowByColumnName(row, foundColumn);
                   source.setText(foundData);
                 }
 
@@ -422,8 +396,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                         ConstellationModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
                 if (scriptCodeColumn != null) {
-                  String scriptCode =
-                      schemaUtils.getCellValueForRowByColumnName(row, scriptCodeColumn);
+                  String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
 
                   if (!scriptCode.equals("")) {
                     Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, scriptCode);
@@ -462,7 +435,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 if (languageCodeColumn != null) {
                   String languageCode =
-                      schemaUtils.getCellValueForRowByColumnName(row, languageCodeColumn);
+                      _utils.getCellValueForRowByColumnName(row, languageCodeColumn);
 
                   if (!languageCode.equals("")) {
                     // this scenario is handled in the "language code" section
@@ -544,7 +517,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // quick check: ensure all required dependen{cy,t} fields exist and are not empty
             if (!_relationModel.hasRequiredFieldsInRow(
-                relationField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
+                relationField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
               continue;
             }
 
@@ -590,7 +563,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                           _schema.getColumnMappings());
 
                   String resourceRole =
-                      schemaUtils.getCellValueForRowByColumnName(row, resourceRoleColumn);
+                      _utils.getCellValueForRowByColumnName(row, resourceRoleColumn);
 
                   Term resourceRoleTerm = _cache.getTerm(TermType.DOCUMENT_ROLE, resourceRole);
 
@@ -608,7 +581,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   }
 
                   resourceRelations.add(resourceRelation);
-                  _relatedResources.add(targetResource);
+                  _relatedIDs.get(ModelType.RESOURCE).add(targetResource);
                 } catch (NumberFormatException e) {
                   _errors.addInvalidNumericFieldError(
                       relationField.getName(), cellValue, csvColumn);
@@ -633,7 +606,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                           RelationModelField.CPF_TO_CPF_RELATION_TYPE, _schema.getColumnMappings());
 
                   String cpfRelationType =
-                      schemaUtils.getCellValueForRowByColumnName(row, cpfRelationTypeColumn);
+                      _utils.getCellValueForRowByColumnName(row, cpfRelationTypeColumn);
 
                   Term cpfRelationTypeTerm =
                       _cache.getTerm(TermType.RELATION_TYPE, cpfRelationType);
@@ -653,7 +626,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   }
 
                   cpfRelations.add(cpfRelation);
-                  _relatedConstellations.add(targetConstellation);
+                  _relatedIDs.get(ModelType.CONSTELLATION).add(targetConstellation);
                 } catch (NumberFormatException e) {
                   _errors.addInvalidNumericFieldError(
                       relationField.getName(), cellValue, csvColumn);
@@ -715,16 +688,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
     _constellation = con;
 
     logger.debug("built constellation: [" + toJSON() + "]");
-  }
-
-  private void buildConstellationVerbatim() {
-    _cache.disableTermCache();
-    buildConstellation();
-  }
-
-  private void buildConstellationAgainstSNAC() {
-    _cache.enableTermCache();
-    buildConstellation();
   }
 
   public String getPreviewText() {
@@ -969,64 +932,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
     return preview;
   }
 
-  public int rowIndex() {
-    return _rowIndex;
-  }
-
   public String toJSON() {
     return Constellation.toJSON(_constellation);
-  }
-
-  private void verifyRelatedIDs() {
-    // Before uploading, we verify existence of any related CPF and resource
-    // IDs in the selected SNAC environment.  This is because SNAC will
-    // accept related CPF IDs that do not actually exist, then crash when
-    // reloading the original CPF, leaving the original CPF in a locked state.
-    // Invalid resource IDs may not cause the same kind of fatal error,
-    // but we check them anyway to keep the data clean.
-
-    // These existence checks should really be made in SNAC proper, but
-    // it's easier (and effective) to perform them here for now.
-
-    if (_modelType == ModelType.RELATION
-        && _relatedConstellations.size() == 0
-        && _relatedResources.size() == 0) {
-      _errors.addError("No related CPFs or Resources defined for this record");
-      return;
-    }
-
-    for (int i = 0; i < _relatedConstellations.size(); i++) {
-      int id = _relatedConstellations.get(i);
-      if (!_cache.constellationExists(id)) {
-        _errors.addMissingRelatedCPFError(id);
-      }
-    }
-
-    for (int i = 0; i < _relatedResources.size(); i++) {
-      int id = _relatedResources.get(i);
-      if (!_cache.resourceExists(id)) {
-        _errors.addMissingRelatedResourceError(id);
-      }
-    }
-  }
-
-  public SNACAPIResponse performValidation() {
-    // create the constellation, validating any controlled vocabulary
-    // terms against the selected SNAC environment
-
-    buildConstellationAgainstSNAC();
-
-    // verify existence of any related IDs
-
-    verifyRelatedIDs();
-
-    // return error if validation errors were encountered at any point
-
-    if (_errors.hasErrors()) {
-      return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
-    }
-
-    return new SNACAPIResponse("success");
   }
 
   public SNACAPIResponse performUpload() {

@@ -20,28 +20,18 @@ import org.snaccooperative.openrefine.api.SNACAPIClient;
 import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
+import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACResourceModel;
 import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
-import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACResourceItem extends SNACAbstractItem {
 
   static final Logger logger = LoggerFactory.getLogger(SNACResourceItem.class);
 
-  private Project _project;
-  private Record _record;
-  private SNACSchema _schema;
-  private SNACAPIClient _client;
-  private SNACLookupCache _cache;
-  private int _rowIndex;
-
   private Resource _resource;
-  private List<Integer> _relatedConstellations;
 
   private SNACResourceModel _resourceModel;
-
-  private SNACValidationErrors _errors;
 
   public SNACResourceItem(
       Project project,
@@ -49,30 +39,20 @@ public class SNACResourceItem extends SNACAbstractItem {
       SNACAPIClient client,
       SNACLookupCache cache,
       Record record) {
-    this._project = project;
-    this._schema = schema;
-    this._client = client;
-    this._cache = cache;
-    this._record = record;
-
-    this._rowIndex = record.fromRowIndex;
+    super(project, schema, client, cache, record);
 
     this._resourceModel = new SNACResourceModel();
 
-    buildResourceVerbatim();
+    buildItemVerbatim();
   }
 
-  private void buildResource() {
-    _resource = null;
-
-    _errors = new SNACValidationErrors();
-
-    SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
+  protected void buildItem() {
+    this._resource = null;
+    this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
+    this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ResourceModelField> resourceValidator =
         new SNACFieldValidator<ResourceModelField>(_errors);
-
-    _relatedConstellations = new LinkedList<Integer>();
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
@@ -89,7 +69,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = schemaUtils.getCellValueForRowByColumnName(row, csvColumn);
+        String cellValue = _utils.getCellValueForRowByColumnName(row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -105,7 +85,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
         // quick check: ensure all required dependency/dependent fields exist and are not empty
         if (!_resourceModel.hasRequiredFieldsInRow(
-            resourceField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
+            resourceField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
           continue;
         }
 
@@ -180,7 +160,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                     ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
 
             if (scriptCodeColumn != null) {
-              String scriptCode = schemaUtils.getCellValueForRowByColumnName(row, scriptCodeColumn);
+              String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
 
               if (!scriptCode.equals("")) {
                 Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, scriptCode);
@@ -218,8 +198,7 @@ public class SNACResourceItem extends SNACAbstractItem {
                     ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
 
             if (languageCodeColumn != null) {
-              String languageCode =
-                  schemaUtils.getCellValueForRowByColumnName(row, languageCodeColumn);
+              String languageCode = _utils.getCellValueForRowByColumnName(row, languageCodeColumn);
 
               if (!languageCode.equals("")) {
                 // this scenario is handled in the "language code" section
@@ -257,7 +236,7 @@ public class SNACResourceItem extends SNACAbstractItem {
               if (id != 0) {
                 cons.setID(id);
                 res.setRepository(cons);
-                _relatedConstellations.add(id);
+                _relatedIDs.get(ModelType.CONSTELLATION).add(id);
               }
             } catch (NumberFormatException e) {
               _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
@@ -274,16 +253,6 @@ public class SNACResourceItem extends SNACAbstractItem {
     _resource = res;
 
     logger.debug("built resource: [" + toJSON() + "]");
-  }
-
-  private void buildResourceVerbatim() {
-    _cache.disableTermCache();
-    buildResource();
-  }
-
-  private void buildResourceAgainstSNAC() {
-    _cache.enableTermCache();
-    buildResource();
   }
 
   public String getPreviewText() {
@@ -414,43 +383,8 @@ public class SNACResourceItem extends SNACAbstractItem {
     return preview;
   }
 
-  public int rowIndex() {
-    return _rowIndex;
-  }
-
   public String toJSON() {
     return Resource.toJSON(_resource);
-  }
-
-  private void verifyRelatedIDs() {
-    // verify existence of any related holding repository IDs in the
-    // selected SNAC environment (there will be at most one)
-
-    for (int i = 0; i < _relatedConstellations.size(); i++) {
-      int id = _relatedConstellations.get(i);
-      if (!_cache.constellationExists(id)) {
-        _errors.addMissingHoldingRepositoryError(id);
-      }
-    }
-  }
-
-  public SNACAPIResponse performValidation() {
-    // create the resource, validating any controlled vocabulary terms
-    // against the selected SNAC environment
-
-    buildResourceAgainstSNAC();
-
-    // verify existence of any related IDs
-
-    verifyRelatedIDs();
-
-    // return error if validation errors were encountered at any point
-
-    if (_errors.hasErrors()) {
-      return new SNACAPIResponse(_client, _errors.getAccumulatedErrorString());
-    }
-
-    return new SNACAPIResponse("success");
   }
 
   public SNACAPIResponse performUpload() {
