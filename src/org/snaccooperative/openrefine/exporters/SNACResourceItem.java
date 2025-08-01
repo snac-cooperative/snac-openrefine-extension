@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.data.AbstractData;
 import org.snaccooperative.data.Constellation;
 import org.snaccooperative.data.Language;
 import org.snaccooperative.data.Resource;
@@ -68,12 +69,13 @@ public class SNACResourceItem extends SNACAbstractItem {
 
     SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
 
-    SNACFieldValidator<ResourceModelField> resourceValidator = new SNACFieldValidator<ResourceModelField>(_errors);
+    SNACFieldValidator<ResourceModelField> resourceValidator =
+        new SNACFieldValidator<ResourceModelField>(_errors);
 
     _relatedConstellations = new LinkedList<Integer>();
 
     Resource res = new Resource();
-    res.setOperation("insert");
+    res.setOperation(AbstractData.OPERATION_INSERT);
 
     // things to accumulate
     List<Language> languages = new LinkedList<Language>();
@@ -112,7 +114,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
-              res.setOperation("update");
+              res.setOperation(AbstractData.OPERATION_UPDATE);
             } catch (NumberFormatException e) {
               _errors.addInvalidNumericFieldError(resourceField.getName(), cellValue, csvColumn);
             }
@@ -169,7 +171,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // initialize language code portion
             Language lang = new Language();
-            lang.setOperation("insert");
+            lang.setOperation(AbstractData.OPERATION_INSERT);
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional 'script code' in this row
@@ -239,7 +241,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // initialize script code portion
             Language script = new Language();
-            script.setOperation("insert");
+            script.setOperation(AbstractData.OPERATION_INSERT);
             script.setScript(scriptCodeTerm);
 
             languages.add(script);
@@ -386,7 +388,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       }
     }
 
-    if (_resource.getOperation() == "update") {
+    if (_resource.getOperation().equals(AbstractData.OPERATION_UPDATE)) {
       outFields.put(
           "*** Operation ***",
           "Edit Resource with ID: "

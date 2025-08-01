@@ -1,9 +1,9 @@
 package org.snaccooperative.openrefine.exporters;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldOccurence;
 import org.snaccooperative.openrefine.model.SNACModelFieldType;
@@ -14,7 +14,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
 
   private SNACValidationErrors _errors;
 
-  private Map <E, SNACFieldTracker> _fields;
+  private Map<E, SNACFieldTracker> _fields;
 
   private class SNACFieldTracker<E extends Enum<E> & SNACModelFieldType> {
 
@@ -53,7 +53,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
 
   public SNACFieldValidator(SNACValidationErrors errors) {
     this._errors = errors;
-    this._fields = new HashMap <E, SNACFieldTracker>();
+    this._fields = new HashMap<E, SNACFieldTracker>();
   }
 
   private SNACFieldTracker getFieldTracker(SNACModelField<E> field) {
@@ -71,5 +71,4 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
   public Boolean hasReachedLimit(SNACModelField<E> field) {
     return getFieldTracker(field).hasReachedLimit();
   }
-
 }

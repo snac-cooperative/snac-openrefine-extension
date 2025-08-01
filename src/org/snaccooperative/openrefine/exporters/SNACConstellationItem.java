@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snaccooperative.data.AbstractData;
 import org.snaccooperative.data.Activity;
 import org.snaccooperative.data.BiogHist;
 import org.snaccooperative.data.Constellation;
@@ -88,14 +89,16 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
     SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
 
-    SNACFieldValidator<ConstellationModelField> constellationValidator = new SNACFieldValidator<ConstellationModelField>(_errors);
-    SNACFieldValidator<RelationModelField> relationValidator = new SNACFieldValidator<RelationModelField>(_errors);
+    SNACFieldValidator<ConstellationModelField> constellationValidator =
+        new SNACFieldValidator<ConstellationModelField>(_errors);
+    SNACFieldValidator<RelationModelField> relationValidator =
+        new SNACFieldValidator<RelationModelField>(_errors);
 
     _relatedConstellations = new LinkedList<Integer>();
     _relatedResources = new LinkedList<Integer>();
 
     Constellation con = new Constellation();
-    con.setOperation("insert");
+    con.setOperation(AbstractData.OPERATION_INSERT);
 
     // things to accumulate
     List<NameEntry> nameEntries = new LinkedList<NameEntry>();
@@ -132,10 +135,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // quick check: ensure current field can be populated (right now this just
             // prevents single-occurence fields from being specified multiple times)
             // NOTE: fields are counted even if they are invalid and would be skipped!
-            if (constellationValidator.hasReachedLimit(_constellationModel.getModelField(constellationField))) {
+            if (constellationValidator.hasReachedLimit(
+                _constellationModel.getModelField(constellationField))) {
               continue;
             }
-            constellationValidator.addOccurence(_constellationModel.getModelField(constellationField));
+            constellationValidator.addOccurence(
+                _constellationModel.getModelField(constellationField));
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
             if (!_constellationModel.hasRequiredFieldsInRow(
@@ -172,7 +177,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 preferredName.setOriginal(cellValue);
                 preferredName.setPreferenceScore(99);
-                preferredName.setOperation("insert");
+                preferredName.setOperation(AbstractData.OPERATION_INSERT);
 
                 nameEntries.add(preferredName);
 
@@ -183,7 +188,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 variantName.setOriginal(cellValue);
                 variantName.setPreferenceScore(0);
-                variantName.setOperation("insert");
+                variantName.setOperation(AbstractData.OPERATION_INSERT);
 
                 nameEntries.add(variantName);
 
@@ -226,7 +231,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 date.setDate(cellValue, cellValue, dateTypeTerm);
                 date.setNote(dateNote);
-                date.setOperation("insert");
+                date.setOperation(AbstractData.OPERATION_INSERT);
 
                 dates.add(date);
 
@@ -249,7 +254,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 Subject subject = new Subject();
                 subject.setTerm(subjectTerm);
-                subject.setOperation("insert");
+                subject.setOperation(AbstractData.OPERATION_INSERT);
 
                 subjects.add(subject);
 
@@ -258,7 +263,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               case PLACE:
                 Place place = new Place();
                 place.setOriginal(cellValue);
-                place.setOperation("insert");
+                place.setOperation(AbstractData.OPERATION_INSERT);
 
                 // we need to supply a place type, so use this if no other is supplied
                 String placeType = "AssociatedPlace";
@@ -349,7 +354,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   source.setText(foundData);
                 }
 
-                source.setOperation("insert");
+                source.setOperation(AbstractData.OPERATION_INSERT);
                 sources.add(source);
 
                 continue;
@@ -371,7 +376,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 Occupation occupation = new Occupation();
                 occupation.setTerm(occupationTerm);
-                occupation.setOperation("insert");
+                occupation.setOperation(AbstractData.OPERATION_INSERT);
 
                 occupations.add(occupation);
 
@@ -388,7 +393,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 Activity activity = new Activity();
                 activity.setTerm(activityTerm);
-                activity.setOperation("insert");
+                activity.setOperation(AbstractData.OPERATION_INSERT);
 
                 activities.add(activity);
 
@@ -408,7 +413,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 // initialize language code portion
                 Language lang = new Language();
-                lang.setOperation("insert");
+                lang.setOperation(AbstractData.OPERATION_INSERT);
                 lang.setLanguage(languageCodeTerm);
 
                 // find and add optional 'script code' in this row
@@ -480,7 +485,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                 // initialize script code portion
                 Language script = new Language();
-                script.setOperation("insert");
+                script.setOperation(AbstractData.OPERATION_INSERT);
                 script.setScript(scriptCodeTerm);
 
                 languages.add(script);
@@ -490,7 +495,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               case BIOG_HIST:
                 BiogHist biogHist = new BiogHist();
                 biogHist.setText(cellValue);
-                biogHist.setOperation("insert");
+                biogHist.setOperation(AbstractData.OPERATION_INSERT);
 
                 biogHists.add(biogHist);
 
@@ -517,7 +522,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 SameAs sameAs = new SameAs();
                 sameAs.setURI(cellValue);
                 sameAs.setType(sameAsTerm);
-                sameAs.setOperation("insert");
+                sameAs.setOperation(AbstractData.OPERATION_INSERT);
 
                 sameAsRelations.add(sameAs);
 
@@ -575,7 +580,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                   resource.setID(targetResource);
 
                   ResourceRelation resourceRelation = new ResourceRelation();
-                  resourceRelation.setOperation("insert");
+                  resourceRelation.setOperation(AbstractData.OPERATION_INSERT);
                   resourceRelation.setResource(resource);
 
                   // find and add required 'cpf to resource relation type' in this row
@@ -635,7 +640,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
                   if (cpfRelationTypeTerm != null) {
                     cpfRelation.setType(cpfRelationTypeTerm);
-                    cpfRelation.setOperation("insert");
+                    cpfRelation.setOperation(AbstractData.OPERATION_INSERT);
                   } else {
                     _errors.addInvalidVocabularyFieldError(
                         RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName(),
@@ -683,7 +688,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
         // TODO: next two lines seem suspicious, need to verify this is correct
         range.setFromDate(from.getFromDate(), from.getFromDate(), from.getFromType());
         range.setToDate(to.getFromDate(), from.getFromDate(), from.getFromType());
-        range.setOperation("insert");
+        range.setOperation(AbstractData.OPERATION_INSERT);
 
         dateList.add(range);
         break;
@@ -938,7 +943,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
       }
     }
 
-    if (_constellation.getOperation() == "update") {
+    if (_constellation.getOperation().equals(AbstractData.OPERATION_UPDATE)) {
       outFields.put(
           "*** Operation ***",
           "Edit Constellation with ID: "
@@ -1061,7 +1066,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
       // set update information
 
-      _constellation.setOperation("update");
+      _constellation.setOperation(AbstractData.OPERATION_UPDATE);
       _constellation.setID(checkoutCon.getID());
       _constellation.setVersion(checkoutCon.getVersion());
       _constellation.setArk(checkoutCon.getArk());
