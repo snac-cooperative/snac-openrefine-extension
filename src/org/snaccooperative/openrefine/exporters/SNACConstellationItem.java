@@ -641,9 +641,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
         SNACDate range = new SNACDate();
         range.setRange(true);
-        // TODO: next two lines seem suspicious, need to verify this is correct
         range.setFromDate(from.getFromDate(), from.getFromDate(), from.getFromType());
-        range.setToDate(to.getFromDate(), from.getFromDate(), from.getFromType());
+        range.setToDate(to.getFromDate(), to.getFromDate(), to.getFromType());
         range.setOperation(AbstractData.OPERATION_INSERT);
 
         con.setDateList(new LinkedList<SNACDate>());
