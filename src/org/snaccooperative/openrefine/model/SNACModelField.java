@@ -195,6 +195,11 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return _requirement.getName();
   }
 
+  @JsonIgnore
+  public FieldRequirement getRequirementType() {
+    return _requirement;
+  }
+
   @JsonProperty("repeatable")
   public Boolean isRepeatable() {
     return (_occurence == FieldOccurence.MULTIPLE);
@@ -205,6 +210,11 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return _occurence.getName();
   }
 
+  @JsonIgnore
+  public FieldOccurence getOccurenceType() {
+    return _occurence;
+  }
+
   @JsonProperty("controlled")
   public Boolean isControlled() {
     return (_vocabulary == FieldVocabulary.CONTROLLED);
@@ -213,6 +223,11 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
   @JsonProperty("vocabulary")
   public String getVocabulary() {
     return _vocabulary.getName();
+  }
+
+  @JsonIgnore
+  public FieldVocabulary getVocabularyType() {
+    return _vocabulary;
   }
 
   @JsonProperty("dependencies")

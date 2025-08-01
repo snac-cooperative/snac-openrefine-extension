@@ -84,11 +84,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
   private void buildConstellation() {
     _constellation = null;
 
+    _errors = new SNACValidationErrors();
+
     SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
+
+    SNACFieldValidator<ConstellationModelField> constellationValidator = new SNACFieldValidator<ConstellationModelField>(_errors);
+    SNACFieldValidator<RelationModelField> relationValidator = new SNACFieldValidator<RelationModelField>(_errors);
 
     _relatedConstellations = new LinkedList<Integer>();
     _relatedResources = new LinkedList<Integer>();
-    _errors = new SNACValidationErrors();
 
     Constellation con = new Constellation();
     con.setOperation("insert");
@@ -109,6 +113,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
+      String snacField = entry.getValue();
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -122,7 +127,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
         switch (_modelType) {
           case CONSTELLATION:
             ConstellationModelField constellationField =
-                _constellationModel.getFieldType(entry.getValue());
+                _constellationModel.getFieldType(snacField);
+
+            // quick check: ensure current field can be populated (right now this just
+            // prevents single-occurence fields from being specified multiple times)
+            // NOTE: fields are counted even if they are invalid and would be skipped!
+            if (constellationValidator.hasReachedLimit(_constellationModel.getModelField(constellationField))) {
+              continue;
+            }
+            constellationValidator.addOccurence(_constellationModel.getModelField(constellationField));
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
             if (!_constellationModel.hasRequiredFieldsInRow(
@@ -132,8 +145,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             switch (constellationField) {
               case CPF_ID:
-                // FIXME: does not enforce one value per record
-
                 try {
                   int id = Integer.parseInt(cellValue);
                   con.setID(id);
@@ -144,8 +155,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case CPF_TYPE:
-                // FIXME: does not enforce one value per record
-
                 Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
 
                 if (entityTypeTerm == null) {
@@ -518,9 +527,17 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case RELATION:
-            RelationModelField relationField = _relationModel.getFieldType(entry.getValue());
+            RelationModelField relationField = _relationModel.getFieldType(snacField);
 
-            // quick check: ensure all required dependency/dependent fields exist and are not empty
+            // quick check: ensure current field can be populated (right now this just
+            // prevents single-occurence fields from being specified multiple times)
+            // NOTE: fields are counted even if they are invalid and would be skipped!
+            if (relationValidator.hasReachedLimit(_relationModel.getModelField(relationField))) {
+              continue;
+            }
+            relationValidator.addOccurence(_relationModel.getModelField(relationField));
+
+            // quick check: ensure all required dependen{cy,t} fields exist and are not empty
             if (!_relationModel.hasRequiredFieldsInRow(
                 relationField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
               continue;
@@ -528,8 +545,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             switch (relationField) {
               case CPF_ID:
-                // FIXME: does not enforce one value per record
-
                 try {
                   int id = Integer.parseInt(cellValue);
                   con.setID(id);
@@ -541,8 +556,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 continue;
 
               case CPF_TYPE:
-                // FIXME: does not enforce one value per record
-
                 Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
 
                 if (entityTypeTerm == null) {
@@ -713,15 +726,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
     Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
-      String snacText = entry.getValue();
+      String snacField = entry.getValue();
 
       switch (_modelType) {
         case CONSTELLATION:
-          switch (_constellationModel.getFieldType(entry.getValue())) {
+          switch (_constellationModel.getFieldType(snacField)) {
             case CPF_TYPE:
               Term previewTerm = _constellation.getEntityType();
               if (previewTerm != null) {
-                outFields.put(snacText, previewTerm.getTerm());
+                outFields.put(snacField, previewTerm.getTerm());
               }
               break;
 
@@ -738,7 +751,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 namesAndPreferenceScores.add(
                     nameAndPreferenceScore.replaceFirst("^Name Entry: ", ""));
               }
-              outFields.put(snacText, htmlOrderedList(namesAndPreferenceScores));
+              outFields.put(snacField, htmlOrderedList(namesAndPreferenceScores));
               break;
 
             case EXIST_DATE:
@@ -747,7 +760,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 dates.add(
                     _constellation.getDateList().get(i).toString().replaceFirst("^Date: ", ""));
               }
-              outFields.put(snacText, htmlOrderedList(dates));
+              outFields.put(snacField, htmlOrderedList(dates));
               break;
 
             case SUBJECT:
@@ -755,7 +768,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               for (int i = 0; i < _constellation.getSubjects().size(); i++) {
                 subjects.add(_constellation.getSubjects().get(i).getTerm().getTerm());
               }
-              outFields.put(snacText, htmlOrderedList(subjects));
+              outFields.put(snacField, htmlOrderedList(subjects));
               break;
 
             case PLACE:
@@ -772,7 +785,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 }
                 placesAndRoles.add(placeAndRoleAndType.replaceFirst("^Place: ", ""));
               }
-              outFields.put(snacText, htmlOrderedList(placesAndRoles));
+              outFields.put(snacField, htmlOrderedList(placesAndRoles));
               break;
 
             case OCCUPATION:
@@ -780,7 +793,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               for (int i = 0; i < _constellation.getOccupations().size(); i++) {
                 occupations.add(_constellation.getOccupations().get(i).getTerm().getTerm());
               }
-              outFields.put(snacText, htmlOrderedList(occupations));
+              outFields.put(snacField, htmlOrderedList(occupations));
               break;
 
             case ACTIVITY:
@@ -788,7 +801,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               for (int i = 0; i < _constellation.getActivities().size(); i++) {
                 activities.add(_constellation.getActivities().get(i).getTerm().getTerm());
               }
-              outFields.put(snacText, htmlOrderedList(activities));
+              outFields.put(snacField, htmlOrderedList(activities));
               break;
 
             case LANGUAGE_CODE:
@@ -839,7 +852,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               }
 
               if (langList.size() > 0) {
-                outFields.put(snacText, htmlOrderedList(langList));
+                outFields.put(snacField, htmlOrderedList(langList));
               }
 
               break;
@@ -849,7 +862,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
               for (int i = 0; i < _constellation.getBiogHists().size(); i++) {
                 bioghists.add(_constellation.getBiogHists().get(i).getText());
               }
-              outFields.put(snacText, htmlOrderedList(bioghists));
+              outFields.put(snacField, htmlOrderedList(bioghists));
               break;
 
             case SOURCE_CITATION:
@@ -865,7 +878,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 }
                 sources.add(sourceAndFoundData);
               }
-              outFields.put(snacText, htmlOrderedList(sources));
+              outFields.put(snacField, htmlOrderedList(sources));
               break;
 
             case EXTERNAL_RELATED_CPF_URL:
@@ -874,7 +887,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 SameAs sameAs = _constellation.getSameAsRelations().get(i);
                 sameAsURIs.add(htmlLink(sameAs.getURI(), sameAs.getURI()));
               }
-              outFields.put(snacText, htmlOrderedList(sameAsURIs));
+              outFields.put(snacField, htmlOrderedList(sameAsURIs));
               break;
           }
           break;
@@ -884,7 +897,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             case CPF_TYPE:
               Term previewTerm = _constellation.getEntityType();
               if (previewTerm != null) {
-                outFields.put(snacText, previewTerm.getTerm());
+                outFields.put(snacField, previewTerm.getTerm());
               }
               break;
 
@@ -901,7 +914,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 }
                 relations.add(relationAndType);
               }
-              outFields.put(snacText, htmlOrderedList(relations));
+              outFields.put(snacField, htmlOrderedList(relations));
               break;
 
             case RELATED_RESOURCE_ID:
@@ -918,7 +931,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 }
                 resourceRelations.add(resourceRelationAndRole);
               }
-              outFields.put(snacText, htmlOrderedList(resourceRelations));
+              outFields.put(snacField, htmlOrderedList(resourceRelations));
               break;
           }
           break;

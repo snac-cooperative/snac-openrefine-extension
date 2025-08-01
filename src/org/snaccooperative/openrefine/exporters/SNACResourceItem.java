@@ -64,10 +64,13 @@ public class SNACResourceItem extends SNACAbstractItem {
   private void buildResource() {
     _resource = null;
 
+    _errors = new SNACValidationErrors();
+
     SNACSchemaUtilities schemaUtils = new SNACSchemaUtilities(_project, _schema);
 
+    SNACFieldValidator<ResourceModelField> resourceValidator = new SNACFieldValidator<ResourceModelField>(_errors);
+
     _relatedConstellations = new LinkedList<Integer>();
-    _errors = new SNACValidationErrors();
 
     Resource res = new Resource();
     res.setOperation("insert");
@@ -77,8 +80,9 @@ public class SNACResourceItem extends SNACAbstractItem {
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String csvColumn = entry.getKey();
+      String snacField = entry.getValue();
 
-      ResourceModelField resourceField = _resourceModel.getFieldType(entry.getValue());
+      ResourceModelField resourceField = _resourceModel.getFieldType(snacField);
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -89,6 +93,14 @@ public class SNACResourceItem extends SNACAbstractItem {
           continue;
         }
 
+        // quick check: ensure current field can be populated (right now this just
+        // prevents single-occurence fields from being specified multiple times)
+        // NOTE: fields are counted even if they are invalid and would be skipped!
+        if (resourceValidator.hasReachedLimit(_resourceModel.getModelField(resourceField))) {
+          continue;
+        }
+        resourceValidator.addOccurence(_resourceModel.getModelField(resourceField));
+
         // quick check: ensure all required dependency/dependent fields exist and are not empty
         if (!_resourceModel.hasRequiredFieldsInRow(
             resourceField, cellValue, csvColumn, row, _schema, schemaUtils, _errors)) {
@@ -97,8 +109,6 @@ public class SNACResourceItem extends SNACAbstractItem {
 
         switch (resourceField) {
           case RESOURCE_ID:
-            // FIXME: does not enforce one value per record
-
             try {
               int id = Integer.parseInt(cellValue);
               res.setID(id);
@@ -110,8 +120,6 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case RESOURCE_TYPE:
-            // FIXME: does not enforce one value per record
-
             Term typeTerm = _cache.getTerm(TermType.DOCUMENT_TYPE, cellValue);
 
             if (typeTerm == null) {
@@ -124,36 +132,26 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case TITLE:
-            // FIXME: does not enforce one value per record
-
             res.setTitle(cellValue);
 
             continue;
 
           case RESOURCE_URL:
-            // FIXME: does not enforce one value per record
-
             res.setLink(cellValue);
 
             continue;
 
           case ABSTRACT:
-            // FIXME: does not enforce one value per record
-
             res.setAbstract(cellValue);
 
             continue;
 
           case EXTENT:
-            // FIXME: does not enforce one value per record
-
             res.setExtent(cellValue);
 
             continue;
 
           case DATE:
-            // FIXME: does not enforce one value per record
-
             res.setDate(cellValue);
 
             continue;
@@ -249,8 +247,6 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case HOLDING_REPOSITORY_ID:
-            // FIXME: does not enforce one value per record
-
             try {
               int id = Integer.parseInt(cellValue);
 
@@ -292,36 +288,36 @@ public class SNACResourceItem extends SNACAbstractItem {
     Map<String, String> outFields = new TreeMap<>();
 
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
-      String snacText = entry.getValue();
+      String snacField = entry.getValue();
 
-      ResourceModelField resourceField = _resourceModel.getFieldType(entry.getValue());
+      ResourceModelField resourceField = _resourceModel.getFieldType(snacField);
 
       switch (resourceField) {
         case RESOURCE_TYPE:
           Term previewTerm = _resource.getDocumentType();
           if (previewTerm != null) {
-            outFields.put(snacText, previewTerm.getTerm());
+            outFields.put(snacField, previewTerm.getTerm());
           }
           break;
 
         case TITLE:
-          outFields.put(snacText, _resource.getTitle());
+          outFields.put(snacField, _resource.getTitle());
           break;
 
         case RESOURCE_URL:
-          outFields.put(snacText, htmlLink(_resource.getLink(), _resource.getLink()));
+          outFields.put(snacField, htmlLink(_resource.getLink(), _resource.getLink()));
           break;
 
         case ABSTRACT:
-          outFields.put(snacText, _resource.getAbstract());
+          outFields.put(snacField, _resource.getAbstract());
           break;
 
         case EXTENT:
-          outFields.put(snacText, _resource.getExtent());
+          outFields.put(snacField, _resource.getExtent());
           break;
 
         case DATE:
-          outFields.put(snacText, _resource.getDate());
+          outFields.put(snacField, _resource.getDate());
           break;
 
         case LANGUAGE_CODE:
@@ -372,18 +368,18 @@ public class SNACResourceItem extends SNACAbstractItem {
           }
 
           if (langList.size() > 0) {
-            outFields.put(snacText, htmlOrderedList(langList));
+            outFields.put(snacField, htmlOrderedList(langList));
           }
 
           break;
 
         case HOLDING_REPOSITORY_ID:
-          snacText = "Repository ID";
+          snacField = "Repository ID";
           if (_resource.getRepository() != null) {
             int repo_id = _resource.getRepository().getID();
             if (repo_id != 0) {
               outFields.put(
-                  snacText,
+                  snacField,
                   htmlLink(_client.urlForConstellationID(repo_id), Integer.toString(repo_id)));
             }
           }
