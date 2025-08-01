@@ -1,14 +1,10 @@
 package org.snaccooperative.openrefine.model;
 
-import com.google.refine.model.Row;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snaccooperative.openrefine.exporters.SNACValidationErrors;
-import org.snaccooperative.openrefine.schema.SNACSchema;
-import org.snaccooperative.openrefine.schema.SNACSchemaUtilities;
 
 public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
 
@@ -128,70 +124,5 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     }
 
     return null;
-  }
-
-  // field processing helpers
-
-  public Boolean hasRequiredFieldsInRow(
-      E fieldType,
-      String fieldValue,
-      String fieldColumn,
-      Row row,
-      SNACSchema schema,
-      SNACSchemaUtilities schemaUtils,
-      SNACValidationErrors errors) {
-    Boolean retval = true;
-
-    List<E> deps;
-
-    // check required field dependencies
-
-    deps = getModelField(fieldType).getRequiredDependenciesFieldTypes();
-
-    for (int i = 0; i < deps.size(); i++) {
-      E requiredField = deps.get(i);
-
-      String requiredColumn = getEntryForFieldType(requiredField, schema.getColumnMappings());
-      if (requiredColumn == null) {
-        errors.addRequiredDependencyFieldMissingError(
-            fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);
-        retval = false;
-        continue;
-      }
-
-      String requiredValue = schemaUtils.getCellValueForRowByColumnName(row, requiredColumn);
-      if (requiredValue.equals("")) {
-        errors.addRequiredDependencyFieldEmptyError(
-            fieldType.getName(), fieldValue, fieldColumn, requiredField.getName(), requiredColumn);
-        retval = false;
-        continue;
-      }
-    }
-
-    // check required field dependents
-
-    deps = getModelField(fieldType).getRequiredDependentsFieldTypes();
-
-    for (int i = 0; i < deps.size(); i++) {
-      E requiredField = deps.get(i);
-
-      String requiredColumn = getEntryForFieldType(requiredField, schema.getColumnMappings());
-      if (requiredColumn == null) {
-        errors.addRequiredDependentFieldMissingError(
-            fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);
-        retval = false;
-        continue;
-      }
-
-      String requiredValue = schemaUtils.getCellValueForRowByColumnName(row, requiredColumn);
-      if (requiredValue.equals("")) {
-        errors.addRequiredDependentFieldEmptyError(
-            fieldType.getName(), fieldValue, fieldColumn, requiredField.getName(), requiredColumn);
-        retval = false;
-        continue;
-      }
-    }
-
-    return retval;
   }
 }

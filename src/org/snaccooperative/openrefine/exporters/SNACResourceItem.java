@@ -52,7 +52,7 @@ public class SNACResourceItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ResourceModelField> resourceValidator =
-        new SNACFieldValidator<ResourceModelField>(_schema, _errors);
+        new SNACFieldValidator<ResourceModelField>(_resourceModel, _schema, _utils, _errors);
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
@@ -81,8 +81,7 @@ public class SNACResourceItem extends SNACAbstractItem {
         resourceValidator.addOccurence(_resourceModel.getModelField(resourceField));
 
         // quick check: ensure all required dependency/dependent fields exist and are not empty
-        if (!_resourceModel.hasRequiredFieldsInRow(
-            resourceField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
+        if (!resourceValidator.hasRequiredFieldsInRow(resourceField, cellValue, row)) {
           continue;
         }
 

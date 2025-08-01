@@ -68,9 +68,10 @@ public class SNACConstellationItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ConstellationModelField> constellationValidator =
-        new SNACFieldValidator<ConstellationModelField>(_schema, _errors);
+        new SNACFieldValidator<ConstellationModelField>(
+            _constellationModel, _schema, _utils, _errors);
     SNACFieldValidator<RelationModelField> relationValidator =
-        new SNACFieldValidator<RelationModelField>(_schema, _errors);
+        new SNACFieldValidator<RelationModelField>(_relationModel, _schema, _utils, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -104,8 +105,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
                 _constellationModel.getModelField(constellationField));
 
             // quick check: ensure all required dependency/dependent fields exist and are not empty
-            if (!_constellationModel.hasRequiredFieldsInRow(
-                constellationField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
+            if (!constellationValidator.hasRequiredFieldsInRow(
+                constellationField, cellValue, row)) {
               continue;
             }
 
@@ -501,9 +502,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             }
             relationValidator.addOccurence(_relationModel.getModelField(relationField));
 
-            // quick check: ensure all required dependen{cy,t} fields exist and are not empty
-            if (!_relationModel.hasRequiredFieldsInRow(
-                relationField, cellValue, csvColumn, row, _schema, _utils, _errors)) {
+            // quick check: ensure all required dependency/dependent fields exist and are not empty
+            if (!relationValidator.hasRequiredFieldsInRow(relationField, cellValue, row)) {
               continue;
             }
 
