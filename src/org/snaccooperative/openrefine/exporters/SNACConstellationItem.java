@@ -135,8 +135,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add required 'exist date type' in this row
             String dateTypeColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.EXIST_DATE_TYPE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ConstellationModelField.EXIST_DATE_TYPE.getName());
 
             String dateType = _utils.getCellValueForRowByColumnName(row, dateTypeColumn);
 
@@ -155,9 +154,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'exist date descriptive note' in this row
             String dateNoteColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE,
-                    _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(
+                    ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE.getName());
 
             String dateNote = "";
             if (dateNoteColumn != null) {
@@ -206,8 +204,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'place type' in this row
             String placeTypeColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.PLACE_TYPE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ConstellationModelField.PLACE_TYPE.getName());
 
             if (placeTypeColumn != null) {
               placeType = _utils.getCellValueForRowByColumnName(row, placeTypeColumn);
@@ -230,8 +227,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'place role' in this row
             String placeRoleColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.PLACE_ROLE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ConstellationModelField.PLACE_ROLE.getName());
 
             if (placeRoleColumn != null) {
               String placeRole = _utils.getCellValueForRowByColumnName(row, placeRoleColumn);
@@ -270,8 +266,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'source citation url' in this row
             String urlColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.SOURCE_CITATION_URL, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(
+                    ConstellationModelField.SOURCE_CITATION_URL.getName());
 
             if (urlColumn != null) {
               String url = _utils.getCellValueForRowByColumnName(row, urlColumn);
@@ -280,9 +276,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'source citation found data' in this row
             String foundColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.SOURCE_CITATION_FOUND_DATA,
-                    _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(
+                    ConstellationModelField.SOURCE_CITATION_FOUND_DATA.getName());
 
             if (foundColumn != null) {
               String foundData = _utils.getCellValueForRowByColumnName(row, foundColumn);
@@ -350,8 +345,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'script code' in this row
             String scriptCodeColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.SCRIPT_CODE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ConstellationModelField.SCRIPT_CODE.getName());
 
             if (scriptCodeColumn != null) {
               String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
@@ -388,8 +382,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCodeColumn =
-                _model.getEntryForFieldType(
-                    ConstellationModelField.LANGUAGE_CODE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ConstellationModelField.LANGUAGE_CODE.getName());
 
             if (languageCodeColumn != null) {
               String languageCode = _utils.getCellValueForRowByColumnName(row, languageCodeColumn);

@@ -141,8 +141,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       for (int i = 0; i < deps.size(); i++) {
         E requiredField = deps.get(i);
 
-        String requiredColumn =
-            _model.getEntryForFieldType(requiredField, _schema.getColumnMappings());
+        String requiredColumn = _schema.getColumnFromSNACField(requiredField.getName());
         if (requiredColumn == null) {
           _errors.addRequiredDependencyFieldMissingError(
               fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);
@@ -170,8 +169,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       for (int i = 0; i < deps.size(); i++) {
         E requiredField = deps.get(i);
 
-        String requiredColumn =
-            _model.getEntryForFieldType(requiredField, _schema.getColumnMappings());
+        String requiredColumn = _schema.getColumnFromSNACField(requiredField.getName());
         if (requiredColumn == null) {
           _errors.addRequiredDependentFieldMissingError(
               fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);

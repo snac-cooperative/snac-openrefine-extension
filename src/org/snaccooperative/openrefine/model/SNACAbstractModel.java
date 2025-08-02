@@ -108,15 +108,4 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
 
     return modelField.isKnownName(s);
   }
-
-  public String getEntryForFieldType(E fieldType, HashMap<String, String> list) {
-    for (String key : list.keySet()) {
-      String entry = list.get(key);
-      if (isNameForFieldType(fieldType, entry)) {
-        return key;
-      }
-    }
-
-    return null;
-  }
 }

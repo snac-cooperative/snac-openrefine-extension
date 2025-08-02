@@ -115,9 +115,8 @@ public class SNACRelationItem extends SNACAbstractItem {
 
               // find and add required 'cpf to resource relation type' in this row
               String resourceRoleColumn =
-                  _model.getEntryForFieldType(
-                      RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
-                      _schema.getColumnMappings());
+                  _schema.getColumnFromSNACField(
+                      RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName());
 
               String resourceRole = _utils.getCellValueForRowByColumnName(row, resourceRoleColumn);
 
@@ -157,8 +156,8 @@ public class SNACRelationItem extends SNACAbstractItem {
 
               // find and add required 'cpf to cpf relation type' in this row
               String cpfRelationTypeColumn =
-                  _model.getEntryForFieldType(
-                      RelationModelField.CPF_TO_CPF_RELATION_TYPE, _schema.getColumnMappings());
+                  _schema.getColumnFromSNACField(
+                      RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName());
 
               String cpfRelationType =
                   _utils.getCellValueForRowByColumnName(row, cpfRelationTypeColumn);

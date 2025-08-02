@@ -145,8 +145,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // find and add optional 'script code' in this row
             String scriptCodeColumn =
-                _model.getEntryForFieldType(
-                    ResourceModelField.SCRIPT_CODE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ResourceModelField.SCRIPT_CODE.getName());
 
             if (scriptCodeColumn != null) {
               String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
@@ -183,8 +182,7 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCodeColumn =
-                _model.getEntryForFieldType(
-                    ResourceModelField.LANGUAGE_CODE, _schema.getColumnMappings());
+                _schema.getColumnFromSNACField(ResourceModelField.LANGUAGE_CODE.getName());
 
             if (languageCodeColumn != null) {
               String languageCode = _utils.getCellValueForRowByColumnName(row, languageCodeColumn);
