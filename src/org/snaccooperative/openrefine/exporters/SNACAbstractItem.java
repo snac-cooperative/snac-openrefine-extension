@@ -113,14 +113,18 @@ public abstract class SNACAbstractItem {
     for (int i = 0; i < ids.size(); i++) {
       int id = ids.get(i);
       if (!_cache.constellationExists(id)) {
-        _errors.addMissingRelatedCPFError(id);
+        if (_modelType == ModelType.RESOURCE) {
+          _errors.addMissingHoldingRepositoryError(id);
+        } else {
+          _errors.addMissingRelatedCPFError(id);
+        }
       }
     }
 
     // related resources:
     // for constellation items, these are related resource IDs
 
-    ids = _relatedIDs.get(ModelType.CONSTELLATION);
+    ids = _relatedIDs.get(ModelType.RESOURCE);
     for (int i = 0; i < ids.size(); i++) {
       int id = ids.get(i);
       if (!_cache.resourceExists(id)) {

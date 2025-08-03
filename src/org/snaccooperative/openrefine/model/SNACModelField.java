@@ -305,4 +305,19 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
 
     return false;
   }
+
+  public Boolean hasRequirementWith(E fieldType) {
+    List<E> reqTypes = new ArrayList<E>();
+
+    reqTypes.addAll(getRequiredDependenciesFieldTypes());
+    reqTypes.addAll(getRequiredDependentsFieldTypes());
+
+    for (E reqType : reqTypes) {
+      if (reqType == fieldType) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }

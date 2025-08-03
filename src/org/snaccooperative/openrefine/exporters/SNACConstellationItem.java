@@ -61,7 +61,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ConstellationModelField> validator =
-        new SNACFieldValidator<ConstellationModelField>(_model, _schema, _utils, _errors);
+        new SNACFieldValidator<ConstellationModelField>(_model, _schema, _utils, _cache, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -73,7 +73,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = _utils.getCellValueForRowByColumnName(row, csvColumn);
+        String cellValue = validator.getCellValue(row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -89,19 +89,20 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
         switch (field) {
           case CPF_ID:
-            try {
-              int id = Integer.parseInt(cellValue);
-              con.setID(id);
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer constellationID = validator.getIdentifier(field, cellValue);
+            if (constellationID == null) {
+              continue;
             }
+
+            int cid = constellationID;
+            con.setID(cid);
+            con.setOperation(AbstractData.OPERATION_UPDATE);
+
             continue;
 
           case CPF_TYPE:
-            Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
-
+            Term entityTypeTerm = validator.getTerm(field, cellValue, TermType.ENTITY_TYPE);
             if (entityTypeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -134,38 +135,26 @@ public class SNACConstellationItem extends SNACAbstractItem {
           case EXIST_DATE:
 
             // find and add required 'exist date type' in this row
-            String dateTypeColumn =
-                _schema.getColumnFromSNACField(ConstellationModelField.EXIST_DATE_TYPE.getName());
-
-            String dateType = _utils.getCellValueForRowByColumnName(row, dateTypeColumn);
-
-            Term dateTypeTerm = _cache.getTerm(TermType.DATE_TYPE, dateType);
-
-            if (dateTypeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(
-                  ConstellationModelField.EXIST_DATE_TYPE.getName(),
-                  dateType,
-                  dateTypeColumn,
-                  field.getName(),
-                  cellValue,
-                  csvColumn);
+            Term existDateTypeTerm =
+                validator.getRelatedTerm(
+                    row,
+                    field,
+                    cellValue,
+                    ConstellationModelField.EXIST_DATE_TYPE,
+                    TermType.DATE_TYPE);
+            if (existDateTypeTerm == null) {
               continue;
             }
 
             // find and add optional 'exist date descriptive note' in this row
-            String dateNoteColumn =
-                _schema.getColumnFromSNACField(
-                    ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE.getName());
-
-            String dateNote = "";
-            if (dateNoteColumn != null) {
-              dateNote = _utils.getCellValueForRowByColumnName(row, dateNoteColumn);
-            }
+            String existDateDescriptiveNote =
+                validator.getRelatedCellValue(
+                    row, ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE);
 
             SNACDate date = new SNACDate();
 
-            date.setDate(cellValue, cellValue, dateTypeTerm);
-            date.setNote(dateNote);
+            date.setDate(cellValue, cellValue, existDateTypeTerm);
+            date.setNote(existDateDescriptiveNote);
             date.setOperation(AbstractData.OPERATION_INSERT);
 
             con.addDate(date);
@@ -179,10 +168,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case SUBJECT:
-            Term subjectTerm = _cache.getTerm(TermType.SUBJECT, cellValue);
-
+            Term subjectTerm = validator.getTerm(field, cellValue, TermType.SUBJECT);
             if (subjectTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -199,53 +186,27 @@ public class SNACConstellationItem extends SNACAbstractItem {
             place.setOriginal(cellValue);
             place.setOperation(AbstractData.OPERATION_INSERT);
 
-            // we need to supply a place type, so use this if no other is supplied
-            String placeType = "AssociatedPlace";
-
-            // find and add optional 'place type' in this row
-            String placeTypeColumn =
-                _schema.getColumnFromSNACField(ConstellationModelField.PLACE_TYPE.getName());
-
-            if (placeTypeColumn != null) {
-              placeType = _utils.getCellValueForRowByColumnName(row, placeTypeColumn);
-            }
-
-            Term placeTypeTerm = _cache.getTerm(TermType.PLACE_TYPE, placeType);
-
-            if (placeTypeTerm != null) {
-              place.setType(placeTypeTerm);
-            } else {
-              _errors.addInvalidVocabularyFieldError(
-                  ConstellationModelField.PLACE_TYPE.getName(),
-                  placeType,
-                  placeTypeColumn,
-                  field.getName(),
-                  cellValue,
-                  csvColumn);
+            // find and add required 'place type' in this row
+            Term placeTypeTerm =
+                validator.getRelatedTerm(
+                    row,
+                    field,
+                    cellValue,
+                    ConstellationModelField.PLACE_TYPE,
+                    TermType.PLACE_TYPE,
+                    "AssociatedPlace");
+            if (placeTypeTerm == null) {
               continue;
             }
 
+            place.setType(placeTypeTerm);
+
             // find and add optional 'place role' in this row
-            String placeRoleColumn =
-                _schema.getColumnFromSNACField(ConstellationModelField.PLACE_ROLE.getName());
-
-            if (placeRoleColumn != null) {
-              String placeRole = _utils.getCellValueForRowByColumnName(row, placeRoleColumn);
-
-              Term placeRoleTerm = _cache.getTerm(TermType.PLACE_ROLE, placeRole);
-
-              if (placeRoleTerm != null) {
-                place.setRole(placeRoleTerm);
-              } else {
-                _errors.addInvalidVocabularyFieldError(
-                    ConstellationModelField.PLACE_ROLE.getName(),
-                    placeRole,
-                    placeRoleColumn,
-                    field.getName(),
-                    cellValue,
-                    csvColumn);
-                continue;
-              }
+            Term placeRoleTerm =
+                validator.getRelatedTerm(
+                    row, field, cellValue, ConstellationModelField.PLACE_ROLE, TermType.PLACE_ROLE);
+            if (placeRoleTerm != null) {
+              place.setRole(placeRoleTerm);
             }
 
             con.addPlace(place);
@@ -265,23 +226,18 @@ public class SNACConstellationItem extends SNACAbstractItem {
             source.setCitation(cellValue);
 
             // find and add optional 'source citation url' in this row
-            String urlColumn =
-                _schema.getColumnFromSNACField(
-                    ConstellationModelField.SOURCE_CITATION_URL.getName());
-
-            if (urlColumn != null) {
-              String url = _utils.getCellValueForRowByColumnName(row, urlColumn);
-              source.setURI(url);
+            String sourceCitationURL =
+                validator.getRelatedCellValue(row, ConstellationModelField.SOURCE_CITATION_URL);
+            if (sourceCitationURL != "") {
+              source.setURI(sourceCitationURL);
             }
 
             // find and add optional 'source citation found data' in this row
-            String foundColumn =
-                _schema.getColumnFromSNACField(
-                    ConstellationModelField.SOURCE_CITATION_FOUND_DATA.getName());
-
-            if (foundColumn != null) {
-              String foundData = _utils.getCellValueForRowByColumnName(row, foundColumn);
-              source.setText(foundData);
+            String sourceCitationFoundData =
+                validator.getRelatedCellValue(
+                    row, ConstellationModelField.SOURCE_CITATION_FOUND_DATA);
+            if (sourceCitationFoundData != "") {
+              source.setText(sourceCitationFoundData);
             }
 
             source.setOperation(AbstractData.OPERATION_INSERT);
@@ -296,10 +252,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case OCCUPATION:
-            Term occupationTerm = _cache.getTerm(TermType.OCCUPATION, cellValue);
-
+            Term occupationTerm = validator.getTerm(field, cellValue, TermType.OCCUPATION);
             if (occupationTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -312,10 +266,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case ACTIVITY:
-            Term activityTerm = _cache.getTerm(TermType.ACTIVITY, cellValue);
-
+            Term activityTerm = validator.getTerm(field, cellValue, TermType.ACTIVITY);
             if (activityTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -331,10 +283,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
-            Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
-
+            Term languageCodeTerm = validator.getTerm(field, cellValue, TermType.LANGUAGE_CODE);
             if (languageCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -344,32 +294,15 @@ public class SNACConstellationItem extends SNACAbstractItem {
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional 'script code' in this row
-            String scriptCodeColumn =
-                _schema.getColumnFromSNACField(ConstellationModelField.SCRIPT_CODE.getName());
-
-            if (scriptCodeColumn != null) {
-              String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
-
-              if (!scriptCode.equals("")) {
-                Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, scriptCode);
-                if (scriptCodeTerm != null) {
-                  // add script code portion
-                  lang.setScript(scriptCodeTerm);
-                } else {
-                  _errors.addInvalidVocabularyFieldError(
-                      ConstellationModelField.SCRIPT_CODE.getName(),
-                      scriptCode,
-                      scriptCodeColumn,
-                      field.getName(),
-                      cellValue,
-                      csvColumn);
-                  continue;
-                }
-              } else {
-                // logger.info("no associated script code value found; skipping");
-              }
-            } else {
-              // logger.info("no associated script code column found; skipping");
+            Term optScriptCodeTerm =
+                validator.getRelatedTerm(
+                    row,
+                    field,
+                    cellValue,
+                    ConstellationModelField.SCRIPT_CODE,
+                    TermType.SCRIPT_CODE);
+            if (optScriptCodeTerm != null) {
+              lang.setScript(optScriptCodeTerm);
             }
 
             con.addLanguageUsed(lang);
@@ -381,27 +314,14 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
-            String languageCodeColumn =
-                _schema.getColumnFromSNACField(ConstellationModelField.LANGUAGE_CODE.getName());
-
-            if (languageCodeColumn != null) {
-              String languageCode = _utils.getCellValueForRowByColumnName(row, languageCodeColumn);
-
-              if (!languageCode.equals("")) {
-                // this scenario is handled in the "language code" section
-                // logger.info("skipping script code with associated language code");
-                continue;
-              } else {
-                // logger.info("no associated language code value found; proceeding");
-              }
-            } else {
-              // logger.info("no associated language code column found; proceeding");
+            String languageCode =
+                validator.getRelatedCellValue(row, ConstellationModelField.LANGUAGE_CODE);
+            if (!languageCode.equals("")) {
+              continue;
             }
 
-            Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
-
+            Term scriptCodeTerm = validator.getTerm(field, cellValue, TermType.SCRIPT_CODE);
             if (scriptCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -426,18 +346,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
           case EXTERNAL_RELATED_CPF_URL:
             // external related CPF URLs are always sameAs relations
 
-            String defaultExternalRelatedCPFUrlType = "sameAs";
-            Term sameAsTerm =
-                _cache.getTerm(TermType.RECORD_TYPE, defaultExternalRelatedCPFUrlType);
-
+            Term sameAsTerm = validator.getTerm("sameAs", TermType.RECORD_TYPE);
             if (sameAsTerm == null) {
-              _errors.addInvalidVocabularyFieldError(
-                  "Record Type",
-                  defaultExternalRelatedCPFUrlType,
-                  null,
-                  field.getName(),
-                  cellValue,
-                  csvColumn);
               continue;
             }
 
@@ -483,7 +393,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      switch (_model.getFieldType(snacField)) {
+      ConstellationModelField field = _model.getFieldType(snacField);
+
+      switch (field) {
         case CPF_TYPE:
           Term previewTerm = _item.getEntityType();
           if (previewTerm != null) {
@@ -557,7 +469,6 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
         case LANGUAGE_CODE:
           List<String> langList = new ArrayList<>();
-
           for (int i = 0; i < _item.getLanguagesUsed().size(); i++) {
             Term lang = _item.getLanguagesUsed().get(i).getLanguage();
 

@@ -54,7 +54,7 @@ public class SNACRelationItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<RelationModelField> validator =
-        new SNACFieldValidator<RelationModelField>(_model, _schema, _utils, _errors);
+        new SNACFieldValidator<RelationModelField>(_model, _schema, _utils, _cache, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -66,7 +66,7 @@ public class SNACRelationItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = _utils.getCellValueForRowByColumnName(row, csvColumn);
+        String cellValue = validator.getCellValue(row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -82,20 +82,20 @@ public class SNACRelationItem extends SNACAbstractItem {
 
         switch (field) {
           case CPF_ID:
-            try {
-              int id = Integer.parseInt(cellValue);
-              con.setID(id);
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer constellationID = validator.getIdentifier(field, cellValue);
+            if (constellationID == null) {
+              continue;
             }
+
+            int cid = constellationID;
+            con.setID(cid);
+            con.setOperation(AbstractData.OPERATION_UPDATE);
 
             continue;
 
           case CPF_TYPE:
-            Term entityTypeTerm = _cache.getTerm(TermType.ENTITY_TYPE, cellValue);
-
+            Term entityTypeTerm = validator.getTerm(field, cellValue, TermType.ENTITY_TYPE);
             if (entityTypeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -104,43 +104,34 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
 
           case RELATED_RESOURCE_ID:
-            try {
-              int targetResource = Integer.parseInt(cellValue);
-              Resource resource = new Resource();
-              resource.setID(targetResource);
-
-              ResourceRelation resourceRelation = new ResourceRelation();
-              resourceRelation.setOperation(AbstractData.OPERATION_INSERT);
-              resourceRelation.setResource(resource);
-
-              // find and add required 'cpf to resource relation type' in this row
-              String resourceRoleColumn =
-                  _schema.getColumnFromSNACField(
-                      RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName());
-
-              String resourceRole = _utils.getCellValueForRowByColumnName(row, resourceRoleColumn);
-
-              Term resourceRoleTerm = _cache.getTerm(TermType.DOCUMENT_ROLE, resourceRole);
-
-              if (resourceRoleTerm != null) {
-                resourceRelation.setRole(resourceRoleTerm);
-              } else {
-                _errors.addInvalidVocabularyFieldError(
-                    RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE.getName(),
-                    resourceRole,
-                    resourceRoleColumn,
-                    field.getName(),
-                    cellValue,
-                    csvColumn);
-                continue;
-              }
-
-              con.addResourceRelation(resourceRelation);
-              _relatedIDs.get(ModelType.RESOURCE).add(targetResource);
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer relatedResourceID = validator.getIdentifier(field, cellValue);
+            if (relatedResourceID == null) {
               continue;
             }
+
+            // find and add required 'cpf to resource relation type' in this row
+            Term resourceRoleTerm =
+                validator.getRelatedTerm(
+                    row,
+                    field,
+                    cellValue,
+                    RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
+                    TermType.DOCUMENT_ROLE);
+            if (resourceRoleTerm == null) {
+              continue;
+            }
+
+            int rrid = relatedResourceID;
+            Resource relatedResource = new Resource();
+            relatedResource.setID(rrid);
+
+            ResourceRelation resourceRelation = new ResourceRelation();
+            resourceRelation.setOperation(AbstractData.OPERATION_INSERT);
+            resourceRelation.setResource(relatedResource);
+            resourceRelation.setRole(resourceRoleTerm);
+
+            con.addResourceRelation(resourceRelation);
+            _relatedIDs.get(ModelType.RESOURCE).add(rrid);
 
             continue;
 
@@ -148,42 +139,32 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
 
           case RELATED_CPF_ID:
-            try {
-              int targetConstellation = Integer.parseInt(cellValue);
-              ConstellationRelation cpfRelation = new ConstellationRelation();
-              cpfRelation.setSourceConstellation(con.getID());
-              cpfRelation.setTargetConstellation(targetConstellation);
-
-              // find and add required 'cpf to cpf relation type' in this row
-              String cpfRelationTypeColumn =
-                  _schema.getColumnFromSNACField(
-                      RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName());
-
-              String cpfRelationType =
-                  _utils.getCellValueForRowByColumnName(row, cpfRelationTypeColumn);
-
-              Term cpfRelationTypeTerm = _cache.getTerm(TermType.RELATION_TYPE, cpfRelationType);
-
-              if (cpfRelationTypeTerm != null) {
-                cpfRelation.setType(cpfRelationTypeTerm);
-                cpfRelation.setOperation(AbstractData.OPERATION_INSERT);
-              } else {
-                _errors.addInvalidVocabularyFieldError(
-                    RelationModelField.CPF_TO_CPF_RELATION_TYPE.getName(),
-                    cpfRelationType,
-                    cpfRelationTypeColumn,
-                    field.getName(),
-                    cellValue,
-                    csvColumn);
-                continue;
-              }
-
-              con.addRelation(cpfRelation);
-              _relatedIDs.get(ModelType.CONSTELLATION).add(targetConstellation);
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer relatedConstellationID = validator.getIdentifier(field, cellValue);
+            if (relatedConstellationID == null) {
               continue;
             }
+
+            // find and add required 'cpf to cpf relation type' in this row
+            Term cpfRelationTypeTerm =
+                validator.getRelatedTerm(
+                    row,
+                    field,
+                    cellValue,
+                    RelationModelField.CPF_TO_CPF_RELATION_TYPE,
+                    TermType.RELATION_TYPE);
+            if (cpfRelationTypeTerm == null) {
+              continue;
+            }
+
+            int rcid = relatedConstellationID;
+            ConstellationRelation cpfRelation = new ConstellationRelation();
+            cpfRelation.setSourceConstellation(con.getID());
+            cpfRelation.setTargetConstellation(rcid);
+            cpfRelation.setType(cpfRelationTypeTerm);
+            cpfRelation.setOperation(AbstractData.OPERATION_INSERT);
+
+            con.addRelation(cpfRelation);
+            _relatedIDs.get(ModelType.CONSTELLATION).add(rcid);
 
             continue;
 
@@ -192,6 +173,8 @@ public class SNACRelationItem extends SNACAbstractItem {
         }
       }
     }
+
+    _item = con;
 
     logger.debug("built constellation: [" + toJSON() + "]");
   }
@@ -202,7 +185,9 @@ public class SNACRelationItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      switch (_model.getFieldType(entry.getValue())) {
+      RelationModelField field = _model.getFieldType(snacField);
+
+      switch (field) {
         case CPF_TYPE:
           Term previewTerm = _item.getEntityType();
           if (previewTerm != null) {

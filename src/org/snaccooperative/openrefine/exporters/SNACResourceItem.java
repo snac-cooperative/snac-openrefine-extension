@@ -52,7 +52,7 @@ public class SNACResourceItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<ResourceModelField> validator =
-        new SNACFieldValidator<ResourceModelField>(_model, _schema, _utils, _errors);
+        new SNACFieldValidator<ResourceModelField>(_model, _schema, _utils, _cache, _errors);
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
@@ -66,7 +66,7 @@ public class SNACResourceItem extends SNACAbstractItem {
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
-        String cellValue = _utils.getCellValueForRowByColumnName(row, csvColumn);
+        String cellValue = validator.getCellValue(row, csvColumn);
 
         if (cellValue.equals("")) {
           continue;
@@ -80,25 +80,24 @@ public class SNACResourceItem extends SNACAbstractItem {
 
         switch (field) {
           case RESOURCE_ID:
-            try {
-              int id = Integer.parseInt(cellValue);
-              res.setID(id);
-              res.setOperation(AbstractData.OPERATION_UPDATE);
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer resourceID = validator.getIdentifier(field, cellValue);
+            if (resourceID == null) {
+              continue;
             }
+
+            int rid = resourceID;
+            res.setID(rid);
+            res.setOperation(AbstractData.OPERATION_UPDATE);
 
             continue;
 
           case RESOURCE_TYPE:
-            Term typeTerm = _cache.getTerm(TermType.DOCUMENT_TYPE, cellValue);
-
-            if (typeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
+            Term resourceTypeTerm = validator.getTerm(field, cellValue, TermType.DOCUMENT_TYPE);
+            if (resourceTypeTerm == null) {
               continue;
             }
 
-            res.setDocumentType(typeTerm);
+            res.setDocumentType(resourceTypeTerm);
 
             continue;
 
@@ -131,10 +130,8 @@ public class SNACResourceItem extends SNACAbstractItem {
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
-            Term languageCodeTerm = _cache.getTerm(TermType.LANGUAGE_CODE, cellValue);
-
+            Term languageCodeTerm = validator.getTerm(field, cellValue, TermType.LANGUAGE_CODE);
             if (languageCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -144,32 +141,11 @@ public class SNACResourceItem extends SNACAbstractItem {
             lang.setLanguage(languageCodeTerm);
 
             // find and add optional 'script code' in this row
-            String scriptCodeColumn =
-                _schema.getColumnFromSNACField(ResourceModelField.SCRIPT_CODE.getName());
-
-            if (scriptCodeColumn != null) {
-              String scriptCode = _utils.getCellValueForRowByColumnName(row, scriptCodeColumn);
-
-              if (!scriptCode.equals("")) {
-                Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, scriptCode);
-                if (scriptCodeTerm != null) {
-                  // add script code portion
-                  lang.setScript(scriptCodeTerm);
-                } else {
-                  _errors.addInvalidVocabularyFieldError(
-                      ResourceModelField.SCRIPT_CODE.getName(),
-                      scriptCode,
-                      scriptCodeColumn,
-                      field.getName(),
-                      cellValue,
-                      csvColumn);
-                  continue;
-                }
-              } else {
-                // logger.info("no associated script code value found; skipping");
-              }
-            } else {
-              // logger.info("no associated script code column found; skipping");
+            Term optScriptCodeTerm =
+                validator.getRelatedTerm(
+                    row, field, cellValue, ResourceModelField.SCRIPT_CODE, TermType.SCRIPT_CODE);
+            if (optScriptCodeTerm != null) {
+              lang.setScript(optScriptCodeTerm);
             }
 
             res.addLanguage(lang);
@@ -181,27 +157,14 @@ public class SNACResourceItem extends SNACAbstractItem {
             // script code.  Here, we check for the case when there is just a script code.
 
             // check whether there is an associated language code in this row; if so, skip
-            String languageCodeColumn =
-                _schema.getColumnFromSNACField(ResourceModelField.LANGUAGE_CODE.getName());
-
-            if (languageCodeColumn != null) {
-              String languageCode = _utils.getCellValueForRowByColumnName(row, languageCodeColumn);
-
-              if (!languageCode.equals("")) {
-                // this scenario is handled in the "language code" section
-                // logger.info("skipping script code with associated language code");
-                continue;
-              } else {
-                // logger.info("no associated language code value found; proceeding");
-              }
-            } else {
-              // logger.info("no associated language code column found; proceeding");
+            String languageCode =
+                validator.getRelatedCellValue(row, ResourceModelField.LANGUAGE_CODE);
+            if (!languageCode.equals("")) {
+              continue;
             }
 
-            Term scriptCodeTerm = _cache.getTerm(TermType.SCRIPT_CODE, cellValue);
-
+            Term scriptCodeTerm = validator.getTerm(field, cellValue, TermType.SCRIPT_CODE);
             if (scriptCodeTerm == null) {
-              _errors.addInvalidVocabularyFieldError(field.getName(), cellValue, csvColumn);
               continue;
             }
 
@@ -215,19 +178,16 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case HOLDING_REPOSITORY_ID:
-            try {
-              int id = Integer.parseInt(cellValue);
-
-              Constellation cons = new Constellation();
-
-              if (id != 0) {
-                cons.setID(id);
-                res.setRepository(cons);
-                _relatedIDs.get(ModelType.CONSTELLATION).add(id);
-              }
-            } catch (NumberFormatException e) {
-              _errors.addInvalidNumericFieldError(field.getName(), cellValue, csvColumn);
+            Integer holdingRepositoryID = validator.getIdentifier(field, cellValue);
+            if (holdingRepositoryID == null) {
+              continue;
             }
+
+            int hrid = holdingRepositoryID;
+            Constellation holdingRepository = new Constellation();
+            holdingRepository.setID(hrid);
+            res.setRepository(holdingRepository);
+            _relatedIDs.get(ModelType.CONSTELLATION).add(hrid);
 
             continue;
         }
