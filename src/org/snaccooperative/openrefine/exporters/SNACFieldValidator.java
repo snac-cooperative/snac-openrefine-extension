@@ -95,6 +95,19 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
     return true;
   }
 
+  public void ensureRequiredFieldsInSchema() {
+    // normally this is enforced by the schema alignment dialog, but preview tab
+    // will show schemas "in progress" so these errors are useful to show there
+
+    for (int i = 0; i < _model.getRequiredFields().size(); i++) {
+      SNACModelField<E> field = _model.getRequiredFields().get(i);
+      String column = getColumn(field.getName());
+      if (column == null) {
+        _errors.addRequiredFieldMissingError(field.getName());
+      }
+    }
+  }
+
   // inner helper class
 
   private class SNACFieldTracker<E extends Enum<E> & SNACModelFieldType> {

@@ -57,6 +57,8 @@ public class SNACRelationItem extends SNACAbstractItem {
     SNACFieldValidator<RelationFieldType> validator =
         new SNACFieldValidator<RelationFieldType>(_model, _schema, _utils, _cache, _errors);
 
+    validator.ensureRequiredFieldsInSchema();
+
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
 

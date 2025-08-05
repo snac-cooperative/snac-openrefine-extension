@@ -67,6 +67,19 @@ public class SNACAbstractModel<E extends Enum<E> & SNACModelFieldType> {
     return _fieldList;
   }
 
+  public List<SNACModelField<E>> getRequiredFields() {
+    List<SNACModelField<E>> requiredFields = new ArrayList<SNACModelField<E>>();
+
+    for (int i = 0; i < _fieldList.size(); i++) {
+      SNACModelField<E> field = _fieldList.get(i);
+      if (field.isRequired()) {
+        requiredFields.add(field);
+      }
+    }
+
+    return requiredFields;
+  }
+
   public E getFieldType(String s) {
     if (s == null || s.equals("")) {
       return _defaultFieldType;

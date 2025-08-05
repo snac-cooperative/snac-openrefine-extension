@@ -55,6 +55,8 @@ public class SNACResourceItem extends SNACAbstractItem {
     SNACFieldValidator<ResourceFieldType> validator =
         new SNACFieldValidator<ResourceFieldType>(_model, _schema, _utils, _cache, _errors);
 
+    validator.ensureRequiredFieldsInSchema();
+
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
 

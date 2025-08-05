@@ -239,7 +239,16 @@ public class SNACValidationErrors {
       err += " (column \"" + fieldColumn + "\")";
     }
 
-    err += " is required, but not found in this record";
+    err += " is required, but not defined in this record";
+
+    addError(err);
+  }
+
+  public void addRequiredFieldMissingError(String fieldName) {
+    String err;
+
+    err = "Field \"" + fieldName + "\"";
+    err += " is required, but not present in SNAC schema";
 
     addError(err);
   }

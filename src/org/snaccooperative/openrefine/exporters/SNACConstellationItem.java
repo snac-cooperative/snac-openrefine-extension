@@ -61,6 +61,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
     SNACFieldValidator<ConstellationFieldType> validator =
         new SNACFieldValidator<ConstellationFieldType>(_model, _schema, _utils, _cache, _errors);
 
+    validator.ensureRequiredFieldsInSchema();
+
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
 
