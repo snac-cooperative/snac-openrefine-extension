@@ -923,10 +923,6 @@ SNACSchemaAlignmentDialog.preview = function() {
 
             $('<hr>').appendTo(previewContainer);
 
-            // give a little more room to prevent minor cutoff of last line
-            var previewHeight = _this._previewPanes.height();
-            _this._previewPanes.height(previewHeight + 50);
-
             _this.updateItemPreviewText(schema.schemaType, data.preview.length, data.total);
          }
 
