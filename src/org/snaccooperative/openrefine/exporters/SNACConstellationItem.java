@@ -572,6 +572,10 @@ public class SNACConstellationItem extends SNACAbstractItem {
       outFields.put("*** Operation ***", "Insert new Constellation");
     }
 
+    if (_errors.hasErrors()) {
+      outFields.put("Validation Errors", htmlOrderedList(_errors.getErrors()));
+    }
+
     String preview = "";
     // FIXME: output in predetermined order (not just alphabetical)?
     for (String key : outFields.keySet()) {

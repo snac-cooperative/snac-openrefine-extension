@@ -324,6 +324,10 @@ public class SNACResourceItem extends SNACAbstractItem {
       outFields.put("*** Operation ***", "Insert new Resource");
     }
 
+    if (_errors.hasErrors()) {
+      outFields.put("Validation Errors", htmlOrderedList(_errors.getErrors()));
+    }
+
     String preview = "";
     // FIXME: output in predetermined order (not just alphabetical)?
     for (String key : outFields.keySet()) {
