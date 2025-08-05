@@ -77,11 +77,12 @@ public class SNACAPIClient {
 
   public SNACAPIResponse post(String req) {
     try {
-      logger.debug("API POST data: [" + req + "]");
+      // logger.debug("API POST data: [" + req + "]");
       StringEntity apiCasted = new StringEntity(req, "UTF-8");
       _post.setEntity(apiCasted);
       HttpResponse res = _client.execute(_post);
       String result = EntityUtils.toString(res.getEntity());
+      // logger.debug("API response: [" + result + "]");
       return new SNACAPIResponse(this, result);
     } catch (IOException e) {
       logger.error(e.toString());

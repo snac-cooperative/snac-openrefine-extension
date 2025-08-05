@@ -22,6 +22,7 @@ import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
+import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.model.SNACRelationModel;
 import org.snaccooperative.openrefine.model.SNACRelationModel.RelationModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
@@ -49,9 +50,9 @@ public class SNACRelationItem extends SNACAbstractItem {
 
   protected void buildItem() {
     this._item = null;
+    this._errors = new SNACValidationErrors();
     this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
     this._relatedIDs.put(ModelType.RESOURCE, new LinkedList<Integer>());
-    this._errors = new SNACValidationErrors();
 
     SNACFieldValidator<RelationModelField> validator =
         new SNACFieldValidator<RelationModelField>(_model, _schema, _utils, _cache, _errors);
@@ -63,6 +64,12 @@ public class SNACRelationItem extends SNACAbstractItem {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
 
+      RelationModelField field = _model.getFieldType(snacField);
+      SNACModelField<RelationModelField> modelField = _model.getModelField(field);
+
+      // initialize field tracker
+      validator.initializeField(modelField);
+
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
 
@@ -72,11 +79,9 @@ public class SNACRelationItem extends SNACAbstractItem {
           continue;
         }
 
-        RelationModelField field = _model.getFieldType(snacField);
-
-        // quick check: ensure current field meets occurence and dependency requirements
+        // quick check: ensure current field meets occurence and row dependency requirements
         // NOTE: fields are checked and counted even if they are invalid and would be skipped!
-        if (!validator.checkAndCountField(_model.getModelField(field), cellValue, row)) {
+        if (!validator.checkAndCountField(modelField, cellValue, row)) {
           continue;
         }
 
@@ -90,6 +95,9 @@ public class SNACRelationItem extends SNACAbstractItem {
             int cid = constellationID;
             con.setID(cid);
             con.setOperation(AbstractData.OPERATION_UPDATE);
+
+            // record this id so that verifyRelatedIDs() checks for its existence
+            _id = cid;
 
             continue;
 
@@ -131,6 +139,8 @@ public class SNACRelationItem extends SNACAbstractItem {
             resourceRelation.setRole(resourceRoleTerm);
 
             con.addResourceRelation(resourceRelation);
+
+            // record this id so that verifyRelatedIDs() checks for its existence
             _relatedIDs.get(ModelType.RESOURCE).add(rrid);
 
             continue;
@@ -164,6 +174,8 @@ public class SNACRelationItem extends SNACAbstractItem {
             cpfRelation.setOperation(AbstractData.OPERATION_INSERT);
 
             con.addRelation(cpfRelation);
+
+            // record this id so that verifyRelatedIDs() checks for its existence
             _relatedIDs.get(ModelType.CONSTELLATION).add(rcid);
 
             continue;
@@ -172,6 +184,9 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
         }
       }
+
+      // perform final checks on this field (for now, just ensures existence of required fields)
+      validator.finalizeField(modelField);
     }
 
     _item = con;

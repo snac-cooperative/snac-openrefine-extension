@@ -35,10 +35,12 @@ public class SNACValidationErrors {
   public String getAccumulatedErrorString() {
     List<String> errs = new ArrayList<String>();
 
-    if (_validationErrors.size() > 0) {
-      errs.add("Validation Errors:");
-      errs.add("");
-    }
+    /*
+        if (_validationErrors.size() > 0) {
+          errs.add("Validation Errors:");
+          errs.add("");
+        }
+    */
 
     for (int i = 0; i < _validationErrors.size(); i++) {
       errs.add((i + 1) + ". " + _validationErrors.get(i));
@@ -184,7 +186,7 @@ public class SNACValidationErrors {
     addRequiredFieldEmptyError(fieldName, fieldValue, fieldColumn, depName, depColumn, "dependent");
   }
 
-  // related SNAC entity errors
+  // snac id errors
 
   private void addMissingIDError(String idType, int id) {
     String err;
@@ -206,6 +208,14 @@ public class SNACValidationErrors {
     addMissingIDError("Holding Repository", id);
   }
 
+  public void addMissingCPFError(int id) {
+    addMissingIDError("CPF", id);
+  }
+
+  public void addMissingResourceError(int id) {
+    addMissingIDError("Resource", id);
+  }
+
   // field validation errors
 
   public void addOccurenceLimitError(String fieldName, String fieldColumn) {
@@ -219,5 +229,22 @@ public class SNACValidationErrors {
     err += " can only appear once per record";
 
     addError(err);
+  }
+
+  public void addRequiredFieldMissingError(String fieldName, String fieldColumn) {
+    String err;
+
+    err = "Field \"" + fieldName + "\"";
+    if (fieldColumn != null && !fieldColumn.equals("")) {
+      err += " (column \"" + fieldColumn + "\")";
+    }
+
+    err += " is required, but not found in this record";
+
+    addError(err);
+  }
+
+  public void addNoRelationsDefinedError() {
+    addError("No related CPFs or Resources defined for this record");
   }
 }

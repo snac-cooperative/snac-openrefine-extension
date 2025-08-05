@@ -21,6 +21,7 @@ import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
+import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.model.SNACResourceModel;
 import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
@@ -48,8 +49,8 @@ public class SNACResourceItem extends SNACAbstractItem {
 
   protected void buildItem() {
     this._item = null;
-    this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
     this._errors = new SNACValidationErrors();
+    this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
 
     SNACFieldValidator<ResourceModelField> validator =
         new SNACFieldValidator<ResourceModelField>(_model, _schema, _utils, _cache, _errors);
@@ -62,6 +63,10 @@ public class SNACResourceItem extends SNACAbstractItem {
       String snacField = entry.getValue();
 
       ResourceModelField field = _model.getFieldType(snacField);
+      SNACModelField<ResourceModelField> modelField = _model.getModelField(field);
+
+      // initialize field tracker
+      validator.initializeField(modelField);
 
       for (int i = _record.fromRowIndex; i < _record.toRowIndex; i++) {
         Row row = _project.rows.get(i);
@@ -72,9 +77,9 @@ public class SNACResourceItem extends SNACAbstractItem {
           continue;
         }
 
-        // quick check: ensure current field meets occurence and dependency requirements
+        // quick check: ensure current field meets occurence and row dependency requirements
         // NOTE: fields are checked and counted even if they are invalid and would be skipped!
-        if (!validator.checkAndCountField(_model.getModelField(field), cellValue, row)) {
+        if (!validator.checkAndCountField(modelField, cellValue, row)) {
           continue;
         }
 
@@ -88,6 +93,9 @@ public class SNACResourceItem extends SNACAbstractItem {
             int rid = resourceID;
             res.setID(rid);
             res.setOperation(AbstractData.OPERATION_UPDATE);
+
+            // record this id so that verifyRelatedIDs() checks for its existence
+            _id = rid;
 
             continue;
 
@@ -187,11 +195,16 @@ public class SNACResourceItem extends SNACAbstractItem {
             Constellation holdingRepository = new Constellation();
             holdingRepository.setID(hrid);
             res.setRepository(holdingRepository);
+
+            // record this id so that verifyRelatedIDs() checks for its existence
             _relatedIDs.get(ModelType.CONSTELLATION).add(hrid);
 
             continue;
         }
       }
+
+      // perform final checks on this field (for now, just ensures existence of required fields)
+      validator.finalizeField(modelField);
     }
 
     _item = res;

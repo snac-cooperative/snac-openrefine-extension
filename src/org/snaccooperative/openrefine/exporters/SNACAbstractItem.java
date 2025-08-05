@@ -29,6 +29,7 @@ public abstract class SNACAbstractItem {
   protected SNACSchemaUtilities _utils;
   protected SNACValidationErrors _errors;
 
+  protected Integer _id;
   protected Map<ModelType, List<Integer>> _relatedIDs;
 
   public SNACAbstractItem(
@@ -47,6 +48,7 @@ public abstract class SNACAbstractItem {
     this._utils = new SNACSchemaUtilities(_project, _schema);
     this._errors = null;
 
+    this._id = null;
     this._relatedIDs = new HashMap<ModelType, List<Integer>>();
     for (ModelType type : ModelType.values()) {
       this._relatedIDs.put(type, new LinkedList<Integer>());
@@ -80,6 +82,21 @@ public abstract class SNACAbstractItem {
   }
 
   protected void verifyRelatedIDs() {
+    // First, verify that any constellation/resource being updated
+    // actually exists in the preferred SNAC environment.
+
+    if (_id != null) {
+      if (_modelType == ModelType.RESOURCE) {
+        if (!_cache.resourceExists(_id)) {
+          _errors.addMissingResourceError(_id);
+        }
+      } else {
+        if (!_cache.constellationExists(_id)) {
+          _errors.addMissingCPFError(_id);
+        }
+      }
+    }
+
     // Before uploading, we verify existence of any related CPF and resource
     // IDs in the selected SNAC environment.  This is because SNAC will
     // accept related CPF IDs that do not actually exist, then crash when
@@ -99,8 +116,7 @@ public abstract class SNACAbstractItem {
     if (_modelType == ModelType.RELATION
         && _relatedIDs.get(ModelType.CONSTELLATION).size() == 0
         && _relatedIDs.get(ModelType.RESOURCE).size() == 0) {
-      _errors.addError("No related CPFs or Resources defined for this record");
-      return;
+      _errors.addNoRelationsDefinedError();
     }
 
     List<Integer> ids;

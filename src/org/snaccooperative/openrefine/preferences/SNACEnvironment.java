@@ -30,7 +30,7 @@ public class SNACEnvironment {
   }
 
   public Boolean isProd() {
-    return _id.toLowerCase().equals("prod");
+    return _id.equalsIgnoreCase("prod");
   }
 
   public String getID() {

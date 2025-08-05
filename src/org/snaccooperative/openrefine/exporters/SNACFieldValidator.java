@@ -46,12 +46,16 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
   private SNACFieldTracker getFieldTracker(SNACModelField<E> field) {
     E fieldType = field.getFieldType();
 
-    _fields.putIfAbsent(fieldType, new SNACFieldTracker<E>(field, _model, _schema, _errors));
+    _fields.putIfAbsent(fieldType, new SNACFieldTracker<E>(field, _model, _errors));
 
     return _fields.get(fieldType);
   }
 
   // field tracking helpers
+
+  public void initializeField(SNACModelField<E> field) {
+    getFieldTracker(field);
+  }
 
   public void addOccurence(SNACModelField<E> field) {
     getFieldTracker(field).addOccurence();
@@ -59,6 +63,10 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
 
   public Boolean hasReachedLimit(SNACModelField<E> field) {
     return getFieldTracker(field).hasReachedLimit();
+  }
+
+  public void finalizeField(SNACModelField<E> field) {
+    getFieldTracker(field).finalizeField();
   }
 
   // field processing helpers
@@ -95,24 +103,19 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
 
     private final SNACModelField<E> _field;
     private final SNACAbstractModel<E> _model;
-    private final SNACSchema _schema;
     private SNACValidationErrors _errors;
 
     private int _count;
-    private Boolean _warned;
+    private Boolean _warnedOccurenceLimit;
 
     public SNACFieldTracker(
-        SNACModelField<E> field,
-        SNACAbstractModel<E> model,
-        SNACSchema schema,
-        SNACValidationErrors errors) {
+        SNACModelField<E> field, SNACAbstractModel<E> model, SNACValidationErrors errors) {
       this._field = field;
       this._model = model;
-      this._schema = schema;
       this._errors = errors;
 
       this._count = 0;
-      this._warned = false;
+      this._warnedOccurenceLimit = false;
     }
 
     public void addOccurence() {
@@ -121,10 +124,9 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
 
     public Boolean hasReachedLimit() {
       if (_field.getOccurenceType() == FieldOccurence.SINGLE && _count > 0) {
-        if (_warned == false) {
-          _errors.addOccurenceLimitError(
-              _field.getName(), _schema.getColumnFromSNACField(_field.getName()));
-          _warned = true;
+        if (_warnedOccurenceLimit == false) {
+          _errors.addOccurenceLimitError(_field.getName(), getColumn(_field.getName()));
+          _warnedOccurenceLimit = true;
         }
         return true;
       }
@@ -136,7 +138,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       Boolean retval = true;
 
       E fieldType = _field.getFieldType();
-      String fieldColumn = _schema.getColumnFromSNACField(fieldType.getName());
+      String fieldColumn = getColumn(fieldType.getName());
 
       List<E> deps;
 
@@ -147,7 +149,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       for (int i = 0; i < deps.size(); i++) {
         E requiredField = deps.get(i);
 
-        String requiredColumn = _schema.getColumnFromSNACField(requiredField.getName());
+        String requiredColumn = getColumn(requiredField.getName());
         if (requiredColumn == null) {
           _errors.addRequiredDependencyFieldMissingError(
               fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);
@@ -175,7 +177,7 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       for (int i = 0; i < deps.size(); i++) {
         E requiredField = deps.get(i);
 
-        String requiredColumn = _schema.getColumnFromSNACField(requiredField.getName());
+        String requiredColumn = getColumn(requiredField.getName());
         if (requiredColumn == null) {
           _errors.addRequiredDependentFieldMissingError(
               fieldType.getName(), fieldColumn, requiredField.getName(), requiredColumn);
@@ -197,6 +199,12 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
       }
 
       return retval;
+    }
+
+    public void finalizeField() {
+      if (_field.isRequired() && _count == 0) {
+        _errors.addRequiredFieldMissingError(_field.getName(), getColumn(_field.getName()));
+      }
     }
   }
 
@@ -225,9 +233,14 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
   public String getRelatedCellValue(Row row, E relatedType, String fallbackValue) {
     String relatedColumn = getColumn(relatedType);
 
-    String relatedValue = fallbackValue;
+    String relatedValue = "";
+
     if (relatedColumn != null) {
       relatedValue = getCellValue(row, relatedColumn);
+    }
+
+    if (fallbackValue != null && relatedValue.equals("")) {
+      relatedValue = fallbackValue;
     }
 
     return relatedValue;
@@ -276,7 +289,6 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
     Term term = _cache.getTerm(termType, relatedValue);
 
     if (term == null) {
-      //      if (_model.getModelField(fieldType).hasRequirementWith(relatedType)) {
       _errors.addInvalidVocabularyFieldError(
           relatedType.getName(),
           relatedValue,
@@ -284,7 +296,6 @@ public class SNACFieldValidator<E extends Enum<E> & SNACModelFieldType> {
           fieldType.getName(),
           fieldValue,
           getColumn(fieldType));
-      //      }
       return null;
     }
 

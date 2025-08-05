@@ -306,18 +306,27 @@ public class SNACModelField<E extends Enum<E> & SNACModelFieldType> {
     return false;
   }
 
-  public Boolean hasRequirementWith(E fieldType) {
-    List<E> reqTypes = new ArrayList<E>();
-
-    reqTypes.addAll(getRequiredDependenciesFieldTypes());
-    reqTypes.addAll(getRequiredDependentsFieldTypes());
-
-    for (E reqType : reqTypes) {
-      if (reqType == fieldType) {
+  public Boolean hasRequiredDependency(E fieldType) {
+    for (E depType : getRequiredDependenciesFieldTypes()) {
+      if (depType == fieldType) {
         return true;
       }
     }
 
     return false;
+  }
+
+  public Boolean hasRequiredDependent(E fieldType) {
+    for (E depType : getRequiredDependentsFieldTypes()) {
+      if (depType == fieldType) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public Boolean hasRequirementWith(E fieldType) {
+    return hasRequiredDependency(fieldType) || hasRequiredDependent(fieldType);
   }
 }
