@@ -23,7 +23,7 @@ import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.model.SNACResourceModel;
-import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceModelField;
+import org.snaccooperative.openrefine.model.SNACResourceModel.ResourceFieldType;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACResourceItem extends SNACAbstractItem {
@@ -52,8 +52,8 @@ public class SNACResourceItem extends SNACAbstractItem {
     this._errors = new SNACValidationErrors();
     this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
 
-    SNACFieldValidator<ResourceModelField> validator =
-        new SNACFieldValidator<ResourceModelField>(_model, _schema, _utils, _cache, _errors);
+    SNACFieldValidator<ResourceFieldType> validator =
+        new SNACFieldValidator<ResourceFieldType>(_model, _schema, _utils, _cache, _errors);
 
     Resource res = new Resource();
     res.setOperation(AbstractData.OPERATION_INSERT);
@@ -62,8 +62,8 @@ public class SNACResourceItem extends SNACAbstractItem {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
 
-      ResourceModelField field = _model.getFieldType(snacField);
-      SNACModelField<ResourceModelField> modelField = _model.getModelField(field);
+      ResourceFieldType fieldType = _model.getFieldType(snacField);
+      SNACModelField<ResourceFieldType> modelField = _model.getModelField(fieldType);
 
       // initialize field tracker
       validator.initializeField(modelField);
@@ -83,9 +83,9 @@ public class SNACResourceItem extends SNACAbstractItem {
           continue;
         }
 
-        switch (field) {
+        switch (fieldType) {
           case RESOURCE_ID:
-            Integer resourceID = validator.getIdentifier(field, cellValue);
+            Integer resourceID = validator.getIdentifier(fieldType, cellValue);
             if (resourceID == null) {
               continue;
             }
@@ -100,7 +100,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case RESOURCE_TYPE:
-            Term resourceTypeTerm = validator.getTerm(field, cellValue, TermType.DOCUMENT_TYPE);
+            Term resourceTypeTerm = validator.getTerm(fieldType, cellValue, TermType.DOCUMENT_TYPE);
             if (resourceTypeTerm == null) {
               continue;
             }
@@ -138,7 +138,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
-            Term languageCodeTerm = validator.getTerm(field, cellValue, TermType.LANGUAGE_CODE);
+            Term languageCodeTerm = validator.getTerm(fieldType, cellValue, TermType.LANGUAGE_CODE);
             if (languageCodeTerm == null) {
               continue;
             }
@@ -151,7 +151,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             // find and add optional 'script code' in this row
             Term optScriptCodeTerm =
                 validator.getRelatedTerm(
-                    row, field, cellValue, ResourceModelField.SCRIPT_CODE, TermType.SCRIPT_CODE);
+                    row, fieldType, cellValue, ResourceFieldType.SCRIPT_CODE, TermType.SCRIPT_CODE);
             if (optScriptCodeTerm != null) {
               lang.setScript(optScriptCodeTerm);
             }
@@ -166,12 +166,12 @@ public class SNACResourceItem extends SNACAbstractItem {
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCode =
-                validator.getRelatedCellValue(row, ResourceModelField.LANGUAGE_CODE);
+                validator.getRelatedCellValue(row, ResourceFieldType.LANGUAGE_CODE);
             if (!languageCode.equals("")) {
               continue;
             }
 
-            Term scriptCodeTerm = validator.getTerm(field, cellValue, TermType.SCRIPT_CODE);
+            Term scriptCodeTerm = validator.getTerm(fieldType, cellValue, TermType.SCRIPT_CODE);
             if (scriptCodeTerm == null) {
               continue;
             }
@@ -186,7 +186,7 @@ public class SNACResourceItem extends SNACAbstractItem {
             continue;
 
           case HOLDING_REPOSITORY_ID:
-            Integer holdingRepositoryID = validator.getIdentifier(field, cellValue);
+            Integer holdingRepositoryID = validator.getIdentifier(fieldType, cellValue);
             if (holdingRepositoryID == null) {
               continue;
             }
@@ -218,9 +218,9 @@ public class SNACResourceItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      ResourceModelField field = _model.getFieldType(snacField);
+      ResourceFieldType fieldType = _model.getFieldType(snacField);
 
-      switch (field) {
+      switch (fieldType) {
         case RESOURCE_TYPE:
           Term previewTerm = _item.getDocumentType();
           if (previewTerm != null) {

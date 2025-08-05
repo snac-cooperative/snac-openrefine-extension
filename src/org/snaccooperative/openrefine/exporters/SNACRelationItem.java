@@ -24,7 +24,7 @@ import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACAbstractModel.ModelType;
 import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.model.SNACRelationModel;
-import org.snaccooperative.openrefine.model.SNACRelationModel.RelationModelField;
+import org.snaccooperative.openrefine.model.SNACRelationModel.RelationFieldType;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
 public class SNACRelationItem extends SNACAbstractItem {
@@ -54,8 +54,8 @@ public class SNACRelationItem extends SNACAbstractItem {
     this._relatedIDs.put(ModelType.CONSTELLATION, new LinkedList<Integer>());
     this._relatedIDs.put(ModelType.RESOURCE, new LinkedList<Integer>());
 
-    SNACFieldValidator<RelationModelField> validator =
-        new SNACFieldValidator<RelationModelField>(_model, _schema, _utils, _cache, _errors);
+    SNACFieldValidator<RelationFieldType> validator =
+        new SNACFieldValidator<RelationFieldType>(_model, _schema, _utils, _cache, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -64,8 +64,8 @@ public class SNACRelationItem extends SNACAbstractItem {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
 
-      RelationModelField field = _model.getFieldType(snacField);
-      SNACModelField<RelationModelField> modelField = _model.getModelField(field);
+      RelationFieldType fieldType = _model.getFieldType(snacField);
+      SNACModelField<RelationFieldType> modelField = _model.getModelField(fieldType);
 
       // initialize field tracker
       validator.initializeField(modelField);
@@ -85,9 +85,9 @@ public class SNACRelationItem extends SNACAbstractItem {
           continue;
         }
 
-        switch (field) {
+        switch (fieldType) {
           case CPF_ID:
-            Integer constellationID = validator.getIdentifier(field, cellValue);
+            Integer constellationID = validator.getIdentifier(fieldType, cellValue);
             if (constellationID == null) {
               continue;
             }
@@ -102,7 +102,7 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
 
           case CPF_TYPE:
-            Term entityTypeTerm = validator.getTerm(field, cellValue, TermType.ENTITY_TYPE);
+            Term entityTypeTerm = validator.getTerm(fieldType, cellValue, TermType.ENTITY_TYPE);
             if (entityTypeTerm == null) {
               continue;
             }
@@ -112,7 +112,7 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
 
           case RELATED_RESOURCE_ID:
-            Integer relatedResourceID = validator.getIdentifier(field, cellValue);
+            Integer relatedResourceID = validator.getIdentifier(fieldType, cellValue);
             if (relatedResourceID == null) {
               continue;
             }
@@ -121,9 +121,9 @@ public class SNACRelationItem extends SNACAbstractItem {
             Term resourceRoleTerm =
                 validator.getRelatedTerm(
                     row,
-                    field,
+                    fieldType,
                     cellValue,
-                    RelationModelField.CPF_TO_RESOURCE_RELATION_TYPE,
+                    RelationFieldType.CPF_TO_RESOURCE_RELATION_TYPE,
                     TermType.DOCUMENT_ROLE);
             if (resourceRoleTerm == null) {
               continue;
@@ -149,7 +149,7 @@ public class SNACRelationItem extends SNACAbstractItem {
             continue;
 
           case RELATED_CPF_ID:
-            Integer relatedConstellationID = validator.getIdentifier(field, cellValue);
+            Integer relatedConstellationID = validator.getIdentifier(fieldType, cellValue);
             if (relatedConstellationID == null) {
               continue;
             }
@@ -158,9 +158,9 @@ public class SNACRelationItem extends SNACAbstractItem {
             Term cpfRelationTypeTerm =
                 validator.getRelatedTerm(
                     row,
-                    field,
+                    fieldType,
                     cellValue,
-                    RelationModelField.CPF_TO_CPF_RELATION_TYPE,
+                    RelationFieldType.CPF_TO_CPF_RELATION_TYPE,
                     TermType.RELATION_TYPE);
             if (cpfRelationTypeTerm == null) {
               continue;
@@ -200,9 +200,9 @@ public class SNACRelationItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      RelationModelField field = _model.getFieldType(snacField);
+      RelationFieldType fieldType = _model.getFieldType(snacField);
 
-      switch (field) {
+      switch (fieldType) {
         case CPF_TYPE:
           Term previewTerm = _item.getEntityType();
           if (previewTerm != null) {

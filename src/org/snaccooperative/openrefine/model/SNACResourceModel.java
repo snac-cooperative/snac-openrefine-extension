@@ -9,9 +9,9 @@ import org.snaccooperative.openrefine.model.SNACModelField.FieldRequirement;
 import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
 import org.snaccooperative.openrefine.model.SNACModelFieldRelation.FieldRelationType;
 
-public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.ResourceModelField> {
+public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.ResourceFieldType> {
 
-  public enum ResourceModelField implements SNACModelFieldType {
+  public enum ResourceFieldType implements SNACModelFieldType {
     NONE,
     RESOURCE_TYPE("Resource Type"),
     RESOURCE_ID("Resource ID"),
@@ -26,11 +26,11 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
 
     private final String _name;
 
-    ResourceModelField() {
+    ResourceFieldType() {
       this("");
     }
 
-    ResourceModelField(String name) {
+    ResourceFieldType(String name) {
       this._name = name;
     }
 
@@ -42,11 +42,11 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
   static final Logger logger = LoggerFactory.getLogger(SNACResourceModel.class);
 
   public SNACResourceModel() {
-    super(ModelType.RESOURCE, ResourceModelField.NONE);
+    super(ModelType.RESOURCE, ResourceFieldType.NONE);
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.RESOURCE_TYPE,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.RESOURCE_TYPE,
                 FieldRequirement.REQUIRED,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.CONTROLLED,
@@ -61,8 +61,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.RESOURCE_ID,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.RESOURCE_ID,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.IDENTIFIER,
@@ -71,8 +71,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.TITLE,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.TITLE,
                 FieldRequirement.REQUIRED,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.FREETEXT,
@@ -80,8 +80,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.RESOURCE_URL,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.RESOURCE_URL,
                 FieldRequirement.REQUIRED,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.FREETEXT,
@@ -89,8 +89,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.HOLDING_REPOSITORY_ID,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.HOLDING_REPOSITORY_ID,
                 FieldRequirement.REQUIRED,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.IDENTIFIER,
@@ -99,8 +99,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.ABSTRACT,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.ABSTRACT,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.FREETEXT,
@@ -108,8 +108,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.EXTENT,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.EXTENT,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.FREETEXT,
@@ -117,8 +117,8 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.DATE,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.DATE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.FREETEXT,
@@ -126,34 +126,34 @@ public class SNACResourceModel extends SNACAbstractModel<SNACResourceModel.Resou
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.LANGUAGE_CODE,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.LANGUAGE_CODE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "ISO 639 Language Code.")
             .withDependencies(
-                new SNACModelFieldRelations<ResourceModelField>(
-                    new ArrayList<SNACModelFieldRelation<ResourceModelField>>(
+                new SNACModelFieldRelations<ResourceFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ResourceFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ResourceModelField>(
-                                ResourceModelField.SCRIPT_CODE, FieldRelationType.OPTIONAL)))))
+                            new SNACModelFieldRelation<ResourceFieldType>(
+                                ResourceFieldType.SCRIPT_CODE, FieldRelationType.OPTIONAL)))))
             .withSampleValues(new ArrayList<String>(Arrays.asList("eng", "ger", "jpn")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ResourceModelField>(
-                ResourceModelField.SCRIPT_CODE,
+        new SNACModelField.Builder<ResourceFieldType>(
+                ResourceFieldType.SCRIPT_CODE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "ISO 15924 Script Code.")
             .withDependencies(
-                new SNACModelFieldRelations<ResourceModelField>(
-                    new ArrayList<SNACModelFieldRelation<ResourceModelField>>(
+                new SNACModelFieldRelations<ResourceFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ResourceFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ResourceModelField>(
-                                ResourceModelField.LANGUAGE_CODE, FieldRelationType.OPTIONAL)))))
+                            new SNACModelFieldRelation<ResourceFieldType>(
+                                ResourceFieldType.LANGUAGE_CODE, FieldRelationType.OPTIONAL)))))
             .withSampleValues(new ArrayList<String>(Arrays.asList("Latn", "Cyrl", "Grek")))
             .build());
   }

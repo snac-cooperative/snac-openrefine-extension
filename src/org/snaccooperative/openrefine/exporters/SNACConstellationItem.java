@@ -29,7 +29,7 @@ import org.snaccooperative.openrefine.api.SNACAPIResponse;
 import org.snaccooperative.openrefine.cache.SNACLookupCache;
 import org.snaccooperative.openrefine.cache.SNACLookupCache.TermType;
 import org.snaccooperative.openrefine.model.SNACConstellationModel;
-import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationModelField;
+import org.snaccooperative.openrefine.model.SNACConstellationModel.ConstellationFieldType;
 import org.snaccooperative.openrefine.model.SNACModelField;
 import org.snaccooperative.openrefine.schema.SNACSchema;
 
@@ -58,8 +58,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
     this._item = null;
     this._errors = new SNACValidationErrors();
 
-    SNACFieldValidator<ConstellationModelField> validator =
-        new SNACFieldValidator<ConstellationModelField>(_model, _schema, _utils, _cache, _errors);
+    SNACFieldValidator<ConstellationFieldType> validator =
+        new SNACFieldValidator<ConstellationFieldType>(_model, _schema, _utils, _cache, _errors);
 
     Constellation con = new Constellation();
     con.setOperation(AbstractData.OPERATION_INSERT);
@@ -68,8 +68,8 @@ public class SNACConstellationItem extends SNACAbstractItem {
       String csvColumn = entry.getKey();
       String snacField = entry.getValue();
 
-      ConstellationModelField field = _model.getFieldType(snacField);
-      SNACModelField<ConstellationModelField> modelField = _model.getModelField(field);
+      ConstellationFieldType fieldType = _model.getFieldType(snacField);
+      SNACModelField<ConstellationFieldType> modelField = _model.getModelField(fieldType);
 
       // initialize field tracker
       validator.initializeField(modelField);
@@ -89,9 +89,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
           continue;
         }
 
-        switch (field) {
+        switch (fieldType) {
           case CPF_ID:
-            Integer constellationID = validator.getIdentifier(field, cellValue);
+            Integer constellationID = validator.getIdentifier(fieldType, cellValue);
             if (constellationID == null) {
               continue;
             }
@@ -106,7 +106,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case CPF_TYPE:
-            Term entityTypeTerm = validator.getTerm(field, cellValue, TermType.ENTITY_TYPE);
+            Term entityTypeTerm = validator.getTerm(fieldType, cellValue, TermType.ENTITY_TYPE);
             if (entityTypeTerm == null) {
               continue;
             }
@@ -143,9 +143,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term existDateTypeTerm =
                 validator.getRelatedTerm(
                     row,
-                    field,
+                    fieldType,
                     cellValue,
-                    ConstellationModelField.EXIST_DATE_TYPE,
+                    ConstellationFieldType.EXIST_DATE_TYPE,
                     TermType.DATE_TYPE);
             if (existDateTypeTerm == null) {
               continue;
@@ -154,7 +154,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // find and add optional 'exist date descriptive note' in this row
             String existDateDescriptiveNote =
                 validator.getRelatedCellValue(
-                    row, ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE);
+                    row, ConstellationFieldType.EXIST_DATE_DESCRIPTIVE_NOTE);
 
             SNACDate date = new SNACDate();
 
@@ -173,7 +173,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case SUBJECT:
-            Term subjectTerm = validator.getTerm(field, cellValue, TermType.SUBJECT);
+            Term subjectTerm = validator.getTerm(fieldType, cellValue, TermType.SUBJECT);
             if (subjectTerm == null) {
               continue;
             }
@@ -195,9 +195,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term placeTypeTerm =
                 validator.getRelatedTerm(
                     row,
-                    field,
+                    fieldType,
                     cellValue,
-                    ConstellationModelField.PLACE_TYPE,
+                    ConstellationFieldType.PLACE_TYPE,
                     TermType.PLACE_TYPE,
                     "AssociatedPlace");
             if (placeTypeTerm == null) {
@@ -209,7 +209,11 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // find and add optional 'place role' in this row
             Term placeRoleTerm =
                 validator.getRelatedTerm(
-                    row, field, cellValue, ConstellationModelField.PLACE_ROLE, TermType.PLACE_ROLE);
+                    row,
+                    fieldType,
+                    cellValue,
+                    ConstellationFieldType.PLACE_ROLE,
+                    TermType.PLACE_ROLE);
             if (placeRoleTerm != null) {
               place.setRole(placeRoleTerm);
             }
@@ -232,7 +236,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // find and add optional 'source citation url' in this row
             String sourceCitationURL =
-                validator.getRelatedCellValue(row, ConstellationModelField.SOURCE_CITATION_URL);
+                validator.getRelatedCellValue(row, ConstellationFieldType.SOURCE_CITATION_URL);
             if (sourceCitationURL != "") {
               source.setURI(sourceCitationURL);
             }
@@ -240,7 +244,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // find and add optional 'source citation found data' in this row
             String sourceCitationFoundData =
                 validator.getRelatedCellValue(
-                    row, ConstellationModelField.SOURCE_CITATION_FOUND_DATA);
+                    row, ConstellationFieldType.SOURCE_CITATION_FOUND_DATA);
             if (sourceCitationFoundData != "") {
               source.setText(sourceCitationFoundData);
             }
@@ -257,7 +261,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case OCCUPATION:
-            Term occupationTerm = validator.getTerm(field, cellValue, TermType.OCCUPATION);
+            Term occupationTerm = validator.getTerm(fieldType, cellValue, TermType.OCCUPATION);
             if (occupationTerm == null) {
               continue;
             }
@@ -271,7 +275,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             continue;
 
           case ACTIVITY:
-            Term activityTerm = validator.getTerm(field, cellValue, TermType.ACTIVITY);
+            Term activityTerm = validator.getTerm(fieldType, cellValue, TermType.ACTIVITY);
             if (activityTerm == null) {
               continue;
             }
@@ -288,7 +292,7 @@ public class SNACConstellationItem extends SNACAbstractItem {
             // NOTE: SNAC language type can contain any combination of language code and/or
             // script code.  Here, we check for the cases that contain a language code.
 
-            Term languageCodeTerm = validator.getTerm(field, cellValue, TermType.LANGUAGE_CODE);
+            Term languageCodeTerm = validator.getTerm(fieldType, cellValue, TermType.LANGUAGE_CODE);
             if (languageCodeTerm == null) {
               continue;
             }
@@ -302,9 +306,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
             Term optScriptCodeTerm =
                 validator.getRelatedTerm(
                     row,
-                    field,
+                    fieldType,
                     cellValue,
-                    ConstellationModelField.SCRIPT_CODE,
+                    ConstellationFieldType.SCRIPT_CODE,
                     TermType.SCRIPT_CODE);
             if (optScriptCodeTerm != null) {
               lang.setScript(optScriptCodeTerm);
@@ -320,12 +324,12 @@ public class SNACConstellationItem extends SNACAbstractItem {
 
             // check whether there is an associated language code in this row; if so, skip
             String languageCode =
-                validator.getRelatedCellValue(row, ConstellationModelField.LANGUAGE_CODE);
+                validator.getRelatedCellValue(row, ConstellationFieldType.LANGUAGE_CODE);
             if (!languageCode.equals("")) {
               continue;
             }
 
-            Term scriptCodeTerm = validator.getTerm(field, cellValue, TermType.SCRIPT_CODE);
+            Term scriptCodeTerm = validator.getTerm(fieldType, cellValue, TermType.SCRIPT_CODE);
             if (scriptCodeTerm == null) {
               continue;
             }
@@ -401,9 +405,9 @@ public class SNACConstellationItem extends SNACAbstractItem {
     for (Map.Entry<String, String> entry : _schema.getColumnMappings().entrySet()) {
       String snacField = entry.getValue();
 
-      ConstellationModelField field = _model.getFieldType(snacField);
+      ConstellationFieldType fieldType = _model.getFieldType(snacField);
 
-      switch (field) {
+      switch (fieldType) {
         case CPF_TYPE:
           Term previewTerm = _item.getEntityType();
           if (previewTerm != null) {

@@ -10,9 +10,9 @@ import org.snaccooperative.openrefine.model.SNACModelField.FieldVocabulary;
 import org.snaccooperative.openrefine.model.SNACModelFieldRelation.FieldRelationType;
 
 public class SNACConstellationModel
-    extends SNACAbstractModel<SNACConstellationModel.ConstellationModelField> {
+    extends SNACAbstractModel<SNACConstellationModel.ConstellationFieldType> {
 
-  public enum ConstellationModelField implements SNACModelFieldType {
+  public enum ConstellationFieldType implements SNACModelFieldType {
     NONE,
     CPF_TYPE("CPF Type"),
     CPF_ID("CPF ID"),
@@ -37,11 +37,11 @@ public class SNACConstellationModel
 
     private final String _name;
 
-    ConstellationModelField() {
+    ConstellationFieldType() {
       this("");
     }
 
-    ConstellationModelField(String name) {
+    ConstellationFieldType(String name) {
       this._name = name;
     }
 
@@ -53,44 +53,44 @@ public class SNACConstellationModel
   static final Logger logger = LoggerFactory.getLogger(SNACConstellationModel.class);
 
   public SNACConstellationModel() {
-    super(ModelType.CONSTELLATION, ConstellationModelField.NONE);
+    super(ModelType.CONSTELLATION, ConstellationFieldType.NONE);
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.CPF_TYPE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.CPF_TYPE,
                 FieldRequirement.REQUIRED,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.CONTROLLED,
                 "Type of CPF entity.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.CPF_ID, FieldRelationType.OPTIONAL)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.CPF_ID, FieldRelationType.OPTIONAL)))))
             .withSampleValues(
                 new ArrayList<String>(Arrays.asList("corporateBody", "person", "family")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.CPF_ID,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.CPF_ID,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.SINGLE,
                 FieldVocabulary.IDENTIFIER,
                 "SNAC identifier for the CPF entity.  Leave blank if the CPF is NOT in SNAC.")
             .withPreviousNames(new ArrayList<String>(Arrays.asList("SNAC CPF ID")))
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.CPF_TYPE, FieldRelationType.REQUIRED)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.CPF_TYPE, FieldRelationType.REQUIRED)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.NAME_ENTRY,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.NAME_ENTRY,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
@@ -98,8 +98,8 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.VARIANT_NAME_ENTRY,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.VARIANT_NAME_ENTRY,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
@@ -107,60 +107,59 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.EXIST_DATE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.EXIST_DATE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "Exist Date or Dates of the CPF entity.")
             .withDependents(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.EXIST_DATE_TYPE,
-                                FieldRelationType.REQUIRED),
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.EXIST_DATE_TYPE, FieldRelationType.REQUIRED),
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.EXIST_DATE_DESCRIPTIVE_NOTE,
                                 FieldRelationType.OPTIONAL)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.EXIST_DATE_TYPE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.EXIST_DATE_TYPE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "Type of Exist Date.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.EXIST_DATE, FieldRelationType.REQUIRED)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.EXIST_DATE, FieldRelationType.REQUIRED)))))
             .withSampleValues(
                 new ArrayList<String>(
                     Arrays.asList("Active", "Birth", "Death", "Establishment", "Disestablishment")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.EXIST_DATE_DESCRIPTIVE_NOTE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.EXIST_DATE_DESCRIPTIVE_NOTE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "Descriptive Note of Exist Date.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.EXIST_DATE, FieldRelationType.REQUIRED)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.EXIST_DATE, FieldRelationType.REQUIRED)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.SUBJECT,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.SUBJECT,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
@@ -168,60 +167,60 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.PLACE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.PLACE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "Place name associated with the CPF entity.")
             .withDependents(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.PLACE_ROLE, FieldRelationType.OPTIONAL),
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.PLACE_TYPE, FieldRelationType.OPTIONAL)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.PLACE_ROLE, FieldRelationType.OPTIONAL),
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.PLACE_TYPE, FieldRelationType.OPTIONAL)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.PLACE_ROLE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.PLACE_ROLE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "Role of the place in relation to the CPF entity.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.PLACE, FieldRelationType.REQUIRED)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.PLACE, FieldRelationType.REQUIRED)))))
             .withSampleValues(
                 new ArrayList<String>(
                     Arrays.asList("Birth", "Death", "Residence", "Citizenship", "Work")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.PLACE_TYPE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.PLACE_TYPE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "Type of the place in relation to the CPF entity.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.PLACE, FieldRelationType.REQUIRED)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.PLACE, FieldRelationType.REQUIRED)))))
             .withSampleValues(new ArrayList<String>(Arrays.asList("AssociatedPlace", "Address")))
             .withDefaultValue("AssociatedPlace")
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.OCCUPATION,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.OCCUPATION,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
@@ -229,8 +228,8 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.ACTIVITY,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.ACTIVITY,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
@@ -238,41 +237,41 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.LANGUAGE_CODE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.LANGUAGE_CODE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "ISO 639 Language Code.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.SCRIPT_CODE, FieldRelationType.OPTIONAL)))))
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.SCRIPT_CODE, FieldRelationType.OPTIONAL)))))
             .withSampleValues(new ArrayList<String>(Arrays.asList("eng", "ger", "jpn")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.SCRIPT_CODE,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.SCRIPT_CODE,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.CONTROLLED,
                 "ISO 15924 Script Code.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.LANGUAGE_CODE,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.LANGUAGE_CODE,
                                 FieldRelationType.OPTIONAL)))))
             .withSampleValues(new ArrayList<String>(Arrays.asList("Latn", "Cyrl", "Grek")))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.BIOG_HIST,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.BIOG_HIST,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
@@ -280,8 +279,8 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.EXTERNAL_RELATED_CPF_URL,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.EXTERNAL_RELATED_CPF_URL,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
@@ -289,53 +288,53 @@ public class SNACConstellationModel
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.SOURCE_CITATION,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.SOURCE_CITATION,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "Text citation for a source used in describing the CPF entity.")
             .withDependents(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.SOURCE_CITATION_URL,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.SOURCE_CITATION_URL,
                                 FieldRelationType.OPTIONAL),
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.SOURCE_CITATION_FOUND_DATA,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.SOURCE_CITATION_FOUND_DATA,
                                 FieldRelationType.OPTIONAL)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.SOURCE_CITATION_URL,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.SOURCE_CITATION_URL,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "URL, if available, for the Source Citation.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.SOURCE_CITATION,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.SOURCE_CITATION,
                                 FieldRelationType.REQUIRED)))))
             .build());
 
     addField(
-        new SNACModelField.Builder<ConstellationModelField>(
-                ConstellationModelField.SOURCE_CITATION_FOUND_DATA,
+        new SNACModelField.Builder<ConstellationFieldType>(
+                ConstellationFieldType.SOURCE_CITATION_FOUND_DATA,
                 FieldRequirement.OPTIONAL,
                 FieldOccurence.MULTIPLE,
                 FieldVocabulary.FREETEXT,
                 "Information found in the Source that is evidence used in the description of the CPF entity.")
             .withDependencies(
-                new SNACModelFieldRelations<ConstellationModelField>(
-                    new ArrayList<SNACModelFieldRelation<ConstellationModelField>>(
+                new SNACModelFieldRelations<ConstellationFieldType>(
+                    new ArrayList<SNACModelFieldRelation<ConstellationFieldType>>(
                         Arrays.asList(
-                            new SNACModelFieldRelation<ConstellationModelField>(
-                                ConstellationModelField.SOURCE_CITATION,
+                            new SNACModelFieldRelation<ConstellationFieldType>(
+                                ConstellationFieldType.SOURCE_CITATION,
                                 FieldRelationType.REQUIRED)))))
             .build());
   }
