@@ -151,7 +151,7 @@ public class SNACValidationErrors {
   private void addRequiredFieldMissingError(
       String fieldName, String fieldColumn, String depName, String depColumn, String depType) {
     addRequiredFieldError(
-        "not present in SNAC schema", fieldName, null, fieldColumn, depName, depColumn, depType);
+        "is not present in SNAC schema", fieldName, null, fieldColumn, depName, depColumn, depType);
   }
 
   public void addRequiredDependencyFieldMissingError(
