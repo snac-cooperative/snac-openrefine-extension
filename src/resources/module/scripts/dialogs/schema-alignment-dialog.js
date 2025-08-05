@@ -35,7 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 FIXME ISSUES:
 
-* editing cells does not re-render preview: added a "reload preview" button as a workaround
+* Some actions (such as editing individual cells) do not cause the preview
+  tab to update.  As a workaround, a "reload preview" button has been added.
 
 */
 
@@ -118,17 +119,6 @@ SNACSchemaAlignmentDialog.setupModel = function(onDone) {
          if (onDone) onDone();
       });
 };
-
-SNACSchemaAlignmentDialog.resizeCanvas = function(type) {
-   // set canvas height based on the number of this type's schema elements,
-   // plus a bit extra so that tooltips do not get cut off
-
-   var rowItems = this._model[type].length ?? 0;
-   var rowHeight = $('.snac-dynamic-table td').height() ?? 30;
-   var canvasHeight = (rowItems + 10) * rowHeight;
-
-   this._schemaElmts.canvas.height(canvasHeight);
-}
 
 /**
  * Installs the tabs in the UI the first time the snac
@@ -247,7 +237,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").hide();
 
       // Show Resources
-      _this.resizeCanvas(_this._schemaTypes.resource.type);
       $(".snac-schema-alignment-dialog-openrefine-names-area-resource").show();
       $(".snac-schema-alignment-dialog-schema-fields-area-resource").show();
 
@@ -265,7 +254,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").hide();
 
       // Show Constellations
-      _this.resizeCanvas(_this._schemaTypes.constellation.type);
       $(".snac-schema-alignment-dialog-openrefine-names-area-constellation").show();
       $(".snac-schema-alignment-dialog-schema-fields-area-constellation").show();
 
@@ -283,7 +271,6 @@ SNACSchemaAlignmentDialog.setupTabs = function() {
       $(".snac-schema-alignment-dialog-schema-fields-area-constellation").hide();
 
       // Show Relations
-      _this.resizeCanvas(_this._schemaTypes.relation.type);
       $(".snac-schema-alignment-dialog-openrefine-names-area-relation").show();
       $(".snac-schema-alignment-dialog-schema-fields-area-relation").show();
 

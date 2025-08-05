@@ -20,6 +20,7 @@
 
 .snac-schema-alignment-dialog-selection-area {
   padding: 10px;
+  padding-bottom: 250px;
   /* max-width: 900px; */
   /* overflow-y: auto; */
 }
